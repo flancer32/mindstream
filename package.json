@@ -13,7 +13,6 @@
   "dependencies": {
     "@flancer32/teq-web": "*",
     "@teqfw/di": "*",
-    "env": "*",
     "knex": "*",
     "pg": "*"
   }

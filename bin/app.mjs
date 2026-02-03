@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import env from 'env';
 import DiContainer from '@teqfw/di';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -10,11 +9,11 @@ const projectRoot = path.resolve(__dirname, '..');
 
 await loadDotEnv(path.join(projectRoot, '.env'));
 
-const runMode = env('MINDSTREAM_MODE', process.env.NODE_ENV ?? 'dev');
+const runMode = process.env.MINDSTREAM_MODE ?? process.env.NODE_ENV ?? 'dev';
 
 const di = new DiContainer();
 const resolver = di.getResolver();
-resolver.addNamespaceRoot('Mindstream_', new URL('../src/', import.meta.url).href);
+resolver.addNamespaceRoot('Mindstream_', new URL('../src/', import.meta.url).href, 'mjs');
 
 const app = await di.get('Mindstream_App$');
 if (typeof app.run === 'function') {
