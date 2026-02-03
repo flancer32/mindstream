@@ -1,0 +1,10 @@
+/.idea/
+/**/.env
+/**/node_modules/
+/**/output.md
+/**/own_modules/
+/**/tmp/
+/ctx/docs/**/*.html
+/ctx/docs/**/*.pdf
+/http-client.env.json
+/tmp/
