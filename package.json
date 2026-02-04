@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node ./bin/app.mjs",
-    "test": "node --test"
+    "test:unit": "node --test \"test/unit/**/*.test.mjs\""
   },
   "dependencies": {
     "@flancer32/teq-web": "*",

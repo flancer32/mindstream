@@ -14,7 +14,7 @@ const runMode = process.env.MINDSTREAM_MODE ?? process.env.NODE_ENV ?? 'dev';
 
 /** @type {TeqFw_Di_Container} */
 const container = new Container();
-/** @type {TeqFw_Di_Container_Resolver} */
+/** @type {TeqFw_Di_Api_Container_Resolver} */
 const resolver = container.getResolver();
 resolver.addNamespaceRoot('Mindstream_Back_', path.join(projectRoot, 'src'), 'mjs');
 resolver.addNamespaceRoot('Mindstream_Shared_', path.join(projectRoot, 'web', 'app', 'Shared'), 'mjs');
