@@ -1,9 +1,9 @@
-export default class App {
-  async run() {
-    return;
-  }
+export default class Mindstream_Back_App {
+  constructor({}) {
+    this.run = async function () {
+    };
 
-  async stop() {
-    return;
+    this.stop = async function () {
+    };
   }
 }
