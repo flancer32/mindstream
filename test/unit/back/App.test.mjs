@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createTestContainer } from '../di-back.mjs';
+import { createTestContainer } from '../di-node.mjs';
 
 test('Mindstream_Back_App resolves via DI container', async () => {
   const container = await createTestContainer();

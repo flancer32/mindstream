@@ -29,15 +29,15 @@ Path: `./ctx/docs/code/di-compatibility.md`
 В проекте зафиксирован **строго ограниченный набор корневых namespace**:
 
 - `Mindstream_Back_`
-- `Mindstream_Front_`
 - `Mindstream_Shared_`
+- `Mindstream_Web_`
 
 Использование иных корневых namespace в MVP **не допускается**.
 
 ### Семантика зон
 
 - `Back` — серверная логика и backend-службы.
-- `Front` — клиентская логика и фронтенд-исполнение.
+- `Web` — клиентская логика и фронтенд-исполнение.
 - `Shared` — platform-agnostic код, пригодный для исполнения как на фронте, так и на бэке.
 
 `Mindstream_Shared_`:
@@ -75,7 +75,7 @@ Path: `./ctx/docs/code/di-compatibility.md`
 В проекте зафиксированы следующие production composition root:
 
 - один для `Back`;
-- один для `Front`;
+- один для `Web`;
 - один для Service Worker.
 
 Тесты используют **отдельный composition root**, который может создаваться:
@@ -119,7 +119,7 @@ Path: `./ctx/docs/code/di-compatibility.md`
 ## Platform Dependencies
 
 - Dependency IDs с префиксом `node:` допустимы **только в `Mindstream_Back_`**.
-- `Front` и `Shared` не используют platform-specific dependency IDs.
+- `Web` и `Shared` не используют platform-specific dependency IDs.
 - Любой доступ к платформе осуществляется только через DI.
 
 ---

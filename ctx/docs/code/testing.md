@@ -20,7 +20,7 @@ Path: `./ctx/docs/code/testing.md`
 
 ## Namespace и зоны тестирования
 
-Тесты используют те же пространства имён, что и production-код: `Mindstream_Back_`, `Mindstream_Front_`, `Mindstream_Shared_`.
+Тесты используют те же пространства имён, что и production-код: `Mindstream_Back_`, `Mindstream_Web_`, `Mindstream_Shared_`.
 
 Введение test-only namespace (например, `Mindstream_Test_*`) не допускается. Тесты проверяют код в тех же namespace-границах, в которых он используется в production.
 
