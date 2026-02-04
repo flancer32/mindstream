@@ -1,6 +1,6 @@
 # Code Logging — MVP
 
-Path: `ctx/docs/code/logging.md`
+Path: `./ctx/docs/code/logging.md`
 
 ## Назначение
 
