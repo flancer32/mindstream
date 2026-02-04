@@ -1,6 +1,7 @@
 export default class Mindstream_Back_App {
-  constructor({}) {
-    this.run = async function () {
+  constructor({ Mindstream_Back_App_Configuration$: config }) {
+    this.run = async function ({ projectRoot } = {}) {
+      await config.init(projectRoot);
     };
 
     this.stop = async function () {
