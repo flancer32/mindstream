@@ -19,4 +19,7 @@ resolver.addNamespaceRoot('Teqfw_Di_', path.join(projectRoot, 'node_modules', '@
 
 /** @type {Mindstream_Back_App} */
 const app = await container.get('Mindstream_Back_App$');
-await app.run({ projectRoot });
+const exitCode = await app.run({ projectRoot, cliArgs: process.argv.slice(2) });
+if (typeof exitCode === 'number') {
+  process.exitCode = exitCode;
+}

@@ -3,7 +3,7 @@
  * @description Applies declarative DB schema using knex.
  */
 export default class Mindstream_Back_Storage_SchemaManager {
-  constructor({ Mindstream_Back_Storage_Schema$: schemaProvider, Mindstream_Shared_Logger$: logger, knex$: knexInstance }) {
+  constructor({ Mindstream_Back_Storage_Schema$: schemaProvider, Mindstream_Shared_Logger$: logger, "node:knex": knexInstance }) {
     const NAMESPACE = 'Mindstream_Back_Storage_SchemaManager';
     const SCHEMA_TABLE = 'schema_version';
     const SCHEMA_VERSION_COLUMN = 'schema_version';
@@ -305,6 +305,21 @@ export default class Mindstream_Back_Storage_SchemaManager {
       try {
         const state = await readSchemaState(knexInstance);
         await recreateWithPreserve(knexInstance, schema, state?.schema ?? null);
+        await writeSchemaState(knexInstance, schema);
+      } catch (err) {
+        logger.exception(NAMESPACE, ensureError(err));
+        throw err;
+      }
+    };
+
+    this.createSchema = async function () {
+      const schema = getDeclaration();
+      assertSchema(schema);
+
+      try {
+        await createTables(knexInstance, schema);
+        await applyIndexes(knexInstance, schema);
+        await applyForeignKeys(knexInstance, schema);
         await writeSchemaState(knexInstance, schema);
       } catch (err) {
         logger.exception(NAMESPACE, ensureError(err));

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createTestContainer } from '../di-node.mjs';
+import { createTestContainer } from '../../di-node.mjs';
 
 function createProcessMock(env = {}) {
   return { env: { ...env } };

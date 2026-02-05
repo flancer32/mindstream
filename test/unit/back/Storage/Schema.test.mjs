@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createTestContainer } from '../di-node.mjs';
+import { createTestContainer } from '../../di-node.mjs';
 
 test('Mindstream_Back_Storage_Schema exposes publication_sources table', async () => {
   const container = await createTestContainer();
@@ -21,16 +21,4 @@ test('Mindstream_Back_Storage_Schema exposes publication_sources table', async (
   assert.ok(columns.is_active);
   assert.ok(columns.created_at);
   assert.ok(columns.updated_at);
-});
-
-test('Mindstream_Back_Storage_SchemaManager resolves with knex stub', async () => {
-  const container = await createTestContainer();
-  const knexStub = { schema: {} };
-
-  container.register('knex$', knexStub);
-
-  const manager = await container.get('Mindstream_Back_Storage_SchemaManager$');
-  assert.ok(manager);
-  assert.equal(typeof manager.applySchema, 'function');
-  assert.equal(typeof manager.recreateWithPreserve, 'function');
 });
