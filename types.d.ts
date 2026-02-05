@@ -20,6 +20,7 @@ declare global {
   type Mindstream_Back_Ingest_Rss_Client = import("./src/Ingest/Rss/Client.mjs").default;
   type Mindstream_Back_Ingest_Rss_Parser = import("./src/Ingest/Rss/Parser.mjs").default;
   type Mindstream_Back_Ingest_Source_Habr = import("./src/Ingest/Source/Habr.mjs").default;
+  type Mindstream_Back_Integration_OpenAi = import("./src/Integration/OpenAi.mjs").default;
   type Mindstream_Back_Platform_Fetch = import("./src/Platform/Fetch.mjs").default;
   type Mindstream_Back_Storage_Knex = import("./src/Storage/Knex.mjs").default;
   type Mindstream_Back_Storage_Schema = import("./src/Storage/Schema.mjs").default;
