@@ -33,11 +33,37 @@ export default class Mindstream_Back_Storage_Schema {
       indexes: [],
     };
 
+    const publicationsTable = {
+      columns: {
+        id: { type: 'bigint', primary: true, autoIncrement: true },
+        source_id: { type: 'bigint', notNull: true },
+        source_item_hash: { type: 'string', notNull: true, length: 64 },
+        source_url: { type: 'string', notNull: true, length: 1024 },
+        rss_title: { type: 'string', length: 512 },
+        rss_guid: { type: 'string', length: 255 },
+        rss_published_at: { type: 'timestamp' },
+        discovered_at: { type: 'timestamp', notNull: true },
+      },
+      foreignKeys: [
+        {
+          columns: ['source_id'],
+          references: { table: 'publication_sources', columns: ['id'] },
+          onDelete: 'restrict',
+          onUpdate: 'cascade',
+        },
+      ],
+      indexes: [
+        { columns: ['source_id', 'source_item_hash'], unique: true },
+        { columns: ['source_id'] },
+      ],
+    };
+
     const declaration = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       tables: {
         schema_version: schemaVersionTable,
         publication_sources: publicationSourcesTable,
+        publications: publicationsTable,
       },
     };
 

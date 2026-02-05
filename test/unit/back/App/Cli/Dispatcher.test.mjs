@@ -28,6 +28,9 @@ test('Mindstream_Back_App_Cli_Dispatcher routes db:schema:create', async () => {
       calls.push(payload);
     },
   });
+  container.register('Mindstream_Back_Cli_Ingest$', {
+    async dispatch() {},
+  });
   container.register('Mindstream_Back_Cli_Runtime$', {
     async dispatch() {},
   });
@@ -48,6 +51,9 @@ test('Mindstream_Back_App_Cli_Dispatcher logs and returns error code on unknown 
 
   container.register('Mindstream_Shared_Logger$', logger);
   container.register('Mindstream_Back_Cli_Db$', {
+    async dispatch() {},
+  });
+  container.register('Mindstream_Back_Cli_Ingest$', {
     async dispatch() {},
   });
   container.register('Mindstream_Back_Cli_Runtime$', {

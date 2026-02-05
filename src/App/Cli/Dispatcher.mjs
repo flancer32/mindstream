@@ -3,7 +3,12 @@
  * @description Root CLI dispatcher for the backend application.
  */
 export default class Mindstream_Back_App_Cli_Dispatcher {
-  constructor({ Mindstream_Shared_Logger$: logger, Mindstream_Back_Cli_Db$: dbDispatcher, Mindstream_Back_Cli_Runtime$: runtimeDispatcher }) {
+  constructor({
+    Mindstream_Shared_Logger$: logger,
+    Mindstream_Back_Cli_Db$: dbDispatcher,
+    Mindstream_Back_Cli_Ingest$: ingestDispatcher,
+    Mindstream_Back_Cli_Runtime$: runtimeDispatcher,
+  }) {
     const NAMESPACE = 'Mindstream_Back_App_Cli_Dispatcher';
 
     const ensureError = function (err) {
@@ -54,6 +59,13 @@ export default class Mindstream_Back_App_Cli_Dispatcher {
             }
             await runtimeDispatcher.dispatch({ commandParts: rest, args });
             return 1;
+          }
+          case 'ingest': {
+            if (!ingestDispatcher?.dispatch) {
+              throw new Error('Ingest dispatcher is unavailable.');
+            }
+            await ingestDispatcher.dispatch({ commandParts: rest, args });
+            return 0;
           }
           default:
             throw new Error(`Unknown CLI command "${command}".`);
