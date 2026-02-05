@@ -7,7 +7,11 @@ test('Mindstream_Back_Storage_SchemaManager resolves with knex stub', async () =
   const container = await createTestContainer();
   const knexStub = { schema: {} };
 
-  container.register('knex$', knexStub);
+  container.register('Mindstream_Back_Storage_Knex$', {
+    get() {
+      return knexStub;
+    },
+  });
 
   const manager = await container.get('Mindstream_Back_Storage_SchemaManager$');
   assert.ok(manager);

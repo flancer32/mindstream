@@ -1,33 +1,18 @@
 /**
+ * @LLM-DOC: Normative configuration structure is defined in `ctx/docs/code/configuration/structure.md`.
+ * @LLM-DOC: The structure described there is authoritative for this module.
+ * @LLM-DOC: `process.env` is the canonical source of configuration values.
+ * @LLM-DOC: The `.env` file is used only to prepare `process.env` before reading configuration.
+ * 
  * @module Mindstream_Back_App_Configuration
  * @description Backend application configuration singleton.
  */
 export default class Mindstream_Back_App_Configuration {
-  /**
-   * @LLM-DOC: Normative configuration structure is defined in `ctx/docs/code/configuration/structure.md`.
-   * @LLM-DOC: The structure described there is authoritative for this module.
-   */
-  constructor({ 'node:process': processModule }) {
+  constructor({ 'node:process': processModule, 'node:fs': fsModule, 'node:path': pathModule, Mindstream_Shared_Logger$: logger }) {
     const processRef = processModule?.default ?? processModule;
-
-    const DEFAULTS = Object.freeze({
-      server: Object.freeze({
-        port: 3000,
-      }),
-      db: Object.freeze({
-        client: '',
-        host: '',
-        port: 0,
-        database: '',
-        user: '',
-        password: '',
-      }),
-      llm: Object.freeze({
-        apiKey: '',
-        baseUrl: 'https://api.openai.com/v1',
-        model: '',
-      }),
-    });
+    const fsRef = fsModule?.default ?? fsModule;
+    const pathRef = pathModule?.default ?? pathModule;
+    const NAMESPACE = 'Mindstream_Back_App_Configuration';
 
     let _initialized = false;
     let _config = null;
@@ -38,15 +23,15 @@ export default class Mindstream_Back_App_Configuration {
       }
     };
 
-    const coerceString = function (value, fallback) {
-      if (value === undefined || value === null || value === '') return fallback;
+    const coerceString = function (value) {
+      if (value === undefined || value === null) return undefined;
       return String(value);
     };
 
-    const coercePort = function (value, fallback) {
-      if (value === undefined || value === null || value === '') return fallback;
+    const coercePort = function (value) {
+      if (value === undefined || value === null || value === '') return undefined;
       const parsed = Number.parseInt(value, 10);
-      return Number.isFinite(parsed) ? parsed : fallback;
+      return Number.isFinite(parsed) ? parsed : undefined;
     };
 
     const freezeConfig = function (config) {
@@ -56,27 +41,70 @@ export default class Mindstream_Back_App_Configuration {
       return Object.freeze(config);
     };
 
+    const isIgnorableLine = function (line) {
+      if (!line) return true;
+      const trimmed = line.trim();
+      return trimmed.length === 0 || trimmed.startsWith('#');
+    };
+
+    const applyEnvLine = function (line, targetEnv) {
+      const separatorIndex = line.indexOf('=');
+      if (separatorIndex < 0) {
+        throw new Error(`Invalid .env line "${line}".`);
+      }
+      const rawKey = line.slice(0, separatorIndex).trim();
+      const rawValue = line.slice(separatorIndex + 1).trim();
+      if (!rawKey) {
+        throw new Error(`Invalid .env key in line "${line}".`);
+      }
+      if (Object.prototype.hasOwnProperty.call(targetEnv, rawKey)) return;
+      targetEnv[rawKey] = rawValue;
+    };
+
+    const loadEnvFile = function (projectRoot) {
+      if (!projectRoot || typeof projectRoot !== 'string') return;
+      if (!fsRef || !pathRef) return;
+      const envPath = pathRef.join(projectRoot, '.env');
+      try {
+        if (!fsRef.existsSync(envPath)) return;
+        const content = fsRef.readFileSync(envPath, 'utf-8');
+        const lines = String(content).split(/\r?\n/u);
+        const env = processRef?.env ?? {};
+        for (const line of lines) {
+          if (isIgnorableLine(line)) continue;
+          applyEnvLine(line, env);
+        }
+      } catch (err) {
+        if (err instanceof Error && (err?.message ?? '').includes('Invalid .env')) {
+          throw err;
+        }
+        if (logger?.exception) {
+          logger.exception(NAMESPACE, err instanceof Error ? err : new Error(String(err)));
+        }
+      }
+    };
+
     this.init = async function (projectRoot) {
       if (_initialized) return;
-      void projectRoot;
+      loadEnvFile(projectRoot);
 
       const env = processRef?.env ?? {};
       _config = freezeConfig({
         server: {
-          port: coercePort(env.SERVER_PORT, DEFAULTS.server.port),
+          port: coercePort(env.SERVER_PORT),
         },
         db: {
-          client: coerceString(env.DB_CLIENT, DEFAULTS.db.client),
-          host: coerceString(env.DB_HOST, DEFAULTS.db.host),
-          port: coercePort(env.DB_PORT, DEFAULTS.db.port),
-          database: coerceString(env.DB_DATABASE, DEFAULTS.db.database),
-          user: coerceString(env.DB_USER, DEFAULTS.db.user),
-          password: coerceString(env.DB_PASSWORD, DEFAULTS.db.password),
+          client: coerceString(env.DB_CLIENT),
+          host: coerceString(env.DB_HOST),
+          port: coercePort(env.DB_PORT),
+          database: coerceString(env.DB_DATABASE),
+          user: coerceString(env.DB_USER),
+          password: coerceString(env.DB_PASSWORD),
         },
         llm: {
-          apiKey: coerceString(env.LLM_API_KEY, DEFAULTS.llm.apiKey),
-          baseUrl: coerceString(env.LLM_BASE_URL, DEFAULTS.llm.baseUrl),
-          model: coerceString(env.LLM_MODEL, DEFAULTS.llm.model),
+          apiKey: coerceString(env.LLM_API_KEY),
+          baseUrl: coerceString(env.LLM_BASE_URL),
+          model: coerceString(env.LLM_MODEL),
         },
       });
 

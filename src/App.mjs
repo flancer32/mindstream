@@ -9,6 +9,7 @@ export default class Mindstream_Back_App {
   constructor({
     Mindstream_Back_App_Configuration$: config,
     Mindstream_Back_App_Cli_Dispatcher$: cliDispatcher,
+    Mindstream_Back_Storage_Knex$: knexProvider,
   }) {
     this.run = async function ({ projectRoot, cliArgs } = {}) {
       await config.init(projectRoot);
@@ -19,6 +20,9 @@ export default class Mindstream_Back_App {
     };
 
     this.stop = async function () {
+      if (knexProvider?.destroy) {
+        await knexProvider.destroy();
+      }
     };
   }
 }

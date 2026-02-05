@@ -3,12 +3,15 @@
  * @description Applies declarative DB schema using knex.
  */
 export default class Mindstream_Back_Storage_SchemaManager {
-  constructor({ Mindstream_Back_Storage_Schema$: schemaProvider, Mindstream_Shared_Logger$: logger, "node:knex": knexInstance }) {
+  constructor({ Mindstream_Back_Storage_Schema$: schemaProvider, Mindstream_Shared_Logger$: logger, Mindstream_Back_Storage_Knex$: knexProvider }) {
     const NAMESPACE = 'Mindstream_Back_Storage_SchemaManager';
     const SCHEMA_TABLE = 'schema_version';
     const SCHEMA_VERSION_COLUMN = 'schema_version';
     const SCHEMA_JSON_COLUMN = 'schema_json';
     const SCHEMA_APPLIED_AT_COLUMN = 'applied_at';
+    const getKnex = function () {
+      return knexProvider.get();
+    };
 
     const ensureError = function (err) {
       if (err instanceof Error) return err;
@@ -265,6 +268,7 @@ export default class Mindstream_Back_Storage_SchemaManager {
       assertSchema(schema);
 
       try {
+        const knexInstance = getKnex();
         const state = await readSchemaState(knexInstance);
         if (!state.exists) {
           logger.info(NAMESPACE, 'Schema version table is missing. Recreating schema.');
@@ -303,6 +307,7 @@ export default class Mindstream_Back_Storage_SchemaManager {
       assertSchema(schema);
 
       try {
+        const knexInstance = getKnex();
         const state = await readSchemaState(knexInstance);
         await recreateWithPreserve(knexInstance, schema, state?.schema ?? null);
         await writeSchemaState(knexInstance, schema);
@@ -317,6 +322,7 @@ export default class Mindstream_Back_Storage_SchemaManager {
       assertSchema(schema);
 
       try {
+        const knexInstance = getKnex();
         await createTables(knexInstance, schema);
         await applyIndexes(knexInstance, schema);
         await applyForeignKeys(knexInstance, schema);
