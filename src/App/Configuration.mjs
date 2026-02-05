@@ -3,43 +3,39 @@
  * @description Backend application configuration singleton.
  */
 export default class Mindstream_Back_App_Configuration {
-  constructor({ 'node:fs/promises': fs, 'node:path': path, 'node:process': processModule }) {
+  /**
+   * @LLM-DOC: Normative configuration structure is defined in `ctx/docs/code/configuration/structure.md`.
+   * @LLM-DOC: The structure described there is authoritative for this module.
+   */
+  constructor({ 'node:process': processModule }) {
     const processRef = processModule?.default ?? processModule;
 
     const DEFAULTS = Object.freeze({
-      API_PORT: 3000,
-      OPENAI_API_KEY: '',
-      OPENAI_BASE_URL: 'https://api.openai.com/v1',
-      OPENAI_MODEL: '',
+      server: Object.freeze({
+        port: 3000,
+      }),
+      db: Object.freeze({
+        client: '',
+        host: '',
+        port: 0,
+        database: '',
+        user: '',
+        password: '',
+      }),
+      llm: Object.freeze({
+        apiKey: '',
+        baseUrl: 'https://api.openai.com/v1',
+        model: '',
+      }),
     });
 
     let _initialized = false;
-    let _values = { ...DEFAULTS };
+    let _config = null;
 
     const ensureInitialized = function () {
       if (!_initialized) {
         throw new Error('Mindstream_Back_App_Configuration is not initialized.');
       }
-    };
-
-    const parseEnvFile = function (content) {
-      const result = {};
-      if (!content) return result;
-      const lines = content.split(/\r?\n/);
-      for (const rawLine of lines) {
-        const line = rawLine.trim();
-        if (!line || line.startsWith('#')) continue;
-        const eqIndex = line.indexOf('=');
-        const key = (eqIndex === -1 ? line : line.slice(0, eqIndex)).trim();
-        let value = (eqIndex === -1 ? '' : line.slice(eqIndex + 1)).trim();
-        if (!key) continue;
-        const quote = value[0];
-        if ((quote === '"' || quote === "'") && value.endsWith(quote)) {
-          value = value.slice(1, -1);
-        }
-        result[key] = value;
-      }
-      return result;
     };
 
     const coerceString = function (value, fallback) {
@@ -53,56 +49,43 @@ export default class Mindstream_Back_App_Configuration {
       return Number.isFinite(parsed) ? parsed : fallback;
     };
 
-    const loadEnvFile = async function (projectRoot) {
-      const envPath = path.join(projectRoot, '.env');
-      try {
-        const content = await fs.readFile(envPath, 'utf8');
-        return parseEnvFile(content);
-      } catch (err) {
-        if (err?.code === 'ENOENT') return {};
-        throw err;
-      }
+    const freezeConfig = function (config) {
+      Object.freeze(config.server);
+      Object.freeze(config.db);
+      Object.freeze(config.llm);
+      return Object.freeze(config);
     };
 
     this.init = async function (projectRoot) {
       if (_initialized) return;
-      if (!projectRoot) throw new Error('projectRoot is required to initialize configuration.');
+      void projectRoot;
 
-      const fileEnv = await loadEnvFile(projectRoot);
-      for (const [key, value] of Object.entries(fileEnv)) {
-        if (processRef.env[key] === undefined) {
-          processRef.env[key] = value;
-        }
-      }
-
-      _values = {
-        API_PORT: coercePort(processRef.env.API_PORT, DEFAULTS.API_PORT),
-        OPENAI_API_KEY: coerceString(processRef.env.OPENAI_API_KEY, DEFAULTS.OPENAI_API_KEY),
-        OPENAI_BASE_URL: coerceString(processRef.env.OPENAI_BASE_URL, DEFAULTS.OPENAI_BASE_URL),
-        OPENAI_MODEL: coerceString(processRef.env.OPENAI_MODEL, DEFAULTS.OPENAI_MODEL),
-      };
+      const env = processRef?.env ?? {};
+      _config = freezeConfig({
+        server: {
+          port: coercePort(env.SERVER_PORT, DEFAULTS.server.port),
+        },
+        db: {
+          client: coerceString(env.DB_CLIENT, DEFAULTS.db.client),
+          host: coerceString(env.DB_HOST, DEFAULTS.db.host),
+          port: coercePort(env.DB_PORT, DEFAULTS.db.port),
+          database: coerceString(env.DB_DATABASE, DEFAULTS.db.database),
+          user: coerceString(env.DB_USER, DEFAULTS.db.user),
+          password: coerceString(env.DB_PASSWORD, DEFAULTS.db.password),
+        },
+        llm: {
+          apiKey: coerceString(env.LLM_API_KEY, DEFAULTS.llm.apiKey),
+          baseUrl: coerceString(env.LLM_BASE_URL, DEFAULTS.llm.baseUrl),
+          model: coerceString(env.LLM_MODEL, DEFAULTS.llm.model),
+        },
+      });
 
       _initialized = true;
     };
 
-    this.getApiPort = function () {
+    this.get = function () {
       ensureInitialized();
-      return _values.API_PORT;
-    };
-
-    this.getOpenaiApiKey = function () {
-      ensureInitialized();
-      return _values.OPENAI_API_KEY;
-    };
-
-    this.getOpenaiBaseUrl = function () {
-      ensureInitialized();
-      return _values.OPENAI_BASE_URL;
-    };
-
-    this.getOpenaiModel = function () {
-      ensureInitialized();
-      return _values.OPENAI_MODEL;
+      return _config;
     };
   }
 }

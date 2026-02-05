@@ -7,83 +7,81 @@ function createProcessMock(env = {}) {
   return { env: { ...env } };
 }
 
-function createPathMock() {
-  return {
-    join: (...parts) => parts.join('/'),
-  };
-}
-
-function createFsMock({ content, error } = {}) {
-  return {
-    readFile: async () => {
-      if (error) throw error;
-      return content ?? '';
-    },
-  };
-}
-
-test('Mindstream_Back_App_Configuration uses defaults without env or .env', async () => {
+test('Mindstream_Back_App_Configuration builds default structure from process.env', async () => {
   const container = await createTestContainer();
   const processMock = createProcessMock();
-  const pathMock = createPathMock();
-  const fsError = Object.assign(new Error('missing .env'), { code: 'ENOENT' });
-  const fsMock = createFsMock({ error: fsError });
 
   container.register('node:process', processMock);
-  container.register('node:path', pathMock);
-  container.register('node:fs/promises', fsMock);
 
   const config = await container.get('Mindstream_Back_App_Configuration$');
   await config.init('/project');
 
-  assert.equal(config.getApiPort(), 3000);
-  assert.equal(config.getOpenaiApiKey(), '');
-  assert.equal(config.getOpenaiBaseUrl(), 'https://api.openai.com/v1');
-  assert.equal(config.getOpenaiModel(), '');
+  const value = config.get();
+
+  assert.ok(Object.prototype.hasOwnProperty.call(value, 'server'));
+  assert.ok(Object.prototype.hasOwnProperty.call(value, 'db'));
+  assert.ok(Object.prototype.hasOwnProperty.call(value, 'llm'));
+  assert.equal(value.server.port, 3000);
+  assert.equal(value.db.client, '');
+  assert.equal(value.db.host, '');
+  assert.equal(value.db.port, 0);
+  assert.equal(value.db.database, '');
+  assert.equal(value.db.user, '');
+  assert.equal(value.db.password, '');
+  assert.equal(value.llm.apiKey, '');
+  assert.equal(value.llm.baseUrl, 'https://api.openai.com/v1');
+  assert.equal(value.llm.model, '');
 });
 
-test('Mindstream_Back_App_Configuration keeps process.env priority over .env', async () => {
+test('Mindstream_Back_App_Configuration reads values from process.env', async () => {
   const container = await createTestContainer();
   const processMock = createProcessMock({
-    API_PORT: '8081',
-    OPENAI_API_KEY: 'env-key',
-  });
-  const pathMock = createPathMock();
-  const fsMock = createFsMock({
-    content: [
-      'API_PORT=3001',
-      'OPENAI_API_KEY=file-key',
-      'OPENAI_MODEL=file-model',
-    ].join('\n'),
+    SERVER_PORT: '8081',
+    DB_CLIENT: 'pg',
+    DB_HOST: 'db.local',
+    DB_PORT: '5432',
+    DB_DATABASE: 'mindstream',
+    DB_USER: 'app',
+    DB_PASSWORD: 'secret',
+    LLM_API_KEY: 'env-key',
+    LLM_BASE_URL: 'https://example.test/v1',
+    LLM_MODEL: 'model-x',
   });
 
   container.register('node:process', processMock);
-  container.register('node:path', pathMock);
-  container.register('node:fs/promises', fsMock);
 
   const config = await container.get('Mindstream_Back_App_Configuration$');
   await config.init('/project');
 
-  assert.equal(config.getApiPort(), 8081);
-  assert.equal(config.getOpenaiApiKey(), 'env-key');
-  assert.equal(config.getOpenaiModel(), 'file-model');
-  assert.equal(processMock.env.API_PORT, '8081');
+  const value = config.get();
+
+  assert.equal(value.server.port, 8081);
+  assert.equal(value.db.client, 'pg');
+  assert.equal(value.db.host, 'db.local');
+  assert.equal(value.db.port, 5432);
+  assert.equal(value.db.database, 'mindstream');
+  assert.equal(value.db.user, 'app');
+  assert.equal(value.db.password, 'secret');
+  assert.equal(value.llm.apiKey, 'env-key');
+  assert.equal(value.llm.baseUrl, 'https://example.test/v1');
+  assert.equal(value.llm.model, 'model-x');
 });
 
-test('Mindstream_Back_App_Configuration coerces API_PORT to number', async () => {
+test('Mindstream_Back_App_Configuration returns a frozen configuration object', async () => {
   const container = await createTestContainer();
-  const processMock = createProcessMock({ API_PORT: '5050' });
-  const pathMock = createPathMock();
-  const fsError = Object.assign(new Error('missing .env'), { code: 'ENOENT' });
-  const fsMock = createFsMock({ error: fsError });
+  const processMock = createProcessMock({ SERVER_PORT: '5050' });
 
   container.register('node:process', processMock);
-  container.register('node:path', pathMock);
-  container.register('node:fs/promises', fsMock);
 
   const config = await container.get('Mindstream_Back_App_Configuration$');
   await config.init('/project');
 
-  assert.equal(config.getApiPort(), 5050);
-  assert.equal(typeof config.getApiPort(), 'number');
+  const value = config.get();
+
+  assert.equal(value.server.port, 5050);
+  assert.equal(typeof value.server.port, 'number');
+  assert.ok(Object.isFrozen(value));
+  assert.ok(Object.isFrozen(value.server));
+  assert.ok(Object.isFrozen(value.db));
+  assert.ok(Object.isFrozen(value.llm));
 });
