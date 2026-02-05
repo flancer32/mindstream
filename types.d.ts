@@ -4,6 +4,7 @@ declare global {
   type Mindstream_Back_App_Configuration = import("./src/App/Configuration.mjs").default;
   type Mindstream_Back_Cli_Db = import("./src/Cli/Db.mjs").default;
   type Mindstream_Back_Cli_Db_Schema_Create = import("./src/Cli/Db/Schema/Create.mjs").default;
+  type Mindstream_Back_Cli_Db_Schema_Renew = import("./src/Cli/Db/Schema/Renew.mjs").default;
   type Mindstream_Back_Cli_Ingest = import("./src/Cli/Ingest.mjs").default;
   type Mindstream_Back_Cli_Ingest_Discover_Habr = import("./src/Cli/Ingest/Discover/Habr.mjs").default;
   type Mindstream_Back_Cli_Ingest_Extract_Habr = import("./src/Cli/Ingest/Extract/Habr.mjs").default;

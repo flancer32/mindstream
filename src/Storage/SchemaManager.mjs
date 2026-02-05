@@ -3,12 +3,22 @@
  * @description Applies declarative DB schema using knex.
  */
 export default class Mindstream_Back_Storage_SchemaManager {
-  constructor({ Mindstream_Back_Storage_Schema$: schemaProvider, Mindstream_Shared_Logger$: logger, Mindstream_Back_Storage_Knex$: knexProvider }) {
+  constructor({
+    Mindstream_Back_Storage_Schema$: schemaProvider,
+    Mindstream_Shared_Logger$: logger,
+    Mindstream_Back_Storage_Knex$: knexProvider,
+    'node:fs/promises': fsModule,
+    'node:path': pathModule,
+    'node:process': processModule,
+  }) {
     const NAMESPACE = 'Mindstream_Back_Storage_SchemaManager';
     const SCHEMA_TABLE = 'schema_version';
     const SCHEMA_VERSION_COLUMN = 'schema_version';
     const SCHEMA_JSON_COLUMN = 'schema_json';
     const SCHEMA_APPLIED_AT_COLUMN = 'applied_at';
+    const fsRef = fsModule?.default ?? fsModule;
+    const pathRef = pathModule?.default ?? pathModule;
+    const processRef = processModule?.default ?? processModule;
     const getKnex = function () {
       return knexProvider.get();
     };
@@ -198,6 +208,219 @@ export default class Mindstream_Back_Storage_SchemaManager {
       await knexRef(targetTable).insert(knexRef.select(columns).from(sourceTable));
     };
 
+    const ensureFs = function () {
+      if (!fsRef || !pathRef) {
+        throw new Error('Filesystem modules are not available for schema renewal.');
+      }
+    };
+
+    const getTmpDir = function () {
+      ensureFs();
+      const cwd = typeof processRef?.cwd === 'function' ? processRef.cwd() : '.';
+      return pathRef.resolve(cwd, 'tmp');
+    };
+
+    const buildDumpFilePath = function () {
+      const stamp = new Date().toISOString().replace(/[:.]/gu, '-');
+      const fileName = `schema-dump-${stamp}.json`;
+      return pathRef.join(getTmpDir(), fileName);
+    };
+
+    const dumpDataToFile = async function (knexRef, schema) {
+      ensureFs();
+      const tables = getTableNames(schema);
+      const dump = {
+        createdAt: new Date().toISOString(),
+        schema,
+        tables: {},
+      };
+
+      for (const tableName of tables) {
+        const rows = await knexRef.select('*').from(tableName);
+        dump.tables[tableName] = rows;
+      }
+
+      const tmpDir = getTmpDir();
+      await fsRef.mkdir(tmpDir, { recursive: true });
+      const filePath = buildDumpFilePath();
+      await fsRef.writeFile(filePath, JSON.stringify(dump, null, 2), 'utf-8');
+      return filePath;
+    };
+
+    const readDumpFile = async function (filePath) {
+      ensureFs();
+      const content = await fsRef.readFile(filePath, 'utf-8');
+      return JSON.parse(content);
+    };
+
+    const dropAllTables = async function (knexRef, schema) {
+      const tableNames = getTableNames(schema).slice().reverse();
+      for (const tableName of tableNames) {
+        if (await knexRef.schema.hasTable(tableName)) {
+          await knexRef.schema.dropTable(tableName);
+        }
+      }
+    };
+
+    const resolveClientName = function (knexRef) {
+      return knexRef?.client?.config?.client ?? '';
+    };
+
+    const disableConstraints = async function (knexRef) {
+      const client = resolveClientName(knexRef);
+      if (!client) return false;
+      try {
+        if (client.includes('mysql')) {
+          await knexRef.raw('SET FOREIGN_KEY_CHECKS = 0');
+          return true;
+        }
+        if (client.includes('sqlite')) {
+          await knexRef.raw('PRAGMA foreign_keys = OFF');
+          return true;
+        }
+        if (client.includes('pg')) {
+          await knexRef.raw('SET CONSTRAINTS ALL DEFERRED');
+          return true;
+        }
+      } catch (err) {
+        logger.warn(NAMESPACE, `Failed to disable constraints for client "${client}".`);
+      }
+      return false;
+    };
+
+    const enableConstraints = async function (knexRef) {
+      const client = resolveClientName(knexRef);
+      if (!client) return false;
+      try {
+        if (client.includes('mysql')) {
+          await knexRef.raw('SET FOREIGN_KEY_CHECKS = 1');
+          return true;
+        }
+        if (client.includes('sqlite')) {
+          await knexRef.raw('PRAGMA foreign_keys = ON');
+          return true;
+        }
+        if (client.includes('pg')) {
+          await knexRef.raw('SET CONSTRAINTS ALL IMMEDIATE');
+          return true;
+        }
+      } catch (err) {
+        logger.warn(NAMESPACE, `Failed to enable constraints for client "${client}".`);
+      }
+      return false;
+    };
+
+    const convertValue = function (value, columnDef, tableName, columnName) {
+      if (value === undefined || value === null) return null;
+      const type = columnDef?.type;
+      switch (type) {
+        case 'bigint': {
+          if (typeof value === 'bigint') return value;
+          if (typeof value === 'number' && Number.isFinite(value)) return value;
+          if (typeof value === 'string') {
+            const trimmed = value.trim();
+            if (/^-?\d+$/u.test(trimmed)) return trimmed;
+            const parsed = Number(trimmed);
+            if (Number.isFinite(parsed)) return parsed;
+          }
+          throw new Error(`Cannot convert value for ${tableName}.${columnName} to bigint.`);
+        }
+        case 'integer': {
+          if (typeof value === 'number' && Number.isFinite(value)) return Math.trunc(value);
+          if (typeof value === 'string') {
+            const parsed = Number.parseInt(value, 10);
+            if (Number.isFinite(parsed)) return parsed;
+          }
+          throw new Error(`Cannot convert value for ${tableName}.${columnName} to integer.`);
+        }
+        case 'boolean': {
+          if (typeof value === 'boolean') return value;
+          if (typeof value === 'number') return value !== 0;
+          if (typeof value === 'string') {
+            const normalized = value.trim().toLowerCase();
+            if (['true', '1', 't', 'yes', 'y'].includes(normalized)) return true;
+            if (['false', '0', 'f', 'no', 'n'].includes(normalized)) return false;
+          }
+          throw new Error(`Cannot convert value for ${tableName}.${columnName} to boolean.`);
+        }
+        case 'timestamp': {
+          if (value instanceof Date) return value;
+          if (typeof value === 'number' && Number.isFinite(value)) {
+            const date = new Date(value);
+            if (!Number.isNaN(date.getTime())) return date;
+          }
+          if (typeof value === 'string') {
+            const date = new Date(value);
+            if (!Number.isNaN(date.getTime())) return date;
+          }
+          throw new Error(`Cannot convert value for ${tableName}.${columnName} to timestamp.`);
+        }
+        case 'json': {
+          if (typeof value === 'object') return value;
+          if (typeof value === 'string') {
+            try {
+              return JSON.parse(value);
+            } catch (err) {
+              throw new Error(`Cannot convert value for ${tableName}.${columnName} to json.`);
+            }
+          }
+          throw new Error(`Cannot convert value for ${tableName}.${columnName} to json.`);
+        }
+        case 'string':
+        case 'text':
+          return String(value);
+        default:
+          throw new Error(`Unsupported column type "${type}" for ${tableName}.${columnName}.`);
+      }
+    };
+
+    const buildInsertRow = function (tableName, columnDefs, sourceRow) {
+      const result = {};
+      for (const [columnName, columnDef] of Object.entries(columnDefs)) {
+        if (Object.prototype.hasOwnProperty.call(sourceRow, columnName)) {
+          result[columnName] = convertValue(sourceRow[columnName], columnDef, tableName, columnName);
+          continue;
+        }
+
+        if (columnDef?.default !== undefined) {
+          result[columnName] = columnDef.default;
+          continue;
+        }
+
+        if (columnDef?.autoIncrement) {
+          continue;
+        }
+
+        if (columnDef?.notNull) {
+          throw new Error(`Missing required column "${tableName}.${columnName}" in dumped data.`);
+        }
+      }
+      return result;
+    };
+
+    const restoreDataFromDump = async function (knexRef, schema, dump) {
+      const newTables = getTableNames(schema);
+      const dumpTables = dump?.tables ?? {};
+      const constrained = await disableConstraints(knexRef);
+      try {
+        for (const tableName of newTables) {
+          if (tableName === SCHEMA_TABLE) continue;
+          const rows = Array.isArray(dumpTables[tableName]) ? dumpTables[tableName] : [];
+          if (!rows.length) continue;
+
+          const columnDefs = schema.tables[tableName]?.columns ?? {};
+          const payload = rows.map((row) => buildInsertRow(tableName, columnDefs, row));
+          if (payload.length) {
+            await knexRef(tableName).insert(payload);
+          }
+        }
+      } finally {
+        if (constrained) {
+          await enableConstraints(knexRef);
+        }
+      }
+    };
+
     const withExecutor = async function (knexRef, handler) {
       if (knexRef && typeof knexRef.transaction === 'function') {
         await knexRef.transaction(async (trx) => {
@@ -327,6 +550,69 @@ export default class Mindstream_Back_Storage_SchemaManager {
         await applyIndexes(knexInstance, schema);
         await applyForeignKeys(knexInstance, schema);
         await writeSchemaState(knexInstance, schema);
+      } catch (err) {
+        logger.exception(NAMESPACE, ensureError(err));
+        throw err;
+      }
+    };
+
+    this.renewSchema = async function () {
+      const schema = getDeclaration();
+      assertSchema(schema);
+
+      try {
+        const knexInstance = getKnex();
+        const state = await readSchemaState(knexInstance);
+        if (!state.exists) {
+          throw new Error('Schema version table is missing.');
+        }
+        if (!state.schema || typeof state.schema !== 'object' || !state.schema.tables) {
+          throw new Error('Stored schema declaration is missing or invalid.');
+        }
+
+        const dumpPath = await dumpDataToFile(knexInstance, state.schema);
+        logger.info(NAMESPACE, `Schema data dumped to ${dumpPath}.`);
+
+        let handlerInvoked = false;
+        try {
+          await knexInstance.transaction(async (trx) => {
+            handlerInvoked = true;
+            await dropAllTables(trx, state.schema);
+            await createTables(trx, schema);
+            await applyIndexes(trx, schema);
+            await applyForeignKeys(trx, schema);
+            await writeSchemaState(trx, schema);
+            const dump = await readDumpFile(dumpPath);
+            await restoreDataFromDump(trx, schema, dump);
+          });
+          return;
+        } catch (err) {
+          if (!handlerInvoked) {
+            logger.warn(NAMESPACE, 'Database transaction is unavailable. Proceeding without transactional safety.');
+          } else {
+            throw err;
+          }
+        }
+
+        logger.warn(NAMESPACE, 'Point of no return: dropping existing schema without transaction.');
+        await dropAllTables(knexInstance, state.schema);
+        await createTables(knexInstance, schema);
+        await applyIndexes(knexInstance, schema);
+        await applyForeignKeys(knexInstance, schema);
+        await writeSchemaState(knexInstance, schema);
+
+        const dump = await readDumpFile(dumpPath);
+        try {
+          await restoreDataFromDump(knexInstance, schema, dump);
+        } catch (err) {
+          logger.warn(NAMESPACE, 'Data restore failed without transaction; dropping newly created schema.');
+          try {
+            await dropAllTables(knexInstance, schema);
+          } catch (dropErr) {
+            logger.exception(NAMESPACE, ensureError(dropErr));
+          }
+          throw err;
+        }
       } catch (err) {
         logger.exception(NAMESPACE, ensureError(err));
         throw err;
