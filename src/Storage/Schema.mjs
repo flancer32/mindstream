@@ -43,6 +43,7 @@ export default class Mindstream_Back_Storage_Schema {
         rss_guid: { type: 'string', length: 255 },
         rss_published_at: { type: 'timestamp' },
         discovered_at: { type: 'timestamp', notNull: true },
+        status: { type: 'string', notNull: true, length: 32, default: 'extract_pending' },
       },
       foreignKeys: [
         {
@@ -58,12 +59,31 @@ export default class Mindstream_Back_Storage_Schema {
       ],
     };
 
+    const publicationExtractionsTable = {
+      columns: {
+        publication_id: { type: 'bigint', notNull: true, primary: true },
+        html: { type: 'text' },
+        md_text: { type: 'text' },
+        created_at: { type: 'timestamp', notNull: true },
+      },
+      foreignKeys: [
+        {
+          columns: ['publication_id'],
+          references: { table: 'publications', columns: ['id'] },
+          onDelete: 'cascade',
+          onUpdate: 'cascade',
+        },
+      ],
+      indexes: [],
+    };
+
     const declaration = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       tables: {
         schema_version: schemaVersionTable,
         publication_sources: publicationSourcesTable,
         publications: publicationsTable,
+        publication_extractions: publicationExtractionsTable,
       },
     };
 
