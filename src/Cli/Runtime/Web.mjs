@@ -3,7 +3,7 @@
  * @description CLI command to start runtime web server mode.
  */
 export default class Mindstream_Back_Cli_Runtime_Web {
-  constructor({ Mindstream_Back_Runtime_Web_Server$: webServer }) {
+  constructor({ Mindstream_Back_Web_Server$: webServer }) {
     this.execute = async function ({ args } = {}) {
       if (Array.isArray(args) && args.length) {
         throw new Error('Command runtime:web does not accept arguments.');

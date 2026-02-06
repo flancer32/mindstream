@@ -5,7 +5,7 @@ import { createTestContainer } from '../../../di-node.mjs';
 
 test('Mindstream_Back_Cli_Runtime_Web rejects arguments', async () => {
   const container = await createTestContainer();
-  container.register('Mindstream_Back_Runtime_Web_Server$', {
+  container.register('Mindstream_Back_Web_Server$', {
     async start() {},
     async wait() {},
   });
@@ -18,7 +18,7 @@ test('Mindstream_Back_Cli_Runtime_Web waits after start', async () => {
   const container = await createTestContainer();
   const calls = [];
 
-  container.register('Mindstream_Back_Runtime_Web_Server$', {
+  container.register('Mindstream_Back_Web_Server$', {
     async start() {
       calls.push('start');
     },

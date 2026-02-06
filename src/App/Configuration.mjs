@@ -92,6 +92,7 @@ export default class Mindstream_Back_App_Configuration {
       _config = freezeConfig({
         server: {
           port: coercePort(env.SERVER_PORT),
+          type: coerceString(env.SERVER_TYPE),
         },
         db: {
           client: coerceString(env.DB_CLIENT),

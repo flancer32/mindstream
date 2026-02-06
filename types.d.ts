@@ -31,9 +31,10 @@ declare global {
   type Mindstream_Back_Process_Publication_Store = import("./src/Process/Publication/Store.mjs").default;
   type Mindstream_Back_Process_Publication_EmbeddingStore = import("./src/Process/Publication/EmbeddingStore.mjs").default;
   type Mindstream_Back_Process_Publication_SummaryStore = import("./src/Process/Publication/SummaryStore.mjs").default;
-  type Mindstream_Back_Runtime_Web_HandlerList = import("./src/Runtime/Web/HandlerList.mjs").default;
-  type Mindstream_Back_Runtime_Web_HandlerRegistry = import("./src/Runtime/Web/HandlerRegistry.mjs").default;
-  type Mindstream_Back_Runtime_Web_Server = import("./src/Runtime/Web/Server.mjs").default;
+  type Mindstream_Back_Web_Api_Dispatcher = import("./src/Web/Api/Dispatcher.mjs").default;
+  type Mindstream_Back_Web_Api_Handler_Fallback = import("./src/Web/Api/Handler/Fallback.mjs").default;
+  type Mindstream_Back_Web_Handler_Api = import("./src/Web/Handler/Api.mjs").default;
+  type Mindstream_Back_Web_Server = import("./src/Web/Server.mjs").default;
   type Mindstream_Back_Storage_Knex = import("./src/Storage/Knex.mjs").default;
   type Mindstream_Back_Storage_Schema = import("./src/Storage/Schema.mjs").default;
   type Mindstream_Back_Storage_SchemaManager = import("./src/Storage/SchemaManager.mjs").default;

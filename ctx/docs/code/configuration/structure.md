@@ -40,6 +40,7 @@ configuration:
 ```
 server:
     port
+    type
 ```
 
 ---

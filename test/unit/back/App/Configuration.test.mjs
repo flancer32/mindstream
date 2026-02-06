@@ -50,10 +50,11 @@ test('Mindstream_Back_App_Configuration builds structure from process.env only',
   const value = config.get();
 
   assert.deepEqual(Object.keys(value).sort(), ['db', 'llm', 'server']);
-  assert.deepEqual(Object.keys(value.server).sort(), ['port']);
+  assert.deepEqual(Object.keys(value.server).sort(), ['port', 'type']);
   assert.deepEqual(Object.keys(value.db).sort(), ['client', 'database', 'host', 'password', 'port', 'user']);
   assert.deepEqual(Object.keys(value.llm).sort(), ['apiKey', 'baseUrl', 'embeddingModel', 'generationModel']);
   assert.equal(value.server.port, undefined);
+  assert.equal(value.server.type, undefined);
   assert.equal(value.db.client, undefined);
   assert.equal(value.db.host, undefined);
   assert.equal(value.db.port, undefined);
@@ -70,6 +71,7 @@ test('Mindstream_Back_App_Configuration loads .env from project root and respect
   const container = await createTestContainer();
   const processMock = createProcessMock({
     SERVER_PORT: '8081',
+    SERVER_TYPE: 'http2',
     DB_CLIENT: 'pg',
     DB_HOST: 'db.local',
     DB_PORT: '5432',
@@ -84,6 +86,7 @@ test('Mindstream_Back_App_Configuration loads .env from project root and respect
   const envContent = [
     '# comment',
     'SERVER_PORT=9999',
+    'SERVER_TYPE=https',
     'DB_CLIENT = mysql',
     'DB_HOST= env-host',
     'DB_PORT= 3306',
@@ -108,6 +111,7 @@ test('Mindstream_Back_App_Configuration loads .env from project root and respect
   const value = config.get();
 
   assert.equal(value.server.port, 8081);
+  assert.equal(value.server.type, 'http2');
   assert.equal(value.db.client, 'pg');
   assert.equal(value.db.host, 'db.local');
   assert.equal(value.db.port, 5432);
@@ -119,6 +123,7 @@ test('Mindstream_Back_App_Configuration loads .env from project root and respect
   assert.equal(value.llm.generationModel, 'gen-x');
   assert.equal(value.llm.embeddingModel, 'embed-x');
   assert.equal(processMock.env.SERVER_PORT, '8081');
+  assert.equal(processMock.env.SERVER_TYPE, 'http2');
   assert.equal(fsMock.getLastPath(), path.join('/project', '.env'));
 });
 
@@ -127,6 +132,7 @@ test('Mindstream_Back_App_Configuration applies .env values when env is missing'
   const processMock = createProcessMock();
   const envContent = [
     'SERVER_PORT = 7000',
+    'SERVER_TYPE = http',
     'DB_CLIENT=sqlite3',
     'DB_HOST = local',
     'DB_PORT= 7777',
@@ -151,6 +157,7 @@ test('Mindstream_Back_App_Configuration applies .env values when env is missing'
   const value = config.get();
 
   assert.equal(value.server.port, 7000);
+  assert.equal(value.server.type, 'http');
   assert.equal(value.db.client, 'sqlite3');
   assert.equal(value.db.host, 'local');
   assert.equal(value.db.port, 7777);
@@ -165,7 +172,7 @@ test('Mindstream_Back_App_Configuration applies .env values when env is missing'
 
 test('Mindstream_Back_App_Configuration ignores missing .env and returns a frozen configuration object', async () => {
   const container = await createTestContainer();
-  const processMock = createProcessMock({ SERVER_PORT: '5050' });
+  const processMock = createProcessMock({ SERVER_PORT: '5050', SERVER_TYPE: 'http' });
   const fsMock = createFsMock({ exists: false });
 
   container.register('node:process', processMock);
@@ -180,6 +187,7 @@ test('Mindstream_Back_App_Configuration ignores missing .env and returns a froze
 
   assert.equal(value.server.port, 5050);
   assert.equal(typeof value.server.port, 'number');
+  assert.equal(value.server.type, 'http');
   assert.ok(Object.isFrozen(value));
   assert.ok(Object.isFrozen(value.server));
   assert.ok(Object.isFrozen(value.db));
