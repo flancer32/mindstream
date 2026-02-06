@@ -16,6 +16,7 @@ const buildLogger = function () {
 const createKnexStub = function ({ existing } = {}) {
   const inserts = [];
   const selects = [];
+  const rawCalls = [];
 
   const knex = function (table) {
     if (table !== 'publication_embeddings') {
@@ -36,12 +37,17 @@ const createKnexStub = function ({ existing } = {}) {
     };
   };
 
-  return { knex, inserts, selects };
+  knex.raw = async function (...args) {
+    rawCalls.push(args);
+    return { rows: [] };
+  };
+
+  return { knex, inserts, selects, rawCalls };
 };
 
 test('Mindstream_Back_Process_Publication_EmbeddingStore saves embeddings', async () => {
   const container = await createTestContainer();
-  const { knex, inserts } = createKnexStub();
+  const { knex, rawCalls } = createKnexStub();
 
   container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
   container.register('Mindstream_Shared_Logger$', buildLogger());
@@ -53,11 +59,11 @@ test('Mindstream_Back_Process_Publication_EmbeddingStore saves embeddings', asyn
     annotationEmbedding: [0.3, 0.4],
   });
 
-  assert.equal(inserts.length, 1);
-  assert.equal(inserts[0].publication_id, 7);
-  assert.deepEqual(inserts[0].overview_embedding, [0.1, 0.2]);
-  assert.deepEqual(inserts[0].annotation_embedding, [0.3, 0.4]);
-  assert.ok(inserts[0].created_at);
+  assert.equal(rawCalls.length, 1);
+  assert.equal(rawCalls[0].length, 2);
+  assert.deepEqual(rawCalls[0][1][0], 7);
+  assert.deepEqual(rawCalls[0][1][1], JSON.stringify([0.1, 0.2]));
+  assert.deepEqual(rawCalls[0][1][2], JSON.stringify([0.3, 0.4]));
 });
 
 test('Mindstream_Back_Process_Publication_EmbeddingStore detects existing embeddings', async () => {

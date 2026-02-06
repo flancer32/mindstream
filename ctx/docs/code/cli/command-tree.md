@@ -17,7 +17,7 @@ ingest:discover:habr
 ingest:extract:habr
 process:generate:embeddings
 process:generate:summaries
-runtime:serve
+runtime:web
 ```
 
 Команды, отсутствующие в данной иерархии, считаются недопустимыми.
@@ -157,11 +157,11 @@ runtime:serve
 - команда не инициирует embedding, runtime или иные последующие этапы обработки;
 - команда не является интерактивной и не принимает входных параметров.
 
-### runtime:serve
+### runtime:web
 
 Контур: runtime.
 
-Назначение: запуск backend-приложения в runtime-режиме.
+Назначение: запуск backend-приложения в runtime-режиме веб-сервера.
 
 Параметры:
 

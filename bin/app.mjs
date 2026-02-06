@@ -17,6 +17,7 @@ const container = new Container();
 const resolver = container.getResolver();
 resolver.addNamespaceRoot('Mindstream_Back_', path.join(projectRoot, 'src'), 'mjs');
 resolver.addNamespaceRoot('Mindstream_Shared_', path.join(projectRoot, 'web', 'app', 'Shared'), 'mjs');
+resolver.addNamespaceRoot('Fl32_Web_', path.join(projectRoot, 'node_modules', '@flancer32', 'teq-web', 'src'), 'js');
 resolver.addNamespaceRoot('Teqfw_Di_', path.join(projectRoot, 'node_modules', '@teqfw', 'di', 'src'));
 
 const ensureError = function (err) {

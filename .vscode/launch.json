@@ -2,11 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Mindstream: Debug Backend",
+      "name": "MS: Debug App",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/bin/app.mjs",
-      "args": ["process:generate:embeddings"],
+      "args": ["runtime:web"],
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "node",
       "runtimeArgs": [],
