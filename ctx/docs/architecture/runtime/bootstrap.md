@@ -65,34 +65,6 @@ Bootstrap-код не интерпретирует окружение и не с
 
 ---
 
-## Эталонная реализация (Node.js, ESM)
-
-Приведённый ниже код является **референсной реализацией** архитектурного решения для Node.js и не определяет архитектуру сам по себе.
-
-```js
-#!/usr/bin/env node
-
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import Container from "@teqfw/di";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, "..");
-
-const container = new Container();
-const resolver = container.getResolver();
-
-resolver.addNamespaceRoot("Mindstream_Back_", path.join(projectRoot, "src"), "mjs");
-resolver.addNamespaceRoot("Mindstream_Shared_", path.join(projectRoot, "web", "app", "Shared"), "mjs");
-resolver.addNamespaceRoot("Teqfw_Di_", path.join(projectRoot, "node_modules", "@teqfw", "di", "src"));
-
-const app = await container.get("Mindstream_Back_App$");
-await app.run({ projectRoot });
-```
-
----
-
 ## Проверка корректности границы
 
 Архитектура считается корректной, если:
@@ -103,6 +75,10 @@ await app.run({ projectRoot });
 
 ---
 
-## Примечание
+## Связи
 
-Документ фиксирует **архитектуру запуска**, а не конкретный способ деплоя, CI/CD или окружения исполнения.
+CLI Ingress использует bootstrap-модель как механизм входа, оставаясь отдельной архитектурной границей. Связанный документ: `ctx/docs/architecture/cli-ingress.md`.
+
+HTTP-runtime-граница описана отдельно в `ctx/docs/architecture/runtime/http-runtime.md` и не изменяет модель передачи управления в приложение.
+
+Референсная кодовая форма bootstrap вынесена в `ctx/docs/code/bootstrap-reference.md` и не определяет архитектуру запуска.
