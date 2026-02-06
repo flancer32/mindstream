@@ -56,6 +56,22 @@ export default class Mindstream_Back_Storage_SchemaManager {
       return `tmp_${tableName}_${stamp}`;
     };
 
+    const hasVectorColumns = function (schema) {
+      const tableNames = getTableNames(schema);
+      for (const tableName of tableNames) {
+        const columns = schema.tables[tableName]?.columns ?? {};
+        for (const columnDef of Object.values(columns)) {
+          if (columnDef?.type === 'vector') return true;
+        }
+      }
+      return false;
+    };
+
+    const ensureVectorExtension = async function (knexRef, schema) {
+      if (!hasVectorColumns(schema)) return;
+      await knexRef.raw('CREATE EXTENSION IF NOT EXISTS vector');
+    };
+
     const createColumn = function (table, name, def) {
       const type = def?.type;
       if (!type) {
@@ -77,6 +93,13 @@ export default class Mindstream_Back_Storage_SchemaManager {
           return table.timestamp(name);
         case 'json':
           return table.json(name);
+        case 'vector': {
+          const dimension = def?.dimension;
+          if (!Number.isFinite(Number(dimension))) {
+            throw new Error(`Vector dimension is missing for "${name}".`);
+          }
+          return table.specificType(name, `vector(${Number(dimension)})`);
+        }
         default:
           throw new Error(`Unsupported column type "${type}" for "${name}".`);
       }
@@ -154,6 +177,7 @@ export default class Mindstream_Back_Storage_SchemaManager {
     };
 
     const createTables = async function (knexRef, schema) {
+      await ensureVectorExtension(knexRef, schema);
       const tableNames = getTableNames(schema);
       for (const tableName of tableNames) {
         await createTable(knexRef, tableName, schema.tables[tableName]);
@@ -365,6 +389,11 @@ export default class Mindstream_Back_Storage_SchemaManager {
             }
           }
           throw new Error(`Cannot convert value for ${tableName}.${columnName} to json.`);
+        }
+        case 'vector': {
+          if (Array.isArray(value)) return value;
+          if (typeof value === 'string') return value;
+          throw new Error(`Cannot convert value for ${tableName}.${columnName} to vector.`);
         }
         case 'string':
         case 'text':

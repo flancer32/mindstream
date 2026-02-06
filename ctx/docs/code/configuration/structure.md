@@ -74,7 +74,8 @@ db:
 llm:
     apiKey
     baseUrl
-    model
+    generationModel
+    embeddingModel
 ```
 
 ---

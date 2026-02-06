@@ -1,6 +1,6 @@
 /**
  * @module Mindstream_Back_Process_Publication_Store
- * @description Provides publication selection for summary generation.
+ * @description Provides publication selection for summary and embedding generation.
  */
 export default class Mindstream_Back_Process_Publication_Store {
   constructor({
@@ -47,6 +47,37 @@ export default class Mindstream_Back_Process_Publication_Store {
       const rows = await query;
       if (!rows?.length) {
         logger.info(NAMESPACE, 'No publications pending summaries.');
+      }
+      return rows ?? [];
+    };
+
+    this.listForEmbeddings = async function ({ limit } = {}) {
+      const pageSize = normalizeLimit(limit);
+      const knexRef = getKnex();
+      const query = knexRef('publications as p')
+        .join('publication_summaries as s', 'p.id', 's.publication_id')
+        .leftJoin('publication_embeddings as e', 'p.id', 'e.publication_id')
+        .select('p.id', 'p.status', 's.overview', 's.annotation')
+        .whereNotNull('s.overview')
+        .whereNotNull('s.annotation')
+        .whereNull('e.publication_id')
+        .orderBy('p.id', 'asc')
+        .limit(pageSize);
+
+      const statusFilter = [];
+      if (statusCatalog?.SUMMARY_READY) {
+        statusFilter.push(statusCatalog.SUMMARY_READY);
+      }
+      if (statusCatalog?.EMBEDDING_PENDING) {
+        statusFilter.push(statusCatalog.EMBEDDING_PENDING);
+      }
+      if (statusFilter.length) {
+        query.whereIn('p.status', statusFilter);
+      }
+
+      const rows = await query;
+      if (!rows?.length) {
+        logger.info(NAMESPACE, 'No publications pending embeddings.');
       }
       return rows ?? [];
     };

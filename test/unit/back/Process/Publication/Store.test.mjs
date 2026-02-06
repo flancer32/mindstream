@@ -16,6 +16,8 @@ const buildLogger = function () {
 const buildStatusCatalog = function () {
   return {
     SUMMARY_FAILED: 'summary_failed',
+    SUMMARY_READY: 'summary_ready',
+    EMBEDDING_PENDING: 'embedding_pending',
   };
 };
 
@@ -27,6 +29,7 @@ const createQueryBuilder = function ({ rows } = {}) {
     whereNotNull: [],
     whereNull: [],
     whereNot: [],
+    whereIn: [],
     orderBy: [],
     limit: [],
   };
@@ -54,6 +57,10 @@ const createQueryBuilder = function ({ rows } = {}) {
     },
     whereNot(...args) {
       calls.whereNot.push(args);
+      return builder;
+    },
+    whereIn(...args) {
+      calls.whereIn.push(args);
       return builder;
     },
     orderBy(...args) {
@@ -116,6 +123,29 @@ test('Mindstream_Back_Process_Publication_Store selects publications without sum
   assert.equal(calls.whereNull.length, 1);
   assert.equal(calls.whereNot.length, 1);
   assert.deepEqual(calls.whereNot[0], ['p.status', 'summary_failed']);
+});
+
+test('Mindstream_Back_Process_Publication_Store selects publications for embeddings', async () => {
+  const container = await createTestContainer();
+  const { knex, calls } = createKnexStub({
+    rows: [{ id: 2, overview: 'Overview', annotation: 'Annotation', status: 'summary_ready' }],
+  });
+
+  container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
+  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
+
+  const store = await container.get('Mindstream_Back_Process_Publication_Store$');
+  const rows = await store.listForEmbeddings();
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].id, 2);
+  assert.equal(calls.join.length, 1);
+  assert.equal(calls.leftJoin.length, 1);
+  assert.equal(calls.whereNotNull.length, 2);
+  assert.equal(calls.whereNull.length, 1);
+  assert.equal(calls.whereIn.length, 1);
+  assert.deepEqual(calls.whereIn[0], ['p.status', ['summary_ready', 'embedding_pending']]);
 });
 
 test('Mindstream_Back_Process_Publication_Store updates status', async () => {

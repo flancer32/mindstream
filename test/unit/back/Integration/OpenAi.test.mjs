@@ -42,7 +42,8 @@ const setup = async function ({ response, fetchError, configOverride } = {}) {
           llm: {
             apiKey: 'key-123',
             baseUrl: 'https://api.test/v1/',
-            model: 'model-x',
+            generationModel: 'gen-x',
+            embeddingModel: 'embed-x',
           },
         }
       );
@@ -69,7 +70,7 @@ test('Mindstream_Back_Integration_OpenAi summarizes via responses endpoint', asy
   assert.equal(calls[0].url, 'https://api.test/v1/responses');
 
   const payload = JSON.parse(calls[0].options.body);
-  assert.equal(payload.model, 'model-x');
+  assert.equal(payload.model, 'gen-x');
   assert.equal(payload.input, 'hello');
 });
 
@@ -84,7 +85,7 @@ test('Mindstream_Back_Integration_OpenAi requests embeddings', async () => {
   assert.equal(calls[0].url, 'https://api.test/v1/embeddings');
 
   const payload = JSON.parse(calls[0].options.body);
-  assert.equal(payload.model, 'model-x');
+  assert.equal(payload.model, 'embed-x');
   assert.deepEqual(payload.input, ['a', 'b']);
 });
 

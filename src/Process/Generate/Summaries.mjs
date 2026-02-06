@@ -105,6 +105,9 @@ export default class Mindstream_Back_Process_Generate_Summaries {
         overview: payload.overview,
         annotation: payload.annotation,
       });
+      if (statusCatalog?.SUMMARY_READY) {
+        await publicationStore.updateStatus({ id: publicationId, status: statusCatalog.SUMMARY_READY });
+      }
       logger.info(NAMESPACE, `Summaries generated for publication ${publicationId}.`);
     };
 

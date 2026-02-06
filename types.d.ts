@@ -9,6 +9,7 @@ declare global {
   type Mindstream_Back_Cli_Ingest_Discover_Habr = import("./src/Cli/Ingest/Discover/Habr.mjs").default;
   type Mindstream_Back_Cli_Ingest_Extract_Habr = import("./src/Cli/Ingest/Extract/Habr.mjs").default;
   type Mindstream_Back_Cli_Process = import("./src/Cli/Process.mjs").default;
+  type Mindstream_Back_Cli_Process_Generate_Embeddings = import("./src/Cli/Process/Generate/Embeddings.mjs").default;
   type Mindstream_Back_Cli_Process_Generate_Summaries = import("./src/Cli/Process/Generate/Summaries.mjs").default;
   type Mindstream_Back_Cli_Runtime = import("./src/Cli/Runtime.mjs").default;
   type Mindstream_Back_Cli_Runtime_Serve = import("./src/Cli/Runtime/Serve.mjs").default;
@@ -24,9 +25,11 @@ declare global {
   type Mindstream_Back_Ingest_Source_Habr = import("./src/Ingest/Source/Habr.mjs").default;
   type Mindstream_Back_Integration_OpenAi = import("./src/Integration/OpenAi.mjs").default;
   type Mindstream_Back_Platform_Fetch = import("./src/Platform/Fetch.mjs").default;
+  type Mindstream_Back_Process_Generate_Embeddings = import("./src/Process/Generate/Embeddings.mjs").default;
   type Mindstream_Back_Process_Generate_Summaries = import("./src/Process/Generate/Summaries.mjs").default;
   type Mindstream_Back_Process_Publication_Status = import("./src/Process/Publication/Status.mjs").default;
   type Mindstream_Back_Process_Publication_Store = import("./src/Process/Publication/Store.mjs").default;
+  type Mindstream_Back_Process_Publication_EmbeddingStore = import("./src/Process/Publication/EmbeddingStore.mjs").default;
   type Mindstream_Back_Process_Publication_SummaryStore = import("./src/Process/Publication/SummaryStore.mjs").default;
   type Mindstream_Back_Storage_Knex = import("./src/Storage/Knex.mjs").default;
   type Mindstream_Back_Storage_Schema = import("./src/Storage/Schema.mjs").default;

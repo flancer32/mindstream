@@ -32,12 +32,13 @@ export default class Mindstream_Back_Integration_OpenAi {
       const cfg = config?.get?.();
       const llm = cfg?.llm ?? {};
       const apiKey = llm.apiKey;
-      const model = llm.model;
+      const generationModel = llm.generationModel;
+      const embeddingModel = llm.embeddingModel;
       const baseUrl = normalizeBaseUrl(llm.baseUrl);
-      if (!apiKey || !baseUrl || !model) {
+      if (!apiKey || !baseUrl || !generationModel || !embeddingModel) {
         throw new Error('LLM configuration is incomplete.');
       }
-      return { apiKey, baseUrl, model };
+      return { apiKey, baseUrl, generationModel, embeddingModel };
     };
 
     const parseJson = function (text) {
@@ -92,19 +93,19 @@ export default class Mindstream_Back_Integration_OpenAi {
     };
 
     this.summarize = async function (input) {
-      const { model } = getConfig();
+      const { generationModel } = getConfig();
       const normalized = normalizeInput(input);
       return await postJson('/responses', {
-        model,
+        model: generationModel,
         input: normalized,
       });
     };
 
     this.embed = async function (input) {
-      const { model } = getConfig();
+      const { embeddingModel } = getConfig();
       const normalized = normalizeInput(input);
       return await postJson('/embeddings', {
-        model,
+        model: embeddingModel,
         input: normalized,
       });
     };

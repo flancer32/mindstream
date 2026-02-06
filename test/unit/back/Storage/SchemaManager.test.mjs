@@ -40,7 +40,7 @@ const createColumnStub = function () {
   };
 };
 
-const createTableStub = function () {
+const createTableStub = function ({ specificTypeCalls }) {
   return {
     bigIncrements() {
       return createColumnStub();
@@ -69,6 +69,10 @@ const createTableStub = function () {
     json() {
       return createColumnStub();
     },
+    specificType(name, type) {
+      specificTypeCalls.push({ name, type });
+      return createColumnStub();
+    },
     primary() {},
     unique() {},
     index() {},
@@ -91,7 +95,8 @@ const createTableStub = function () {
 
 const createKnexStub = function ({ client, dumpTables, schema }) {
   const rawCalls = [];
-  const tableStub = createTableStub();
+  const specificTypeCalls = [];
+  const tableStub = createTableStub({ specificTypeCalls });
   const schemaState = {
     schema_version: schema.schemaVersion,
     schema_json: JSON.stringify(schema),
@@ -133,7 +138,7 @@ const createKnexStub = function ({ client, dumpTables, schema }) {
 
   knex.client = { config: { client } };
 
-  return { knex, rawCalls };
+  return { knex, rawCalls, specificTypeCalls };
 };
 
 const createFsStub = function () {
@@ -298,4 +303,33 @@ test('Mindstream_Back_Storage_SchemaManager skips sequence sync for non-pg clien
   await manager.renewSchema();
 
   assert.equal(rawCalls.length, 0);
+});
+
+test('Mindstream_Back_Storage_SchemaManager creates vector columns and extension', async () => {
+  const container = await createTestContainer();
+  const schema = buildSchema();
+  schema.tables.items.columns.embedding = { type: 'vector', dimension: 1536 };
+  const { knex, rawCalls, specificTypeCalls } = createKnexStub({
+    client: 'pg',
+    dumpTables: { items: [] },
+    schema,
+  });
+
+  container.register('Mindstream_Back_Storage_Schema$', {
+    getDeclaration() {
+      return schema;
+    },
+  });
+  container.register('Mindstream_Back_Storage_Knex$', {
+    get() {
+      return knex;
+    },
+  });
+  container.register('Mindstream_Shared_Logger$', createLoggerStub());
+
+  const manager = await container.get('Mindstream_Back_Storage_SchemaManager$');
+  await manager.createSchema();
+
+  assert.ok(rawCalls.some((call) => call.sql.includes('CREATE EXTENSION IF NOT EXISTS vector')));
+  assert.ok(specificTypeCalls.some((call) => call.name === 'embedding' && call.type === 'vector(1536)'));
 });

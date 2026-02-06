@@ -104,7 +104,8 @@ export default class Mindstream_Back_App_Configuration {
         llm: {
           apiKey: coerceString(env.LLM_API_KEY),
           baseUrl: coerceString(env.LLM_BASE_URL),
-          model: coerceString(env.LLM_MODEL),
+          generationModel: coerceString(env.LLM_GENERATION_MODEL),
+          embeddingModel: coerceString(env.LLM_EMBEDDING_MODEL),
         },
       });
 

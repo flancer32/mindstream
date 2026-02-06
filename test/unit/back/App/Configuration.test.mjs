@@ -52,7 +52,7 @@ test('Mindstream_Back_App_Configuration builds structure from process.env only',
   assert.deepEqual(Object.keys(value).sort(), ['db', 'llm', 'server']);
   assert.deepEqual(Object.keys(value.server).sort(), ['port']);
   assert.deepEqual(Object.keys(value.db).sort(), ['client', 'database', 'host', 'password', 'port', 'user']);
-  assert.deepEqual(Object.keys(value.llm).sort(), ['apiKey', 'baseUrl', 'model']);
+  assert.deepEqual(Object.keys(value.llm).sort(), ['apiKey', 'baseUrl', 'embeddingModel', 'generationModel']);
   assert.equal(value.server.port, undefined);
   assert.equal(value.db.client, undefined);
   assert.equal(value.db.host, undefined);
@@ -62,7 +62,8 @@ test('Mindstream_Back_App_Configuration builds structure from process.env only',
   assert.equal(value.db.password, undefined);
   assert.equal(value.llm.apiKey, undefined);
   assert.equal(value.llm.baseUrl, undefined);
-  assert.equal(value.llm.model, undefined);
+  assert.equal(value.llm.generationModel, undefined);
+  assert.equal(value.llm.embeddingModel, undefined);
 });
 
 test('Mindstream_Back_App_Configuration loads .env from project root and respects existing env', async () => {
@@ -77,7 +78,8 @@ test('Mindstream_Back_App_Configuration loads .env from project root and respect
     DB_PASSWORD: 'secret',
     LLM_API_KEY: 'env-key',
     LLM_BASE_URL: 'https://example.test/v1',
-    LLM_MODEL: 'model-x',
+    LLM_GENERATION_MODEL: 'gen-x',
+    LLM_EMBEDDING_MODEL: 'embed-x',
   });
   const envContent = [
     '# comment',
@@ -90,7 +92,8 @@ test('Mindstream_Back_App_Configuration loads .env from project root and respect
     'DB_PASSWORD=env-pass',
     'LLM_API_KEY=env-override',
     'LLM_BASE_URL= https://env.test/v1',
-    'LLM_MODEL=env-model',
+    'LLM_GENERATION_MODEL=env-gen',
+    'LLM_EMBEDDING_MODEL=env-embed',
   ].join('\n');
   const fsMock = createFsMock({ exists: true, content: envContent });
 
@@ -113,7 +116,8 @@ test('Mindstream_Back_App_Configuration loads .env from project root and respect
   assert.equal(value.db.password, 'secret');
   assert.equal(value.llm.apiKey, 'env-key');
   assert.equal(value.llm.baseUrl, 'https://example.test/v1');
-  assert.equal(value.llm.model, 'model-x');
+  assert.equal(value.llm.generationModel, 'gen-x');
+  assert.equal(value.llm.embeddingModel, 'embed-x');
   assert.equal(processMock.env.SERVER_PORT, '8081');
   assert.equal(fsMock.getLastPath(), path.join('/project', '.env'));
 });
@@ -131,7 +135,8 @@ test('Mindstream_Back_App_Configuration applies .env values when env is missing'
     'DB_PASSWORD= local-pass',
     'LLM_API_KEY= key-123',
     'LLM_BASE_URL = https://llm.local/v1',
-    'LLM_MODEL= local-model',
+    'LLM_GENERATION_MODEL= local-gen',
+    'LLM_EMBEDDING_MODEL= local-embed',
   ].join('\n');
   const fsMock = createFsMock({ exists: true, content: envContent });
 
@@ -154,7 +159,8 @@ test('Mindstream_Back_App_Configuration applies .env values when env is missing'
   assert.equal(value.db.password, 'local-pass');
   assert.equal(value.llm.apiKey, 'key-123');
   assert.equal(value.llm.baseUrl, 'https://llm.local/v1');
-  assert.equal(value.llm.model, 'local-model');
+  assert.equal(value.llm.generationModel, 'local-gen');
+  assert.equal(value.llm.embeddingModel, 'local-embed');
 });
 
 test('Mindstream_Back_App_Configuration ignores missing .env and returns a frozen configuration object', async () => {

@@ -104,3 +104,34 @@ test('Mindstream_Back_App_Cli_Dispatcher routes process:generate:summaries', asy
   assert.deepEqual(calls[0].args, []);
   assert.equal(logger.calls.length, 0);
 });
+
+test('Mindstream_Back_App_Cli_Dispatcher routes process:generate:embeddings', async () => {
+  const container = await createTestContainer();
+  const logger = createLoggerStub();
+  const calls = [];
+
+  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Cli_Db$', {
+    async dispatch() {},
+  });
+  container.register('Mindstream_Back_Cli_Ingest$', {
+    async dispatch() {},
+  });
+  container.register('Mindstream_Back_Cli_Process$', {
+    async dispatch(payload) {
+      calls.push(payload);
+    },
+  });
+  container.register('Mindstream_Back_Cli_Runtime$', {
+    async dispatch() {},
+  });
+
+  const dispatcher = await container.get('Mindstream_Back_App_Cli_Dispatcher$');
+  const exitCode = await dispatcher.dispatch({ cliArgs: ['process:generate:embeddings'] });
+
+  assert.equal(exitCode, 0);
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0].commandParts, ['generate', 'embeddings']);
+  assert.deepEqual(calls[0].args, []);
+  assert.equal(logger.calls.length, 0);
+});

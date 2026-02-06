@@ -3,7 +3,10 @@
  * @description CLI dispatcher for process:* commands.
  */
 export default class Mindstream_Back_Cli_Process {
-  constructor({ Mindstream_Back_Cli_Process_Generate_Summaries$: generateSummaries }) {
+  constructor({
+    Mindstream_Back_Cli_Process_Generate_Summaries$: generateSummaries,
+    Mindstream_Back_Cli_Process_Generate_Embeddings$: generateEmbeddings,
+  }) {
     const resolveTarget = function (commandParts) {
       const parts = Array.isArray(commandParts) ? commandParts : [];
       const [segment, action, ...rest] = parts;
@@ -12,6 +15,7 @@ export default class Mindstream_Back_Cli_Process {
       }
       const key = `${segment}:${action}`;
       const map = {
+        'generate:embeddings': generateEmbeddings,
         'generate:summaries': generateSummaries,
       };
       if (!map[key]) {

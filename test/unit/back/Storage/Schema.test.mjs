@@ -14,6 +14,7 @@ test('Mindstream_Back_Storage_Schema exposes publication_sources table', async (
   assert.ok(declaration.tables.publications);
   assert.ok(declaration.tables.publication_extractions);
   assert.ok(declaration.tables.publication_summaries);
+  assert.ok(declaration.tables.publication_embeddings);
 
   const columns = declaration.tables.publication_sources.columns;
   assert.ok(columns.id);
@@ -39,4 +40,10 @@ test('Mindstream_Back_Storage_Schema exposes publication_sources table', async (
   assert.ok(summaryColumns.overview);
   assert.ok(summaryColumns.annotation);
   assert.ok(summaryColumns.created_at);
+
+  const embeddingColumns = declaration.tables.publication_embeddings.columns;
+  assert.ok(embeddingColumns.publication_id);
+  assert.ok(embeddingColumns.overview_embedding);
+  assert.ok(embeddingColumns.annotation_embedding);
+  assert.ok(embeddingColumns.created_at);
 });

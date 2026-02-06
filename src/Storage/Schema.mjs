@@ -3,7 +3,7 @@
  * @description Declarative DB schema for the Storage layer.
  */
 export default class Mindstream_Back_Storage_Schema {
-  constructor({}) {
+  constructor({ }) {
     const publicationSourcesTable = {
       columns: {
         id: { type: 'bigint', primary: true, autoIncrement: true },
@@ -95,14 +95,45 @@ export default class Mindstream_Back_Storage_Schema {
       indexes: [],
     };
 
+    const publicationEmbeddingsTable = {
+      columns: {
+        publication_id: { type: 'bigint', notNull: true, primary: true },
+
+        overview_embedding: {
+          type: 'vector',
+          dimension: 1536,
+          notNull: true,
+        },
+
+        annotation_embedding: {
+          type: 'vector',
+          dimension: 1536,
+          notNull: true,
+        },
+
+        created_at: { type: 'timestamp', notNull: true },
+      },
+      foreignKeys: [
+        {
+          columns: ['publication_id'],
+          references: { table: 'publications', columns: ['id'] },
+          onDelete: 'cascade',
+          onUpdate: 'cascade',
+        },
+      ],
+      indexes: [],
+    };
+
+
     const declaration = {
-      schemaVersion: 4,
+      schemaVersion: 6,
       tables: {
         schema_version: schemaVersionTable,
         publication_sources: publicationSourcesTable,
         publications: publicationsTable,
         publication_extractions: publicationExtractionsTable,
         publication_summaries: publicationSummariesTable,
+        publication_embeddings: publicationEmbeddingsTable,
       },
     };
 

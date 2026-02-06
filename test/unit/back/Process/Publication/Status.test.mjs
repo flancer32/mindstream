@@ -9,7 +9,13 @@ test('Mindstream_Back_Process_Publication_Status exposes summary statuses', asyn
 
   assert.equal(status.SUMMARY_FAILED, 'summary_failed');
   assert.equal(status.SUMMARY_READY, 'summary_ready');
+  assert.equal(status.EMBEDDING_PENDING, 'embedding_pending');
+  assert.equal(status.EMBEDDING_DONE, 'embedding_done');
+  assert.equal(status.EMBEDDING_FAILED, 'embedding_failed');
   assert.ok(Array.isArray(status.list));
   assert.ok(status.list.includes('summary_failed'));
   assert.ok(status.list.includes('summary_ready'));
+  assert.ok(status.list.includes('embedding_pending'));
+  assert.ok(status.list.includes('embedding_done'));
+  assert.ok(status.list.includes('embedding_failed'));
 });

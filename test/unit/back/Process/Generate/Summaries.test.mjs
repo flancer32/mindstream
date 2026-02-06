@@ -16,6 +16,7 @@ const buildLogger = function () {
 const buildStatusCatalog = function () {
   return {
     SUMMARY_FAILED: 'summary_failed',
+    SUMMARY_READY: 'summary_ready',
   };
 };
 
@@ -59,7 +60,9 @@ test('Mindstream_Back_Process_Generate_Summaries generates summaries for pending
   assert.equal(calls.summarize, 1);
   assert.equal(calls.saved.length, 1);
   assert.equal(calls.saved[0].publicationId, 11);
-  assert.equal(calls.status.length, 0);
+  assert.equal(calls.status.length, 1);
+  assert.equal(calls.status[0].id, 11);
+  assert.equal(calls.status[0].status, 'summary_ready');
 });
 
 test('Mindstream_Back_Process_Generate_Summaries skips publications with summaries', async () => {
@@ -143,9 +146,11 @@ test('Mindstream_Back_Process_Generate_Summaries marks failures and continues', 
   const generator = await container.get('Mindstream_Back_Process_Generate_Summaries$');
   await generator.execute();
 
-  assert.equal(calls.status.length, 1);
+  assert.equal(calls.status.length, 2);
   assert.equal(calls.status[0].id, 31);
   assert.equal(calls.status[0].status, 'summary_failed');
+  assert.equal(calls.status[1].id, 32);
+  assert.equal(calls.status[1].status, 'summary_ready');
   assert.equal(calls.saved.length, 1);
   assert.equal(calls.saved[0].publicationId, 32);
 });
