@@ -421,6 +421,23 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
+    const syncPostgresSequences = async function (knexRef, schema) {
+      const client = resolveClientName(knexRef);
+      if (!client.includes('pg')) return;
+
+      const tables = getTableNames(schema);
+      for (const tableName of tables) {
+        if (tableName === SCHEMA_TABLE) continue;
+        const columns = schema.tables[tableName]?.columns ?? {};
+        for (const [columnName, columnDef] of Object.entries(columns)) {
+          if (!columnDef?.autoIncrement) continue;
+          const sql =
+            'SELECT setval(pg_get_serial_sequence(?, ?), COALESCE(MAX(??), 0)) FROM ??';
+          await knexRef.raw(sql, [tableName, columnName, columnName, tableName]);
+        }
+      }
+    };
+
     const withExecutor = async function (knexRef, handler) {
       if (knexRef && typeof knexRef.transaction === 'function') {
         await knexRef.transaction(async (trx) => {
@@ -584,6 +601,7 @@ export default class Mindstream_Back_Storage_SchemaManager {
             await writeSchemaState(trx, schema);
             const dump = await readDumpFile(dumpPath);
             await restoreDataFromDump(trx, schema, dump);
+            await syncPostgresSequences(trx, schema);
           });
           return;
         } catch (err) {
@@ -604,6 +622,7 @@ export default class Mindstream_Back_Storage_SchemaManager {
         const dump = await readDumpFile(dumpPath);
         try {
           await restoreDataFromDump(knexInstance, schema, dump);
+          await syncPostgresSequences(knexInstance, schema);
         } catch (err) {
           logger.warn(NAMESPACE, 'Data restore failed without transaction; dropping newly created schema.');
           try {
