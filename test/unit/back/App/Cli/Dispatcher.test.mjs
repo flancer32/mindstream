@@ -31,6 +31,9 @@ test('Mindstream_Back_App_Cli_Dispatcher routes db:schema:create', async () => {
   container.register('Mindstream_Back_Cli_Ingest$', {
     async dispatch() {},
   });
+  container.register('Mindstream_Back_Cli_Process$', {
+    async dispatch() {},
+  });
   container.register('Mindstream_Back_Cli_Runtime$', {
     async dispatch() {},
   });
@@ -56,6 +59,9 @@ test('Mindstream_Back_App_Cli_Dispatcher logs and returns error code on unknown 
   container.register('Mindstream_Back_Cli_Ingest$', {
     async dispatch() {},
   });
+  container.register('Mindstream_Back_Cli_Process$', {
+    async dispatch() {},
+  });
   container.register('Mindstream_Back_Cli_Runtime$', {
     async dispatch() {},
   });
@@ -66,4 +72,35 @@ test('Mindstream_Back_App_Cli_Dispatcher logs and returns error code on unknown 
   assert.equal(exitCode, 1);
   assert.equal(logger.calls.length, 1);
   assert.ok(logger.calls[0].error instanceof Error);
+});
+
+test('Mindstream_Back_App_Cli_Dispatcher routes process:generate:summaries', async () => {
+  const container = await createTestContainer();
+  const logger = createLoggerStub();
+  const calls = [];
+
+  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Cli_Db$', {
+    async dispatch() {},
+  });
+  container.register('Mindstream_Back_Cli_Ingest$', {
+    async dispatch() {},
+  });
+  container.register('Mindstream_Back_Cli_Process$', {
+    async dispatch(payload) {
+      calls.push(payload);
+    },
+  });
+  container.register('Mindstream_Back_Cli_Runtime$', {
+    async dispatch() {},
+  });
+
+  const dispatcher = await container.get('Mindstream_Back_App_Cli_Dispatcher$');
+  const exitCode = await dispatcher.dispatch({ cliArgs: ['process:generate:summaries'] });
+
+  assert.equal(exitCode, 0);
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0].commandParts, ['generate', 'summaries']);
+  assert.deepEqual(calls[0].args, []);
+  assert.equal(logger.calls.length, 0);
 });

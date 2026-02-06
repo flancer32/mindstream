@@ -7,6 +7,7 @@ export default class Mindstream_Back_App_Cli_Dispatcher {
     Mindstream_Shared_Logger$: logger,
     Mindstream_Back_Cli_Db$: dbDispatcher,
     Mindstream_Back_Cli_Ingest$: ingestDispatcher,
+    Mindstream_Back_Cli_Process$: processDispatcher,
     Mindstream_Back_Cli_Runtime$: runtimeDispatcher,
   }) {
     const NAMESPACE = 'Mindstream_Back_App_Cli_Dispatcher';
@@ -65,6 +66,13 @@ export default class Mindstream_Back_App_Cli_Dispatcher {
               throw new Error('Ingest dispatcher is unavailable.');
             }
             await ingestDispatcher.dispatch({ commandParts: rest, args });
+            return 0;
+          }
+          case 'process': {
+            if (!processDispatcher?.dispatch) {
+              throw new Error('Process dispatcher is unavailable.');
+            }
+            await processDispatcher.dispatch({ commandParts: rest, args });
             return 0;
           }
           default:

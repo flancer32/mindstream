@@ -6,7 +6,7 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/bin/app.mjs",
-      "args": ["db:schema:create"],
+      "args": ["process:generate:summaries"],
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "node",
       "runtimeArgs": [],
