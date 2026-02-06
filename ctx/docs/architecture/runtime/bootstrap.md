@@ -77,7 +77,7 @@ Bootstrap-код не интерпретирует окружение и не с
 
 ## Связи
 
-CLI Ingress использует bootstrap-модель как механизм входа, оставаясь отдельной архитектурной границей. Связанный документ: `ctx/docs/architecture/cli-ingress.md`.
+CLI Ingress использует bootstrap-модель как механизм входа, оставаясь отдельной архитектурной границей. Связанный документ: `ctx/docs/architecture/ingress/cli-ingress.md`.
 
 HTTP-runtime-граница описана отдельно в `ctx/docs/architecture/runtime/http-runtime.md` и не изменяет модель передачи управления в приложение.
 

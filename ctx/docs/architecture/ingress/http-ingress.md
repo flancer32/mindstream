@@ -1,6 +1,6 @@
 # HTTP Ingress
 
-Path: `ctx/docs/architecture/http-ingress.md`
+Path: `ctx/docs/architecture/ingress/http-ingress.md`
 
 ## Назначение
 

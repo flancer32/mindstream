@@ -1,6 +1,6 @@
 # CLI Ingress
 
-Path: `ctx/docs/architecture/cli-ingress.md`
+Path: `ctx/docs/architecture/ingress/cli-ingress.md`
 
 ## Назначение
 

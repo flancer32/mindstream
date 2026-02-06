@@ -139,8 +139,8 @@ Mindstream архитектурно представляет собой расп
 
 Документы:
 
-- `ctx/docs/architecture/http-ingress.md`
-- `ctx/docs/architecture/cli-ingress.md`
+- `ctx/docs/architecture/ingress/http-ingress.md`
+- `ctx/docs/architecture/ingress/cli-ingress.md`
 
 фиксируют архитектурные решения уровня MVP. Изменение их инвариантов требует пересмотра архитектурного корпуса документации.
 
