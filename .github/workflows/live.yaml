@@ -62,10 +62,10 @@ jobs:
 
             cd "${{ env.APP_DIR }}"
 
-            rm -rf prod.old
+            rm -rf prod.new
             mkdir -p prod.new
 
-            unzip -qq ${{ env.PRJ }}.zip -d prod.new
+            unzip -qq "${{ env.PRJ }}.zip" -d prod.new
 
             source ~/.nvm/nvm.sh
             nvm use node
@@ -73,28 +73,40 @@ jobs:
             TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 
             # Stop previous runtime if exists
-            pm2 stop ${{ env.PM2_APP }} || true
-            pm2 delete ${{ env.PM2_APP }} || true
+            pm2 stop "${{ env.PM2_APP }}" || true
+            pm2 delete "${{ env.PM2_APP }}" || true
 
-            # Switch application version
-            mv prod prod.old || true
+            # Rotate directories (first deploy safe)
+            rm -rf prod.old
+            if [ -d prod ]; then
+              mv prod prod.old
+            else
+              mkdir -p prod.old
+            fi
+
             mv prod.new prod
 
-            # Restore configuration and runtime data
-            cp prod.old/.env prod/.env
-            mkdir -p prod/var
-            cp -a prod.old/var/* prod/var/ || true
+            # Restore configuration and runtime data (only if exist)
+            if [ -f prod.old/.env ]; then
+              cp prod.old/.env prod/.env
+            fi
 
-            # Start runtime:web in PM2 cluster mode (4 processes)
+            if [ -d prod.old/var ]; then
+              mkdir -p prod/var
+              cp -a prod.old/var/. prod/var/ || true
+            fi
+
+            # Start runtime:web in PM2 cluster mode (4 workers)
             pm2 start node \
-              --name ${{ env.PM2_APP }} \
+              --name "${{ env.PM2_APP }}" \
               -i 4 \
               -- \
               bin/app.mjs runtime:web
 
             pm2 save
 
-            mv ${{ env.PRJ }}.zip ${{ env.PRJ }}-${TIMESTAMP}.zip
+            mv "${{ env.PRJ }}.zip" "${{ env.PRJ }}-${TIMESTAMP}.zip"
 
             echo "Mindstream deployed successfully (PM2 cluster x4)"
             pm2 ls
+            ls -lh "${{ env.APP_DIR }}"
