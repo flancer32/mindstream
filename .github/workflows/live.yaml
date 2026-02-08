@@ -4,7 +4,7 @@ on: workflow_dispatch
 
 env:
   PRJ: mindstream
-  APP_DIR: /home/${{ vars.USER }}/inst/app/mindstream
+  APP_DIR: /home/${{ vars.USER }}/app/mindstream
   PM2_APP: mindstream-web
 
 jobs:
