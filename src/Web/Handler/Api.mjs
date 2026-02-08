@@ -5,7 +5,7 @@
 export default class Mindstream_Back_Web_Handler_Api {
   constructor({
     Mindstream_Back_Web_Api_Dispatcher$: dispatcher,
-    Mindstream_Back_Web_Api_Handler_Fallback$: fallback,
+    Mindstream_Back_Web_Api_Fallback$: fallback,
   }) {
     const PREFIX = '/api';
 

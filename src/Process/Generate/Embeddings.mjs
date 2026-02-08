@@ -99,7 +99,7 @@ export default class Mindstream_Back_Process_Generate_Embeddings {
 
     this.execute = async function () {
       logger.info(NAMESPACE, 'Embedding generation started.');
-      const limit = 3;
+      const limit = 30;
       const batch = await publicationStore.listForEmbeddings({ limit });
       if (!Array.isArray(batch) || !batch.length) {
         logger.info(NAMESPACE, 'Embedding generation finished with no work.');

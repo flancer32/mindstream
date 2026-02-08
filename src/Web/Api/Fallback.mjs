@@ -1,8 +1,8 @@
 /**
- * @module Mindstream_Back_Web_Api_Handler_Fallback
+ * @module Mindstream_Back_Web_Api_Fallback
  * @description Handles unknown /api/** requests.
  */
-export default class Mindstream_Back_Web_Api_Handler_Fallback {
+export default class Mindstream_Back_Web_Api_Fallback {
   constructor({ Fl32_Web_Back_Helper_Respond$: respond }) {
     const buildPayload = function (path) {
       return {

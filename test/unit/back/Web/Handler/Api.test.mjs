@@ -20,7 +20,7 @@ test('Mindstream_Back_Web_Handler_Api returns false for non-api path', async () 
       throw new Error('Dispatcher should not be called.');
     },
   });
-  container.register('Mindstream_Back_Web_Api_Handler_Fallback$', {
+  container.register('Mindstream_Back_Web_Api_Fallback$', {
     async handle() {
       throw new Error('Fallback should not be called.');
     },
@@ -41,7 +41,7 @@ test('Mindstream_Back_Web_Handler_Api uses fallback for unknown endpoint', async
       return undefined;
     },
   });
-  container.register('Mindstream_Back_Web_Api_Handler_Fallback$', {
+  container.register('Mindstream_Back_Web_Api_Fallback$', {
     async handle({ path }) {
       calls.push(path);
       return true;
@@ -72,7 +72,7 @@ test('Mindstream_Back_Web_Handler_Api dispatches to endpoint handler', async () 
       return undefined;
     },
   });
-  container.register('Mindstream_Back_Web_Api_Handler_Fallback$', {
+  container.register('Mindstream_Back_Web_Api_Fallback$', {
     async handle() {
       throw new Error('Fallback should not be used.');
     },

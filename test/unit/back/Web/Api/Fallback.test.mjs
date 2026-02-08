@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createTestContainer } from '../../../../di-node.mjs';
+import { createTestContainer } from '../../../di-node.mjs';
 
 const buildResponder = function () {
   const calls = [];
@@ -39,14 +39,14 @@ const buildResponse = function () {
   return res;
 };
 
-test('Mindstream_Back_Web_Api_Handler_Fallback responds with ok json', async () => {
+test('Mindstream_Back_Web_Api_Fallback responds with ok json', async () => {
   const container = await createTestContainer();
   const responder = buildResponder();
   const res = buildResponse();
 
   container.register('Fl32_Web_Back_Helper_Respond$', responder);
 
-  const fallback = await container.get('Mindstream_Back_Web_Api_Handler_Fallback$');
+  const fallback = await container.get('Mindstream_Back_Web_Api_Fallback$');
   await fallback.handle({ res, path: '/unknown' });
 
   assert.equal(res.status, 200);
