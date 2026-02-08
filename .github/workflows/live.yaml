@@ -1,0 +1,100 @@
+name: LIVE - Build & Deploy Mindstream (PM2 cluster x4)
+
+on: workflow_dispatch
+
+env:
+  PRJ: mindstream
+  APP_DIR: /home/${{ vars.USER }}/inst/app/mindstream
+  PM2_APP: mindstream-web
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install production dependencies
+        run: |
+          npm install --omit=optional
+          npm prune --omit=dev
+
+      - name: Build deployment archive
+        run: |
+          zip -qq --exclude=*.git* -r ${{ env.PRJ }}.zip ./
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-archive
+          path: ${{ env.PRJ }}.zip
+          retention-days: 1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-archive
+          path: .
+
+      - name: Copy archive to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: ${{ env.PRJ }}.zip
+          target: ${{ env.APP_DIR }}
+
+      - name: Deploy via PM2 (cluster x4)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+
+            cd "${{ env.APP_DIR }}"
+
+            rm -rf prod.old
+            mkdir -p prod.new
+
+            unzip -qq ${{ env.PRJ }}.zip -d prod.new
+
+            source ~/.nvm/nvm.sh
+            nvm use node
+
+            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+
+            # Stop previous runtime if exists
+            pm2 stop ${{ env.PM2_APP }} || true
+            pm2 delete ${{ env.PM2_APP }} || true
+
+            # Switch application version
+            mv prod prod.old || true
+            mv prod.new prod
+
+            # Restore configuration and runtime data
+            cp prod.old/.env prod/.env
+            mkdir -p prod/var
+            cp -a prod.old/var/* prod/var/ || true
+
+            # Start runtime:web in PM2 cluster mode (4 processes)
+            pm2 start node \
+              --name ${{ env.PM2_APP }} \
+              -i 4 \
+              -- \
+              bin/app.mjs runtime:web
+
+            pm2 save
+
+            mv ${{ env.PRJ }}.zip ${{ env.PRJ }}-${TIMESTAMP}.zip
+
+            echo "Mindstream deployed successfully (PM2 cluster x4)"
+            pm2 ls
