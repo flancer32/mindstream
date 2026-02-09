@@ -97,11 +97,10 @@ jobs:
             fi
 
             # Start runtime:web in PM2 cluster mode (4 workers)
-            pm2 start node \
-              --name "${{ env.PM2_APP }}" \
+            pm2 start bin/app.mjs \
+              --name mindstream-web \
               -i 4 \
-              -- \
-              bin/app.mjs runtime:web
+              -- runtime:web
 
             pm2 save
 
