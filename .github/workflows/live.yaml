@@ -97,13 +97,15 @@ jobs:
             fi
 
             # Start runtime:web in PM2 cluster mode (4 workers)
+            cd "${{ env.APP_DIR }}/prod"
             pm2 start bin/app.mjs \
               --name mindstream-web \
               -i 4 \
               -- runtime:web
 
             pm2 save
-
+            
+            cd "${{ env.APP_DIR }}"
             mv "${{ env.PRJ }}.zip" "${{ env.PRJ }}-${TIMESTAMP}.zip"
 
             echo "Mindstream deployed successfully (PM2 cluster x4)"
