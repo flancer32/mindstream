@@ -59,11 +59,9 @@ if (feedRoot) {
     return state.sources.get(sourceCode) || null;
   };
 
-  const buildVisibleItems = () => {
+  const buildAllItems = () => {
     const list = [];
-    for (const pubId of state.visible) {
-      const entry = state.items.get(pubId);
-      if (!entry) continue;
+    for (const entry of state.items.values()) {
       list.push(entry);
     }
     return list;
@@ -71,9 +69,9 @@ if (feedRoot) {
 
   const recordAttention = async (payload, item) => {
     await interestScores.recordAttention(payload, item, {
-      visibleItems: buildVisibleItems(),
+      items: buildAllItems(),
     });
-    refreshVisibleScores();
+    refreshAllScores();
   };
 
   const clampScore = (value) => {
@@ -91,12 +89,10 @@ if (feedRoot) {
     markerValue.textContent = `${percent}%`;
   };
 
-  const refreshVisibleScores = () => {
-    for (const pubId of state.visible) {
+  const refreshAllScores = () => {
+    for (const [pubId, marker] of state.markers.entries()) {
       const item = state.items.get(pubId);
       if (!item) continue;
-      const marker = state.markers.get(pubId);
-      if (!marker) continue;
       const score = interestScores.getScore(pubId) ?? interestScores.scoreItem(item);
       applyInterestScore(marker.fill, marker.value, score);
     }

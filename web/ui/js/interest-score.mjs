@@ -50,11 +50,11 @@ export const resolveScore = (item) => {
   return scoreItem(item);
 };
 
-export const recordAttention = async (payload, item, { visibleItems } = {}) => {
+export const recordAttention = async (payload, item, { items } = {}) => {
   const embedding = ensureEmbedding(item);
   const visiblePublications = [];
-  if (Array.isArray(visibleItems)) {
-    for (const entry of visibleItems) {
+  if (Array.isArray(items)) {
+    for (const entry of items) {
       const pubId = resolvePubId(entry);
       const visibleEmbedding = resolveEmbedding(entry);
       if (pubId === null || typeof pubId === 'undefined' || !visibleEmbedding) {
