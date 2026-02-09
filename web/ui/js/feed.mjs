@@ -1,3 +1,5 @@
+import * as interestScores from './interest-score.mjs';
+
 const feedRoot = document.getElementById('feed');
 
 if (feedRoot) {
@@ -6,6 +8,10 @@ if (feedRoot) {
     loading: false,
     done: false,
     sources: new Map(),
+    items: new Map(),
+    visible: new Set(),
+    attentionReady: false,
+    markers: new Map(),
   };
 
   const header = document.createElement('section');
@@ -53,10 +59,54 @@ if (feedRoot) {
     return state.sources.get(sourceCode) || null;
   };
 
+  const buildVisibleItems = () => {
+    const list = [];
+    for (const pubId of state.visible) {
+      const entry = state.items.get(pubId);
+      if (!entry) continue;
+      list.push(entry);
+    }
+    return list;
+  };
+
+  const recordAttention = async (payload, item) => {
+    await interestScores.recordAttention(payload, item, {
+      visibleItems: buildVisibleItems(),
+    });
+    refreshVisibleScores();
+  };
+
+  const clampScore = (value) => {
+    if (!Number.isFinite(value)) return 0;
+    if (value < 0) return 0;
+    if (value > 1) return 1;
+    return value;
+  };
+
+  const scoreToPercent = (score) => Math.round(clampScore(score) * 100);
+
+  const applyInterestScore = (markerFill, markerValue, score) => {
+    const percent = scoreToPercent(score);
+    markerFill.style.height = `${percent}%`;
+    markerValue.textContent = `${percent}%`;
+  };
+
+  const refreshVisibleScores = () => {
+    for (const pubId of state.visible) {
+      const item = state.items.get(pubId);
+      if (!item) continue;
+      const marker = state.markers.get(pubId);
+      if (!marker) continue;
+      const score = interestScores.getScore(pubId) ?? interestScores.scoreItem(item);
+      applyInterestScore(marker.fill, marker.value, score);
+    }
+  };
+
   const renderItem = (item) => {
     const source = resolveSource(item.sourceCode);
     const card = document.createElement('article');
     card.className = 'feed-card';
+    card.dataset.pubId = String(item.id);
 
     const sourceName = source?.name || item.sourceCode || 'Unknown source';
     const sourceUrl = source?.url || '#';
@@ -86,11 +136,34 @@ if (feedRoot) {
     titleLink.target = '_blank';
     titleLink.rel = 'noopener noreferrer';
     titleLink.textContent = titleText;
+    titleLink.addEventListener('click', () => {
+      recordAttention({ type: 'source_click', pubId: item.id }, item).catch((err) => {
+        console.error(err);
+      });
+    });
     title.append(titleLink);
 
     const annotation = document.createElement('p');
     annotation.className = 'feed-annotation';
     annotation.textContent = item.annotation;
+
+    const body = document.createElement('div');
+    body.className = 'feed-body';
+
+    const marker = document.createElement('div');
+    marker.className = 'interest-marker';
+    const markerFill = document.createElement('div');
+    markerFill.className = 'interest-marker__fill';
+    marker.append(markerFill);
+
+    const markerValue = document.createElement('div');
+    markerValue.className = 'interest-marker__value';
+
+    const bodyContent = document.createElement('div');
+    bodyContent.className = 'feed-body-content';
+    bodyContent.append(title, annotation);
+
+    body.append(marker, markerValue, bodyContent);
 
     const details = document.createElement('details');
     details.className = 'feed-details';
@@ -108,6 +181,11 @@ if (feedRoot) {
     readMore.rel = 'noopener noreferrer';
     readMore.textContent = '↗';
     readMore.setAttribute('aria-label', 'Open original publication');
+    readMore.addEventListener('click', () => {
+      recordAttention({ type: 'source_click', pubId: item.id }, item).catch((err) => {
+        console.error(err);
+      });
+    });
 
     const collapse = document.createElement('button');
     collapse.className = 'feed-action-button';
@@ -118,11 +196,19 @@ if (feedRoot) {
       details.open = false;
       summary.focus();
     });
+    details.addEventListener('toggle', () => {
+      if (!details.open) return;
+      recordAttention({ type: 'overview_open', pubId: item.id }, item).catch((err) => {
+        console.error(err);
+      });
+    });
 
     actions.append(readMore, collapse);
     details.append(summary, overview, actions);
 
-    card.append(meta, title, annotation, details);
+    card.append(meta, body, details);
+    state.markers.set(item.id, { fill: markerFill, value: markerValue });
+    applyInterestScore(markerFill, markerValue, interestScores.resolveScore(item));
 
     return card;
   };
@@ -132,10 +218,13 @@ if (feedRoot) {
     status.hidden = !text;
   };
 
-  const appendItems = (items) => {
+  const appendItems = (items, observer) => {
     const fragment = document.createDocumentFragment();
     for (const item of items) {
-      fragment.append(renderItem(item));
+      state.items.set(item.id, item);
+      const card = renderItem(item);
+      fragment.append(card);
+      observer.observe(card);
     }
     feedRoot.insertBefore(fragment, sentinel);
   };
@@ -172,7 +261,12 @@ if (feedRoot) {
         return;
       }
 
-      appendItems(items);
+      if (!state.attentionReady) {
+        interestScores.initAttention(items);
+        state.attentionReady = true;
+      }
+
+      appendItems(items, visibilityObserver);
       state.cursor = payload.cursor || null;
       updateStatus('');
     } catch (err) {
@@ -190,6 +284,21 @@ if (feedRoot) {
       }
     },
     { rootMargin: '200px 0px' }
+  );
+
+  const visibilityObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const pubId = entry.target?.dataset?.pubId;
+        if (!pubId) continue;
+        if (entry.isIntersecting) {
+          state.visible.add(Number(pubId));
+        } else {
+          state.visible.delete(Number(pubId));
+        }
+      }
+    },
+    { rootMargin: '0px 0px -10% 0px' }
   );
 
   observer.observe(sentinel);

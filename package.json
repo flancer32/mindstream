@@ -8,7 +8,7 @@
     "mindstream": "./bin/app.mjs"
   },
   "scripts": {
-    "start": "node ./bin/app.mjs",
+    "start": "node ./bin/app.mjs runtime:web",
     "test:unit": "node --test \"test/unit/**/*.test.mjs\""
   },
   "dependencies": {
