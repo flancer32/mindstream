@@ -26,6 +26,8 @@ Path: `./ctx/docs/architecture/data-flow/attention.md`
 
 Схема: Attention Signal Data Flows.
 
+Семантическая интерпретация сигналов внимания и их влияние на interest vector зафиксированы в документе `../attention/interest-vector.md`.
+
 ## Поток передачи сигналов внимания
 
 (`Browser → Storage`)

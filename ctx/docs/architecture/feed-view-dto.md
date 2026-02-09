@@ -22,6 +22,8 @@ Feed View DTO:
 
 Feed View DTO является **frontend-aware read-model**, допускающим использование части данных (включая embeddings) для локальных вычислений в браузере, но не раскрывающим внутреннюю архитектуру backend.
 
+Локальные вычисления interest vector и интерпретация пользовательских действий нормируются архитектурным документом `attention/interest-vector.md`.
+
 ---
 
 ## Состав Feed View DTO (MVP)
