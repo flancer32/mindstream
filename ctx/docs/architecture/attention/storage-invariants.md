@@ -1,6 +1,6 @@
 # Attention Storage Invariants
 
-Path: `ctx/docs/architecture/storage/attention-storage-invariants.md`
+Path: `./ctx/docs/architecture/attention/storage-invariants.md`
 
 ## Назначение
 
@@ -65,12 +65,12 @@ Storage в контуре сигналов внимания является **e
 
 ### Обязательность существования публикации
 
-- Attention Event может ссылаться только на публикацию, которая существует в storage корпусных данных.
+- Attention Event может ссылаться только на публикацию, которая существует в Content Collection storage.
 - Попытка зафиксировать событие внимания для несуществующей публикации является ошибкой.
 
 ### Удаление публикации
 
-- Если публикация удаляется из корпуса, связанные с ней данные attention должны быть удалены каскадно.
+- Если публикация удаляется из Content Collection, связанные с ней данные attention должны быть удалены каскадно.
 - После каскадного удаления публикации не остаётся attention-состояний, ссылающихся на неё.
 
 ---
@@ -149,7 +149,7 @@ Attention Event в MVP является не историческим событ
 
 ## Связанные документы
 
-- `ctx/docs/architecture/anonymous-identity.md`
+- `ctx/docs/architecture/anonymous-identity/invariants.md`
 - `ctx/docs/architecture/ingress/http-ingress.md`
 - `ctx/docs/architecture/ingress/attention-write-ingress.md`
 - `ctx/docs/architecture/data-flow/attention.md`
@@ -162,7 +162,7 @@ Attention Event в MVP является не историческим событ
 Storage-конур сигналов внимания в MVP хранит:
 
 - зарегистрированные anonymous identities (с временем регистрации);
-- ссылки на публикации, существующие в корпусе (как внешнюю зависимость);
+- ссылки на публикации, существующие в Content Collection (как внешнюю зависимость);
 - attention-состояния (не историю), уникальные по `(identity, publication, attention_type)`, полностью идемпотентные к повторной отправке и удаляемые каскадно при удалении публикации.
 
 Очистка данных допускается и может выполняться вручную. Derived data допускаются в будущем при соблюдении инвариантов данного документа.

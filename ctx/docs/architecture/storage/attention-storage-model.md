@@ -1,6 +1,6 @@
 # Attention Storage Data Model
 
-Path: `ctx/docs/architecture/storage/attention-storage-model.md`
+Path: `./ctx/docs/architecture/storage/attention-storage-model.md`
 
 ## Назначение
 
@@ -51,12 +51,12 @@ Anonymous identity представляет зарегистрированный
 
 ### 2. Publication Reference
 
-Publication Reference представляет ссылку на публикацию, существующую в корпусе данных Mindstream.
+Publication Reference представляет ссылку на публикацию, существующую в Content Collection.
 
 **Атрибуты:**
 
 - `publication_id`
-  - тип: определяется корпусом публикаций
+  - тип: определяется Content Collection
   - обязательный
   - первичный ключ
   - внешний ключ на таблицу публикаций
@@ -123,7 +123,7 @@ Attention Event представляет **логическое состояни
 - `link_click_after_overview`  
   Факт перехода по ссылке после предварительного просмотра обзора.
 
-Расширение перечня attention-type требует пересмотра архитектурного корпуса документации.
+Расширение перечня attention-type требует пересмотра архитектурного набора документации.
 
 ---
 
@@ -192,10 +192,10 @@ Storage обязан enforce следующие ограничения:
 
 ## Связанные документы
 
-- `ctx/docs/architecture/anonymous-identity.md`
+- `ctx/docs/architecture/anonymous-identity/invariants.md`
 - `ctx/docs/architecture/ingress/attention-write-ingress.md`
 - `ctx/docs/architecture/data-flow/attention.md`
-- `ctx/docs/architecture/storage/attention-storage-invariants.md`
+- `ctx/docs/architecture/attention/storage-invariants.md`
 
 ---
 

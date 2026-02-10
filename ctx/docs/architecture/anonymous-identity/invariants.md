@@ -1,6 +1,6 @@
 # Anonymous Identity
 
-Path: `./ctx/docs/architecture/anonymous-identity.md`
+Path: `./ctx/docs/architecture/anonymous-identity/invariants.md`
 
 ## Назначение
 
@@ -86,5 +86,10 @@ Anonymous identity без связанных событий подлежит у�
 
 ## Связанные документы
 
-- `ctx/docs/architecture/data-flow.md` — общий поток данных системы.
-- `ctx/docs/architecture/http-ingress.md` — правила HTTP write-ingress (ссылается на требования регистрации identity).
+- `ctx/docs/architecture/data-flow/attention.md` — Attention flows.
+- `ctx/docs/architecture/ingress/http-ingress.md` — HTTP ingress.
+- `ctx/docs/architecture/ingress/attention-write-ingress.md` — write-ingress сигналов внимания.
+
+## Итог
+
+Документ фиксирует anonymous identity как техническую сущность write-path, не являющуюся пользователем и не вводящую персонализации, а также задаёт инварианты её регистрации и использования в MVP Mindstream.
