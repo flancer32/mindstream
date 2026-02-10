@@ -1,3 +1,5 @@
+import { sendAttentionSignal } from './identity.mjs';
+
 const STORAGE_VECTOR_KEY = 'mindstream.attention.interestVector';
 const STORAGE_HISTORY_KEY = 'mindstream.attention.recentSignals';
 const MAX_HISTORY = 100;
@@ -197,6 +199,14 @@ const recalcScoresAsync = (visiblePublications) => {
   });
 };
 
+const notifyBackend = ({ type, pubId }) => {
+  try {
+    sendAttentionSignal({ type, pubId });
+  } catch {
+    // Ignore attention beacon failures in MVP.
+  }
+};
+
 export const init = ({ dim }) => {
   if (!Number.isInteger(dim) || dim <= 0) {
     throw new Error('init({ dim }) requires a positive integer dimension.');
@@ -245,6 +255,7 @@ export const recordAttention = (
     recentSignals = recentSignals.slice(recentSignals.length - MAX_HISTORY);
   }
   persistState();
+  notifyBackend({ type: effectiveType, pubId });
 
   return recalcScoresAsync(visiblePublications);
 };

@@ -2,6 +2,7 @@ declare global {
   type Mindstream_Back_App = import("./src/App.mjs").default;
   type Mindstream_Back_App_Cli_Dispatcher = import("./src/App/Cli/Dispatcher.mjs").default;
   type Mindstream_Back_App_Configuration = import("./src/App/Configuration.mjs").default;
+  type Mindstream_Back_Attention_Ingress = import("./src/Attention/Ingress.mjs").default;
   type Mindstream_Back_Cli_Db = import("./src/Cli/Db.mjs").default;
   type Mindstream_Back_Cli_Db_Schema_Create = import("./src/Cli/Db/Schema/Create.mjs").default;
   type Mindstream_Back_Cli_Db_Schema_Renew = import("./src/Cli/Db/Schema/Renew.mjs").default;
@@ -31,10 +32,11 @@ declare global {
   type Mindstream_Back_Process_Publication_Store = import("./src/Process/Publication/Store.mjs").default;
   type Mindstream_Back_Process_Publication_EmbeddingStore = import("./src/Process/Publication/EmbeddingStore.mjs").default;
   type Mindstream_Back_Process_Publication_SummaryStore = import("./src/Process/Publication/SummaryStore.mjs").default;
-  type Mindstream_Back_Web_Api_Dispatcher = import("./src/Web/Api/Dispatcher.mjs").default;
+  type Mindstream_Back_Web_Api_Attention = import("./src/Web/Api/Attention.mjs").default;
   type Mindstream_Back_Web_Api_Fallback = import("./src/Web/Api/Fallback.mjs").default;
   type Mindstream_Back_Web_Api_FeedView = import("./src/Web/Api/FeedView.mjs").default;
-  type Mindstream_Back_Web_Handler_Api = import("./src/Web/Handler/Api.mjs").default;
+  type Mindstream_Back_Web_Api_Identity = import("./src/Web/Api/Identity.mjs").default;
+  type Mindstream_Back_Web_Handler = import("./src/Web/Handler.mjs").default;
   type Mindstream_Back_Web_Server = import("./src/Web/Server.mjs").default;
   type Mindstream_Back_Storage_Knex = import("./src/Storage/Knex.mjs").default;
   type Mindstream_Back_Storage_Schema = import("./src/Storage/Schema.mjs").default;

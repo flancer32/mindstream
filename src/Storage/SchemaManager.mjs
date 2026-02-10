@@ -461,8 +461,14 @@ export default class Mindstream_Back_Storage_SchemaManager {
         for (const [columnName, columnDef] of Object.entries(columns)) {
           if (!columnDef?.autoIncrement) continue;
           const sql =
-            'SELECT setval(pg_get_serial_sequence(?, ?), COALESCE(MAX(??), 0)) FROM ??';
-          await knexRef.raw(sql, [tableName, columnName, columnName, tableName]);
+            'SELECT setval(pg_get_serial_sequence(?, ?), COALESCE(MAX(??), 1), MAX(??) IS NOT NULL) FROM ??';
+          await knexRef.raw(sql, [
+            tableName,
+            columnName,
+            columnName,
+            columnName,
+            tableName,
+          ]);
         }
       }
     };

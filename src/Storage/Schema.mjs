@@ -124,9 +124,56 @@ export default class Mindstream_Back_Storage_Schema {
       indexes: [],
     };
 
+    const anonymousIdentitiesTable = {
+      columns: {
+        id: { type: 'bigint', primary: true, autoIncrement: true },
+        identity_uuid: { type: 'string', notNull: true, length: 36 },
+        registered_at: { type: 'timestamp', notNull: true },
+      },
+      foreignKeys: [],
+      indexes: [
+        { columns: ['identity_uuid'], unique: true },
+        { columns: ['registered_at'] },
+      ],
+    };
+
+    const attentionStatesTable = {
+      columns: {
+        identity_id: { type: 'bigint', notNull: true },
+        publication_id: { type: 'bigint', notNull: true },
+        attention_type: { type: 'string', notNull: true, length: 64 },
+        created_at: { type: 'timestamp', notNull: true },
+      },
+      primaryKey: ['identity_id', 'publication_id', 'attention_type'],
+      foreignKeys: [
+        {
+          columns: ['identity_id'],
+          references: { table: 'anonymous_identities', columns: ['id'] },
+          onDelete: 'cascade',
+          onUpdate: 'cascade',
+        },
+        {
+          columns: ['publication_id'],
+          references: { table: 'publications', columns: ['id'] },
+          onDelete: 'cascade',
+          onUpdate: 'cascade',
+        },
+      ],
+      checks: [
+        {
+          name: 'attention_states_attention_type_check',
+          columns: ['attention_type'],
+          operator: 'in',
+          values: ['overview_view', 'link_click', 'link_click_after_overview'],
+        },
+      ],
+      indexes: [
+        { columns: ['created_at'] },
+      ],
+    };
 
     const declaration = {
-      schemaVersion: 6,
+      schemaVersion: 8,
       tables: {
         schema_version: schemaVersionTable,
         publication_sources: publicationSourcesTable,
@@ -134,6 +181,8 @@ export default class Mindstream_Back_Storage_Schema {
         publication_extractions: publicationExtractionsTable,
         publication_summaries: publicationSummariesTable,
         publication_embeddings: publicationEmbeddingsTable,
+        anonymous_identities: anonymousIdentitiesTable,
+        attention_states: attentionStatesTable,
       },
     };
 

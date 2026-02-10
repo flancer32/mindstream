@@ -1,3 +1,4 @@
+import * as identity from './identity.mjs';
 import * as interestScores from './interest-score.mjs';
 
 const feedRoot = document.getElementById('feed');
@@ -16,13 +17,50 @@ if (feedRoot) {
 
   const header = document.createElement('section');
   header.className = 'feed-header';
+  const headerTop = document.createElement('div');
+  headerTop.className = 'feed-header-top';
+  const headerText = document.createElement('div');
+  headerText.className = 'feed-header-text';
   const headerTitle = document.createElement('h1');
   headerTitle.className = 'feed-title';
   headerTitle.textContent = 'Mindstream Feed';
   const headerSubtitle = document.createElement('p');
   headerSubtitle.className = 'feed-subtitle';
   headerSubtitle.textContent = 'Curated signal from your sources.';
-  header.append(headerTitle, headerSubtitle);
+
+  const identityMenu = document.createElement('div');
+  identityMenu.className = 'identity-menu';
+  const identityToggle = document.createElement('button');
+  identityToggle.className = 'identity-menu__toggle';
+  identityToggle.type = 'button';
+  identityToggle.setAttribute('aria-label', 'Identity menu');
+  identityToggle.setAttribute('aria-expanded', 'false');
+  const toggleBarTop = document.createElement('span');
+  toggleBarTop.className = 'identity-menu__bar';
+  const toggleBarMid = document.createElement('span');
+  toggleBarMid.className = 'identity-menu__bar';
+  const toggleBarBottom = document.createElement('span');
+  toggleBarBottom.className = 'identity-menu__bar';
+  identityToggle.append(toggleBarTop, toggleBarMid, toggleBarBottom);
+
+  const identityPanel = document.createElement('div');
+  identityPanel.className = 'identity-menu__panel';
+  identityPanel.hidden = true;
+
+  const identityAction = document.createElement('button');
+  identityAction.className = 'identity-menu__action';
+  identityAction.type = 'button';
+  identityAction.textContent = 'Активировать идентичность';
+
+  const identityValue = document.createElement('div');
+  identityValue.className = 'identity-menu__value';
+
+  identityPanel.append(identityAction, identityValue);
+  identityMenu.append(identityToggle, identityPanel);
+
+  headerText.append(headerTitle, headerSubtitle);
+  headerTop.append(headerText, identityMenu);
+  header.append(headerTop);
 
   const status = document.createElement('div');
   status.className = 'feed-status';
@@ -32,6 +70,71 @@ if (feedRoot) {
   sentinel.className = 'feed-sentinel';
 
   feedRoot.append(header, status, sentinel);
+
+  const closeIdentityMenu = () => {
+    identityPanel.hidden = true;
+    identityToggle.setAttribute('aria-expanded', 'false');
+  };
+
+  const openIdentityMenu = () => {
+    identityPanel.hidden = false;
+    identityToggle.setAttribute('aria-expanded', 'true');
+  };
+
+  const toggleIdentityMenu = () => {
+    if (identityPanel.hidden) {
+      openIdentityMenu();
+    } else {
+      closeIdentityMenu();
+    }
+  };
+
+  const syncIdentityMenu = () => {
+    const currentIdentity = identity.getIdentity();
+    if (currentIdentity) {
+      identityAction.hidden = true;
+      identityValue.hidden = false;
+      identityValue.textContent = currentIdentity;
+    } else {
+      identityAction.hidden = false;
+      identityValue.hidden = true;
+      identityValue.textContent = '';
+    }
+  };
+
+  identityToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleIdentityMenu();
+  });
+
+  identityAction.addEventListener('click', () => {
+    const confirmed = window.confirm(
+      'Активация идентичности: сигналы внимания будут агрегироваться на сервере. Продолжить?'
+    );
+    if (!confirmed) return;
+    identity.activateIdentity();
+    syncIdentityMenu();
+    closeIdentityMenu();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!identityMenu.contains(event.target)) {
+      closeIdentityMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeIdentityMenu();
+    }
+  });
+
+  identity.watchIdentity(() => {
+    syncIdentityMenu();
+  });
+
+  syncIdentityMenu();
+  identity.ensureIdentityRegistered();
 
   const buildUrl = () => {
     const url = new URL('/api/feed', window.location.origin);

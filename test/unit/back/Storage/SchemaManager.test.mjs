@@ -223,10 +223,10 @@ test('Mindstream_Back_Storage_SchemaManager syncs pg sequences after renew', asy
     (call) => call.sql.includes('setval') && call.sql.includes('pg_get_serial_sequence')
   );
   assert.ok(setvalCall);
-  assert.deepEqual(setvalCall.bindings, ['items', 'id', 'id', 'items']);
+  assert.deepEqual(setvalCall.bindings, ['items', 'id', 'id', 'id', 'items']);
 });
 
-test('Mindstream_Back_Storage_SchemaManager sets pg sequences to 0 for empty tables', async () => {
+test('Mindstream_Back_Storage_SchemaManager initializes pg sequences for empty tables', async () => {
   const container = await createTestContainer();
   const schema = buildSchema();
   const { fs } = createFsStub();
@@ -265,7 +265,8 @@ test('Mindstream_Back_Storage_SchemaManager sets pg sequences to 0 for empty tab
   );
   assert.ok(setvalCall);
   assert.ok(setvalCall.sql.includes('COALESCE(MAX'));
-  assert.ok(setvalCall.sql.includes('0'));
+  assert.ok(setvalCall.sql.includes('1'));
+  assert.ok(setvalCall.sql.includes('IS NOT NULL'));
 });
 
 test('Mindstream_Back_Storage_SchemaManager skips sequence sync for non-pg client', async () => {

@@ -46,7 +46,7 @@ test('Mindstream_Back_Web_Server registers api handler and starts once', async (
     },
   });
   const apiHandler = { name: 'api-handler' };
-  container.register('Mindstream_Back_Web_Handler_Api$', apiHandler);
+  container.register('Mindstream_Back_Web_Handler$', apiHandler);
 
   const server = await container.get('Mindstream_Back_Web_Server$');
   await server.start();
@@ -81,7 +81,7 @@ test('Mindstream_Back_Web_Server exposes wait promise', async () => {
       return payload;
     },
   });
-  container.register('Mindstream_Back_Web_Handler_Api$', {});
+  container.register('Mindstream_Back_Web_Handler$', {});
 
   const server = await container.get('Mindstream_Back_Web_Server$');
   const waitPromise = server.wait();

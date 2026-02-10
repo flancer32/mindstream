@@ -9,7 +9,7 @@ export default class Mindstream_Back_Web_Server {
     Fl32_Web_Back_Server$: server,
     Fl32_Web_Back_Server_Config$: serverConfigFactory,
     Fl32_Web_Back_Dispatcher$: dispatcher,
-    Mindstream_Back_Web_Handler_Api$: apiHandler,
+    Mindstream_Back_Web_Handler$: apiHandler,
   }) {
     const NAMESPACE = 'Mindstream_Back_Web_Server';
     let started = false;

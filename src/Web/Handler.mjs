@@ -1,13 +1,20 @@
 /**
- * @module Mindstream_Back_Web_Handler_Api
+ * @module Mindstream_Back_Web_Handler
  * @description API ingress handler for /api/** requests.
  */
-export default class Mindstream_Back_Web_Handler_Api {
+export default class Mindstream_Back_Web_Handler {
   constructor({
-    Mindstream_Back_Web_Api_Dispatcher$: dispatcher,
     Mindstream_Back_Web_Api_Fallback$: fallback,
+    Mindstream_Back_Web_Api_FeedView$: feedView,
+    Mindstream_Back_Web_Api_Attention$: attention,
+    Mindstream_Back_Web_Api_Identity$: identity,
   }) {
     const PREFIX = '/api';
+    const handlers = new Map([
+      ['/feed', feedView],
+      ['/attention', attention],
+      ['/identity', identity],
+    ]);
 
     const normalizeUrl = function (url) {
       if (!url) return '';
@@ -36,7 +43,7 @@ export default class Mindstream_Back_Web_Handler_Api {
 
     this.getRegistrationInfo = function () {
       return Object.freeze({
-        name: 'Mindstream_Back_Web_Handler_Api',
+        name: 'Mindstream_Back_Web_Handler',
         stage: 'process',
         before: [],
         after: [],
@@ -46,7 +53,7 @@ export default class Mindstream_Back_Web_Handler_Api {
     this.handle = async function (req, res) {
       const apiPath = extractApiPath(req?.url);
       if (!apiPath) return false;
-      const endpoint = dispatcher.resolve(apiPath);
+      const endpoint = handlers.get(apiPath);
       if (endpoint) {
         await invokeEndpoint(endpoint, { req, res, path: apiPath });
       } else {
