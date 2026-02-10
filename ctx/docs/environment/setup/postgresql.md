@@ -1,103 +1,159 @@
-# PostgreSQL — настройка для Mindstream (pgvector)
+# PostgreSQL — среда исполнения Mindstream (pgvector)
 
-Path: `ctx/docs/environment/setup/postgresql.md`
-
-Назначение: обеспечить корректную работу эмбеддингов в MVP Mindstream.
-
-## 1. Требования
-
-- PostgreSQL версии **16+**.
-- Доступ к установке расширений (superuser или эквивалентные права).
-- Одна база данных Mindstream.
-
-PostgreSQL без поддержки `pgvector` считается некорректной средой исполнения.
+**Path:** `ctx/docs/environment/setup/postgresql.md`
 
 ---
 
-## 2. Установка расширения pgvector
+## 1. Область ответственности документа
 
-### Ubuntu / Debian (PostgreSQL из apt)
+Документ описывает:
 
-Определи версию PostgreSQL:
+- минимальные требования к PostgreSQL;
+- обязательное расширение `pgvector`;
+- критерии корректной среды исполнения;
+- операции резервного копирования и восстановления базы данных.
 
-```
+Документ **не описывает**:
+
+- структуру схемы БД;
+- доменные таблицы;
+- миграции данных;
+- логику storage-слоя.
+
+---
+
+## 2. Требования к PostgreSQL
+
+Среда исполнения считается **корректной**, если выполняются все условия:
+
+- PostgreSQL версии **16+**;
+- одна база данных проекта Mindstream;
+- возможность установки расширений (`superuser` или эквивалент);
+- установленное и активированное расширение `pgvector`.
+
+PostgreSQL без поддержки `pgvector` считается **некорректной средой исполнения**.
+
+---
+
+## 3. Установка расширения pgvector
+
+### 3.1. Проверка версии PostgreSQL
+
+```sh
 psql --version
 ```
 
-Установи пакет pgvector для своей версии PostgreSQL:
+### 3.2. Установка пакета pgvector (Ubuntu / Debian)
 
-```
+```sh
 sudo apt update
 sudo apt install postgresql-16-pgvector
 ```
 
-(для других версий заменить `16` на фактическую).
+(номер версии заменить на фактический).
 
-Перезапусти PostgreSQL:
+### 3.3. Перезапуск PostgreSQL
 
-```
+```sh
 sudo systemctl restart postgresql
 ```
 
 ---
 
-## 3. Подключение расширения в базе данных
+## 4. Активация pgvector в базе данных
 
-Подключись к базе Mindstream:
+### 4.1. Подключение к базе Mindstream
 
-```
+```sh
 psql -d mindstream
 ```
 
-Выполни:
+### 4.2. Создание расширения
 
 ```sql
 CREATE EXTENSION vector;
 ```
 
-Проверка:
+### 4.3. Проверка установки
 
 ```sql
 SELECT extname FROM pg_extension WHERE extname = 'vector';
 ```
 
-Ожидаемый результат — одна строка `vector`.
-
 ---
 
-## 4. Проверка поддержки векторов
+## 5. Проверка поддержки векторного типа
 
 ```sql
 SELECT '[1,2,3]'::vector;
 ```
 
-Если выражение выполняется без ошибки — `pgvector` работает корректно.
+---
+
+## 6. Использование в Mindstream
+
+После подготовки PostgreSQL выполняются команды:
+
+```text
+db:schema:renew
+process:generate:embeddings
+```
+
+Эмбеддинги сохраняются в колонках типа `vector(N)`.
 
 ---
 
-## 5. Работа с Mindstream
+## 7. Инварианты и ограничения
 
-После установки расширения:
-
-1. Выполни пересборку схемы:
-
-   ```
-   db:schema:renew
-   ```
-
-2. Пересчитай эмбеддинги:
-
-   ```
-   process:generate:embeddings
-   ```
-
-Эмбеддинги будут сохранены в колонках типа `vector(N)`.
+- `pgvector` является **обязательной зависимостью** storage-слоя;
+- эмбеддинги не допускается хранить в JSON, массивах или текстовых полях;
+- среды без `pgvector` не поддерживаются;
+- в production расширение должно быть установлено **до запуска приложения**.
 
 ---
 
-## 6. Важные ограничения
+## 8. Резервное копирование базы данных
 
-- `pgvector` — обязательная зависимость storage-слоя.
-- Эмбеддинги **не хранятся** как JSON или массивы.
-- Среды PostgreSQL без `pgvector` не поддерживаются.
-- В production расширение должно быть установлено **до** запуска приложения.
+```sh
+sudo -u postgres pg_dump \
+  --format=custom \
+  --clean \
+  --if-exists \
+  mindstream \
+  | gzip > mindstream_$(date +%Y%m%d_%H%M%S).dump.gz
+```
+
+---
+
+## 9. Восстановление базы данных
+
+```sh
+gunzip -c mindstream_YYYYMMDD_HHMMSS.dump.gz \
+  | sudo -u postgres pg_restore \
+      --clean \
+      --if-exists \
+      --role=mindstream \
+      --dbname=mindstream
+```
+
+Проверка:
+
+```sh
+psql -U mindstream -d mindstream -c '\dt'
+```
+
+Все объекты базы данных должны принадлежать пользователю `mindstream`.
+
+---
+
+## 10. Критерий корректности среды
+
+Среда PostgreSQL считается **корректно подготовленной**, если:
+
+- PostgreSQL версии 16+ запущен;
+- расширение `pgvector` установлено и активировано;
+- тип `vector` доступен;
+- операции `db:schema:renew` и `process:generate:embeddings` выполняются без ошибок;
+- все объекты базы данных `mindstream` принадлежат пользователю `mindstream`.
+
+---
