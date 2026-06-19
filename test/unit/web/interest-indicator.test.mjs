@@ -80,3 +80,76 @@ test('resolveTopInterestRange prevents single click outlier from skewing the thr
   // Both the outlier (0.99) and items above 0.42 (0.5) get marked
   assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [35, 36]);
 });
+
+test('resolveTopInterestRangeManual marks items above absolute percentile threshold', async () => {
+  const indicator = await loadModule();
+
+  // percentile=80 → threshold = 0.1 + (0.9 - 0.1) * 0.8 = 0.74
+  const result = indicator.resolveTopInterestRangeManual([
+    { pubId: 41, score: 0.1 },
+    { pubId: 42, score: 0.5 },
+    { pubId: 43, score: 0.74 },
+    { pubId: 44, score: 0.9 },
+  ], 80);
+
+  assert.ok(Math.abs(result.threshold - 0.74) < 1e-12);
+  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [43, 44]);
+});
+
+test('resolveTopInterestRangeManual with percentile=0 marks all entries', async () => {
+  const indicator = await loadModule();
+
+  const result = indicator.resolveTopInterestRangeManual([
+    { pubId: 51, score: 0.1 },
+    { pubId: 52, score: 0.5 },
+    { pubId: 53, score: 0.9 },
+  ], 0);
+
+  assert.equal(result.threshold, 0.1);
+  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [51, 52, 53]);
+});
+
+test('resolveTopInterestRangeManual with percentile=100 marks only max', async () => {
+  const indicator = await loadModule();
+
+  const result = indicator.resolveTopInterestRangeManual([
+    { pubId: 61, score: 0.1 },
+    { pubId: 62, score: 0.5 },
+    { pubId: 63, score: 0.9 },
+  ], 100);
+
+  assert.equal(result.threshold, 0.9);
+  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [63]);
+});
+
+test('resolveTopInterestRangeManual handles degenerate range', async () => {
+  const indicator = await loadModule();
+
+  const result = indicator.resolveTopInterestRangeManual([
+    { pubId: 71, score: 0.5 },
+    { pubId: 72, score: 0.5 },
+  ], 60);
+
+  assert.equal(result.threshold, 0.5);
+  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [71, 72]);
+});
+
+test('resolveTopInterestRangeManual clamps percentile to 0..100', async () => {
+  const indicator = await loadModule();
+
+  const over = indicator.resolveTopInterestRangeManual([
+    { pubId: 81, score: 0.2 },
+    { pubId: 82, score: 0.8 },
+  ], 150);
+
+  assert.equal(over.threshold, 0.8);
+  assert.deepEqual(Array.from(over.topIds), [82]);
+
+  const under = indicator.resolveTopInterestRangeManual([
+    { pubId: 83, score: 0.2 },
+    { pubId: 84, score: 0.8 },
+  ], -10);
+
+  assert.equal(under.threshold, 0.2);
+  assert.deepEqual(Array.from(under.topIds).sort((a, b) => a - b), [83, 84]);
+});

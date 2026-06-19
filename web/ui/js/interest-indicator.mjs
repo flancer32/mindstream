@@ -61,5 +61,31 @@ export const resolveTopInterestRange = (entries) => {
   return { min, max, threshold: markThreshold, topIds };
 };
 
+export const resolveTopInterestRangeManual = (entries, percentile) => {
+  const normalized = normalizeEntries(entries);
+  if (normalized.length === 0) {
+    return { min: 0, max: 0, threshold: 0, topIds: new Set() };
+  }
+
+  const { min, max } = findMinMax(normalized);
+
+  if (Math.abs(max - min) < EPSILON) {
+    const topIds = new Set(normalized.map((e) => e.pubId));
+    return { min, max, threshold: min, topIds };
+  }
+
+  const p = Math.min(100, Math.max(0, percentile));
+  const markThreshold = min + (max - min) * p / 100;
+
+  const topIds = new Set();
+  for (const entry of normalized) {
+    if (entry.score + EPSILON >= markThreshold) {
+      topIds.add(entry.pubId);
+    }
+  }
+
+  return { min, max, threshold: markThreshold, topIds };
+};
+
 export const scoreToPercent = (score) => Math.round(clampScore(score) * 100);
 const EPSILON = 1e-12;

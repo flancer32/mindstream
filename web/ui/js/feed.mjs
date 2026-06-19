@@ -5,6 +5,8 @@ import * as interestScores from './interest-score.mjs';
 const feedRoot = document.getElementById('feed');
 
 if (feedRoot) {
+  const STORAGE_KEY_THRESHOLD = 'mindstream:threshold';
+
   const state = {
     cursor: null,
     loading: false,
@@ -14,7 +16,36 @@ if (feedRoot) {
     visible: new Set(),
     attentionReady: false,
     markers: new Map(),
+    manualThreshold: null,
   };
+
+  const loadThreshold = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_THRESHOLD);
+      if (raw !== null) {
+        const value = Number(raw);
+        if (Number.isFinite(value) && value >= 0 && value <= 100) {
+          state.manualThreshold = value;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const saveThreshold = (value) => {
+    try {
+      if (value === null) {
+        localStorage.removeItem(STORAGE_KEY_THRESHOLD);
+      } else {
+        localStorage.setItem(STORAGE_KEY_THRESHOLD, String(value));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  loadThreshold();
 
   const header = document.createElement('section');
   header.className = 'feed-header';
@@ -56,7 +87,59 @@ if (feedRoot) {
   const identityValue = document.createElement('div');
   identityValue.className = 'identity-menu__value';
 
-  identityPanel.append(identityAction, identityValue);
+  const thresholdDivider = document.createElement('hr');
+  thresholdDivider.className = 'identity-menu__divider';
+
+  const thresholdSection = document.createElement('div');
+  thresholdSection.className = 'identity-menu__threshold';
+
+  const thresholdHeader = document.createElement('div');
+  thresholdHeader.className = 'identity-menu__threshold-header';
+
+  const thresholdLabel = document.createElement('span');
+  thresholdLabel.textContent = 'Порог интереса';
+
+  const thresholdValue = document.createElement('span');
+  thresholdValue.className = 'identity-menu__threshold-value';
+  thresholdValue.textContent = state.manualThreshold !== null ? `${state.manualThreshold}%` : 'авто';
+
+  thresholdHeader.append(thresholdLabel, thresholdValue);
+
+  const thresholdSlider = document.createElement('input');
+  thresholdSlider.className = 'identity-menu__threshold-slider';
+  thresholdSlider.type = 'range';
+  thresholdSlider.min = '0';
+  thresholdSlider.max = '100';
+  thresholdSlider.value = state.manualThreshold !== null ? String(state.manualThreshold) : '80';
+  thresholdSlider.setAttribute('aria-label', 'Порог интереса');
+
+  const thresholdReset = document.createElement('button');
+  thresholdReset.className = 'identity-menu__threshold-reset';
+  thresholdReset.type = 'button';
+  thresholdReset.textContent = 'Сбросить (авто)';
+  thresholdReset.hidden = state.manualThreshold === null;
+
+  thresholdSlider.addEventListener('input', () => {
+    const value = Number(thresholdSlider.value);
+    state.manualThreshold = value;
+    thresholdValue.textContent = `${value}%`;
+    thresholdReset.hidden = false;
+    saveThreshold(value);
+    refreshAllScores();
+  });
+
+  thresholdReset.addEventListener('click', () => {
+    state.manualThreshold = null;
+    thresholdSlider.value = '80';
+    thresholdValue.textContent = 'авто';
+    thresholdReset.hidden = true;
+    saveThreshold(null);
+    refreshAllScores();
+  });
+
+  thresholdSection.append(thresholdHeader, thresholdSlider, thresholdReset);
+
+  identityPanel.append(identityAction, identityValue, thresholdDivider, thresholdSection);
   identityMenu.append(identityToggle, identityPanel);
 
   headerText.append(headerTitle, headerSubtitle);
@@ -191,7 +274,15 @@ if (feedRoot) {
       allScores.push({ pubId, score });
     }
 
-    const { topIds } = interestIndicator.resolveTopInterestRange(allScores);
+    const result = state.manualThreshold !== null
+      ? interestIndicator.resolveTopInterestRangeManual(allScores, state.manualThreshold)
+      : interestIndicator.resolveTopInterestRange(allScores);
+    const { topIds } = result;
+
+    const isDegenerate = Math.abs(result.max - result.min) < 1e-12;
+    thresholdSection.classList.toggle('identity-menu__threshold--disabled', isDegenerate);
+    thresholdSlider.disabled = isDegenerate;
+
     for (const [pubId, marker] of state.markers.entries()) {
       const isTopInterest = topIds.has(pubId);
       marker.root.classList.toggle('interest-marker--top', isTopInterest);
