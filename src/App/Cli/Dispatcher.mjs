@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_App_Cli_Dispatcher
+ * @namespace Mindstream_Back_App_Cli_Dispatcher
  * @description Root CLI dispatcher for the backend application.
  */
 export default class Mindstream_Back_App_Cli_Dispatcher {

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Runtime_Web
+ * @namespace Mindstream_Back_Cli_Runtime_Web
  * @description CLI command to start runtime web server mode.
  */
 export default class Mindstream_Back_Cli_Runtime_Web {

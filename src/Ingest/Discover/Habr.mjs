@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Ingest_Discover_Habr
+ * @namespace Mindstream_Back_Ingest_Discover_Habr
  * @description Orchestrates Habr RSS discovery and storage.
  */
 export default class Mindstream_Back_Ingest_Discover_Habr {

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Process_Generate_Embeddings
+ * @namespace Mindstream_Back_Process_Generate_Embeddings
  * @description Generates embeddings for publication summaries.
  */
 export default class Mindstream_Back_Process_Generate_Embeddings {
@@ -99,7 +100,7 @@ export default class Mindstream_Back_Process_Generate_Embeddings {
 
     this.execute = async function () {
       logger.info(NAMESPACE, 'Embedding generation started.');
-      const limit = 30;
+      const limit = 3;
       const batch = await publicationStore.listForEmbeddings({ limit });
       if (!Array.isArray(batch) || !batch.length) {
         logger.info(NAMESPACE, 'Embedding generation finished with no work.');

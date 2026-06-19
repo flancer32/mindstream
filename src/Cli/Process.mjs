@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Process
+ * @namespace Mindstream_Back_Cli_Process
  * @description CLI dispatcher for process:* commands.
  */
 export default class Mindstream_Back_Cli_Process {

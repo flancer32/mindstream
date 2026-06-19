@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Db_Schema_Renew
+ * @namespace Mindstream_Back_Cli_Db_Schema_Renew
  * @description CLI command to recreate the database schema with best-effort data preservation.
  */
 export default class Mindstream_Back_Cli_Db_Schema_Renew {

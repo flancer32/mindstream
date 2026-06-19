@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Process_Generate_Summaries
+ * @namespace Mindstream_Back_Process_Generate_Summaries
  * @description Generates overview and annotation for publications without summaries.
  */
 export default class Mindstream_Back_Process_Generate_Summaries {
@@ -120,7 +121,7 @@ export default class Mindstream_Back_Process_Generate_Summaries {
     };
 
     this.execute = async function () {
-      const limit = 30;
+      const limit = 3;
       const batch = await publicationStore.listForSummaries({ limit });
       if (!Array.isArray(batch) || !batch.length) return;
 

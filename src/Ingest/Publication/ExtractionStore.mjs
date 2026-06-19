@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Ingest_Publication_ExtractionStore
+ * @namespace Mindstream_Back_Ingest_Publication_ExtractionStore
  * @description Persists extracted HTML and markdown for publications.
  */
 export default class Mindstream_Back_Ingest_Publication_ExtractionStore {

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Ingest_Discover_Habr
+ * @namespace Mindstream_Back_Cli_Ingest_Discover_Habr
  * @description CLI command to discover Habr publications via RSS.
  */
 export default class Mindstream_Back_Cli_Ingest_Discover_Habr {

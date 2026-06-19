@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Platform_Fetch
+ * @namespace Mindstream_Back_Platform_Fetch
  * @description Platform fetch adapter for backend code.
  */
 export default class Mindstream_Back_Platform_Fetch {

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Storage_Schema
+ * @namespace Mindstream_Back_Storage_Schema
  * @description Declarative DB schema for the Storage layer.
  */
 export default class Mindstream_Back_Storage_Schema {

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Process_Publication_EmbeddingStore
+ * @namespace Mindstream_Back_Process_Publication_EmbeddingStore
  * @description Persists embeddings for publications.
  */
 export default class Mindstream_Back_Process_Publication_EmbeddingStore {

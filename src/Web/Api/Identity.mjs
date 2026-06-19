@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Web_Api_Identity
+ * @namespace Mindstream_Back_Web_Api_Identity
  * @description Handles /api/identity registration requests.
  */
 export default class Mindstream_Back_Web_Api_Identity {

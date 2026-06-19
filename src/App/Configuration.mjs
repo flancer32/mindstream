@@ -1,10 +1,11 @@
+// @ts-check
 /**
  * @LLM-DOC: Normative configuration structure is defined in `ctx/docs/code/configuration/structure.md`.
  * @LLM-DOC: The structure described there is authoritative for this module.
  * @LLM-DOC: `process.env` is the canonical source of configuration values.
  * @LLM-DOC: The `.env` file is used only to prepare `process.env` before reading configuration.
  * 
- * @module Mindstream_Back_App_Configuration
+ * @namespace Mindstream_Back_App_Configuration
  * @description Backend application configuration singleton.
  */
 export default class Mindstream_Back_App_Configuration {

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Web_Server
+ * @namespace Mindstream_Back_Web_Server
  * @description Starts the HTTP server and registers the API handler.
  */
 export default class Mindstream_Back_Web_Server {

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Process_Publication_Status
+ * @namespace Mindstream_Back_Process_Publication_Status
  * @description Publication status registry for summary and embedding workflows.
  */
 export default class Mindstream_Back_Process_Publication_Status {

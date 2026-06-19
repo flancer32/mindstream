@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Ingest_Extract_Habr_Fetcher
+ * @namespace Mindstream_Back_Ingest_Extract_Habr_Fetcher
  * @description Loads HTML for Habr publications via fetch.
  */
 export default class Mindstream_Back_Ingest_Extract_Habr_Fetcher {

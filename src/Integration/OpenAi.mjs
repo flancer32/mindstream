@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Integration_OpenAi
+ * @namespace Mindstream_Back_Integration_OpenAi
  * @description Thin OpenAI API client for backend code.
  */
 export default class Mindstream_Back_Integration_OpenAi {

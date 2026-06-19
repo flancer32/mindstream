@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Ingest
+ * @namespace Mindstream_Back_Cli_Ingest
  * @description CLI dispatcher for ingest:* commands.
  */
 export default class Mindstream_Back_Cli_Ingest {

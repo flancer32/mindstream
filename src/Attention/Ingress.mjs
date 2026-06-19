@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Attention_Ingress
+ * @namespace Mindstream_Back_Attention_Ingress
  * @description Validates attention write payloads and persists them in Storage.
  */
 export default class Mindstream_Back_Attention_Ingress {

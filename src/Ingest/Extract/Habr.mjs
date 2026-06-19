@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Ingest_Extract_Habr
+ * @namespace Mindstream_Back_Ingest_Extract_Habr
  * @description Orchestrates extraction of markdown for Habr publications.
  */
 export default class Mindstream_Back_Ingest_Extract_Habr {

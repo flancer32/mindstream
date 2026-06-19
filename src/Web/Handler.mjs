@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Web_Handler
+ * @namespace Mindstream_Back_Web_Handler
  * @description API ingress handler for /api/** requests.
  */
 export default class Mindstream_Back_Web_Handler {

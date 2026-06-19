@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Ingest_Publication_Status
+ * @namespace Mindstream_Back_Ingest_Publication_Status
  * @description Publication status registry for ingestion extraction workflow.
  */
 export default class Mindstream_Back_Ingest_Publication_Status {

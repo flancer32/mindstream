@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Web_Api_Fallback
+ * @namespace Mindstream_Back_Web_Api_Fallback
  * @description Handles unknown /api/** requests.
  */
 export default class Mindstream_Back_Web_Api_Fallback {

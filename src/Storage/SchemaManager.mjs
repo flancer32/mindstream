@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Storage_SchemaManager
+ * @namespace Mindstream_Back_Storage_SchemaManager
  * @description Applies declarative DB schema using knex.
  */
 export default class Mindstream_Back_Storage_SchemaManager {

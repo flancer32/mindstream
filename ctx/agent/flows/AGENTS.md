@@ -10,6 +10,7 @@ Defines the structure of agent event flow operational context for a project.
 
 ## Level Map
 
+- `_workflow/` — placeholder workflow bundle showing the template structure for one concrete agent flow.
 - `AGENTS.md` — level definition for `ctx/agent/flows/`.
 
 ## Level Boundary
@@ -35,3 +36,5 @@ Does NOT define:
 ## Workflow Set
 
 No concrete agent event flows are currently defined for this project.
+
+`_workflow/` exists only as a structural placeholder required by the baseline template and must be renamed when a real workflow is explicitly defined.

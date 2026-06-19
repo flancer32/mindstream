@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Ingest_Publication_Store
+ * @namespace Mindstream_Back_Ingest_Publication_Store
  * @description Persists discovered publications in Storage.
  */
 export default class Mindstream_Back_Ingest_Publication_Store {

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Web_Api_Attention
+ * @namespace Mindstream_Back_Web_Api_Attention
  * @description Handles /api/attention requests and persists attention events.
  */
 export default class Mindstream_Back_Web_Api_Attention {

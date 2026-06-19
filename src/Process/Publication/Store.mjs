@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Process_Publication_Store
+ * @namespace Mindstream_Back_Process_Publication_Store
  * @description Provides publication selection for summary and embedding generation.
  */
 export default class Mindstream_Back_Process_Publication_Store {

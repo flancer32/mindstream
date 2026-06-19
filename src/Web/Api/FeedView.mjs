@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Web_Api_FeedView
+ * @namespace Mindstream_Back_Web_Api_FeedView
  * @description Handles /api/feed requests and builds Feed View DTO.
  */
 export default class Mindstream_Back_Web_Api_FeedView {

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Process_Publication_SummaryStore
+ * @namespace Mindstream_Back_Process_Publication_SummaryStore
  * @description Persists generated summaries for publications.
  */
 export default class Mindstream_Back_Process_Publication_SummaryStore {

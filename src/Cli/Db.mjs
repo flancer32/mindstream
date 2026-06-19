@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Db
+ * @namespace Mindstream_Back_Cli_Db
  * @description CLI dispatcher for db:* commands.
  */
 export default class Mindstream_Back_Cli_Db {

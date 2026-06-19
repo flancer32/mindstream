@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Ingest_Extract_Habr
+ * @namespace Mindstream_Back_Cli_Ingest_Extract_Habr
  * @description CLI command to extract markdown from Habr publications.
  */
 export default class Mindstream_Back_Cli_Ingest_Extract_Habr {

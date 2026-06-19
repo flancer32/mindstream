@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Storage_Knex
+ * @namespace Mindstream_Back_Storage_Knex
  * @description Provides a singleton knex instance for the Storage layer.
  */
 export default class Mindstream_Back_Storage_Knex {

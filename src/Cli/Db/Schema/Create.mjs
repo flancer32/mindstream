@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Db_Schema_Create
+ * @namespace Mindstream_Back_Cli_Db_Schema_Create
  * @description CLI command to create the database schema in an empty database.
  */
 export default class Mindstream_Back_Cli_Db_Schema_Create {

@@ -1,3 +1,8 @@
+// @ts-check
+/**
+ * @namespace Mindstream_Back_App
+ * @description Backend application composition root.
+ */
 export default class Mindstream_Back_App {
   /**
    * @param {Object} deps

@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Process_Generate_Embeddings
+ * @namespace Mindstream_Back_Cli_Process_Generate_Embeddings
  * @description CLI command to generate embeddings for publications.
  */
 export default class Mindstream_Back_Cli_Process_Generate_Embeddings {

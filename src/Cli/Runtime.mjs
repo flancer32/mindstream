@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @module Mindstream_Back_Cli_Runtime
+ * @namespace Mindstream_Back_Cli_Runtime
  * @description CLI dispatcher for runtime:* commands.
  */
 export default class Mindstream_Back_Cli_Runtime {

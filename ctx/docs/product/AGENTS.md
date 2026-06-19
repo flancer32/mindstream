@@ -11,16 +11,19 @@ Defines the product documentation level as the semantic root of the project docu
 ## Level Map
 
 - `AGENTS.md` — level definition for `ctx/docs/product/`.
-- `terminology.md` — project vocabulary and semantic term definitions.
-- `vision.md` — product purpose, scope focus, and high-level intent.
+- `domain.md` — product world model, core domain areas, entities, and domain invariants.
+- `glossary.md` — stable project terminology and naming boundaries.
+- `overview.md` — product identity, mission, scope, and semantic navigation entry point.
+- `roles.md` — product participants, authority boundaries, and ownership model.
+- `use-cases.md` — product-level user goals, outcomes, and lifecycle-oriented use cases.
 
 ## Level Boundary
 
 Defines:
 
-- Product meaning, vocabulary, and high-level intent.
-- The semantic source of truth for downstream documentation levels.
-- The local document set used to supervise product-level invariants.
+- Product identity, scope, and durable semantic boundaries.
+- Product language, role model, and domain-level meaning.
+- Product-level goals and outcomes that supervise downstream levels.
 
 Does NOT define:
 
