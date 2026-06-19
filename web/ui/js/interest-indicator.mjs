@@ -16,28 +16,49 @@ const normalizeEntries = (entries) => {
   return normalized;
 };
 
+const findMinMax = (entries) => {
+  if (entries.length === 0) return { min: 0, max: 0 };
+  let min = entries[0].score;
+  let max = entries[0].score;
+  for (const entry of entries) {
+    if (entry.score < min) min = entry.score;
+    if (entry.score > max) max = entry.score;
+  }
+  return { min, max };
+};
+
 export const resolveTopInterestRange = (entries) => {
   const normalized = normalizeEntries(entries);
   if (normalized.length === 0) {
     return { min: 0, max: 0, threshold: 0, topIds: new Set() };
   }
 
-  let min = normalized[0].score;
-  let max = normalized[0].score;
-  for (const entry of normalized) {
-    if (entry.score < min) min = entry.score;
-    if (entry.score > max) max = entry.score;
+  const { min, max } = findMinMax(normalized);
+
+  if (Math.abs(max - min) < EPSILON) {
+    const topIds = new Set(normalized.map((e) => e.pubId));
+    return { min, max, threshold: min, topIds };
   }
 
-  const threshold = min + (max - min) * 0.8;
+  const cutoff = min + (max - min) * 0.9;
+  const remaining = normalized.filter((e) => e.score < cutoff);
+
+  let markThreshold;
+  if (remaining.length === 0) {
+    markThreshold = min;
+  } else {
+    const { min: rMin, max: rMax } = findMinMax(remaining);
+    markThreshold = rMin + (rMax - rMin) * 0.8;
+  }
+
   const topIds = new Set();
   for (const entry of normalized) {
-    if (entry.score + EPSILON >= threshold && entry.score <= max + EPSILON) {
+    if (entry.score + EPSILON >= markThreshold) {
       topIds.add(entry.pubId);
     }
   }
 
-  return { min, max, threshold, topIds };
+  return { min, max, threshold: markThreshold, topIds };
 };
 
 export const scoreToPercent = (score) => Math.round(clampScore(score) * 100);

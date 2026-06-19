@@ -185,15 +185,13 @@ if (feedRoot) {
   };
 
   const refreshMarkerHighlighting = () => {
-    const visibleScores = [];
-    for (const pubId of state.visible) {
-      const item = state.items.get(pubId);
-      if (!item) continue;
+    const allScores = [];
+    for (const [pubId, item] of state.items.entries()) {
       const score = interestScores.getScore(pubId) ?? interestScores.scoreItem(item);
-      visibleScores.push({ pubId, score });
+      allScores.push({ pubId, score });
     }
 
-    const { topIds } = interestIndicator.resolveTopInterestRange(visibleScores);
+    const { topIds } = interestIndicator.resolveTopInterestRange(allScores);
     for (const [pubId, marker] of state.markers.entries()) {
       const isTopInterest = topIds.has(pubId);
       marker.root.classList.toggle('interest-marker--top', isTopInterest);

@@ -11,7 +11,7 @@ const loadModule = async () => {
   return import(url.href);
 };
 
-test('resolveTopInterestRange selects entries in the top 20 percent of the visible range', async () => {
+test('resolveTopInterestRange excludes top 10% from threshold calculation', async () => {
   const indicator = await loadModule();
 
   const result = indicator.resolveTopInterestRange([
@@ -21,11 +21,14 @@ test('resolveTopInterestRange selects entries in the top 20 percent of the visib
     { pubId: 4, score: 0.82 },
   ]);
 
-  assert.ok(Math.abs(result.threshold - 0.794) < 1e-12);
+  // cutoff = 0.69 + (0.82 - 0.69) * 0.9 = 0.807
+  // remaining: [0.69, 0.75, 0.794]
+  // markThreshold = 0.69 + (0.794 - 0.69) * 0.8 = 0.7732
+  assert.ok(Math.abs(result.threshold - 0.7732) < 1e-12);
   assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [3, 4]);
 });
 
-test('resolveTopInterestRange marks all visible entries when min equals max', async () => {
+test('resolveTopInterestRange marks all entries when min equals max', async () => {
   const indicator = await loadModule();
 
   const result = indicator.resolveTopInterestRange([
@@ -40,7 +43,7 @@ test('resolveTopInterestRange marks all visible entries when min equals max', as
   assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [11, 12, 13]);
 });
 
-test('resolveTopInterestRange includes a score exactly on the threshold', async () => {
+test('resolveTopInterestRange excludes top 10% outlier and lowers threshold', async () => {
   const indicator = await loadModule();
 
   const result = indicator.resolveTopInterestRange([
@@ -50,6 +53,30 @@ test('resolveTopInterestRange includes a score exactly on the threshold', async 
     { pubId: 24, score: 0.74 },
   ]);
 
-  assert.ok(Math.abs(result.threshold - 0.74) < 1e-12);
+  // cutoff = 0.1 + (0.9 - 0.1) * 0.9 = 0.82
+  // remaining: [0.1, 0.5, 0.74]  (0.9 excluded)
+  // markThreshold = 0.1 + (0.74 - 0.1) * 0.8 = 0.612
+  assert.ok(Math.abs(result.threshold - 0.612) < 1e-12);
   assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [23, 24]);
+});
+
+test('resolveTopInterestRange prevents single click outlier from skewing the threshold', async () => {
+  const indicator = await loadModule();
+
+  // After a click, one item jumps to 0.99 while others stay low
+  const result = indicator.resolveTopInterestRange([
+    { pubId: 31, score: 0.1 },
+    { pubId: 32, score: 0.2 },
+    { pubId: 33, score: 0.3 },
+    { pubId: 34, score: 0.4 },
+    { pubId: 35, score: 0.5 },
+    { pubId: 36, score: 0.99 },
+  ]);
+
+  // cutoff = 0.1 + (0.99 - 0.1) * 0.9 = 0.901
+  // remaining: [0.1, 0.2, 0.3, 0.4, 0.5]  (0.99 excluded)
+  // markThreshold = 0.1 + (0.5 - 0.1) * 0.8 = 0.42
+  assert.ok(Math.abs(result.threshold - 0.42) < 1e-12);
+  // Both the outlier (0.99) and items above 0.42 (0.5) get marked
+  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [35, 36]);
 });
