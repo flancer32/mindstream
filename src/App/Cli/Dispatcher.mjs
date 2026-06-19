@@ -86,3 +86,13 @@ export default class Mindstream_Back_App_Cli_Dispatcher {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+    'Mindstream_Back_Cli_Db$': 'Mindstream_Back_Cli_Db$',
+    'Mindstream_Back_Cli_Ingest$': 'Mindstream_Back_Cli_Ingest$',
+    'Mindstream_Back_Cli_Process$': 'Mindstream_Back_Cli_Process$',
+    'Mindstream_Back_Cli_Runtime$': 'Mindstream_Back_Cli_Runtime$',
+  },
+});

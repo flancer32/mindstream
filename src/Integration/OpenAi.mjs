@@ -112,3 +112,11 @@ export default class Mindstream_Back_Integration_OpenAi {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_App_Configuration$': 'Mindstream_Back_App_Configuration$',
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+    'Mindstream_Back_Platform_Fetch$': 'Mindstream_Back_Platform_Fetch$',
+  },
+});

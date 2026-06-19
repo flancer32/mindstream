@@ -4,7 +4,7 @@
  * @description Fetches RSS feeds over HTTPS.
  */
 export default class Mindstream_Back_Ingest_Rss_Client {
-  constructor({ 'node:https': httpsModule, 'node:url': urlModule, 'node:buffer': bufferModule }) {
+  constructor({ httpsModule, urlModule, bufferModule }) {
     const httpsRef = httpsModule?.default ?? httpsModule;
     const URLRef = (urlModule && urlModule.URL) || URL;
     const BufferRef = (bufferModule && bufferModule.Buffer) || Buffer;
@@ -50,3 +50,11 @@ export default class Mindstream_Back_Ingest_Rss_Client {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    httpsModule: 'node:https',
+    urlModule: 'node:url',
+    bufferModule: 'node:buffer',
+  },
+});

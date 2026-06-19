@@ -1,4 +1,5 @@
 import * as identity from './identity.mjs';
+import * as interestIndicator from './interest-indicator.mjs';
 import * as interestScores from './interest-score.mjs';
 
 const feedRoot = document.getElementById('feed');
@@ -177,19 +178,27 @@ if (feedRoot) {
     refreshAllScores();
   };
 
-  const clampScore = (value) => {
-    if (!Number.isFinite(value)) return 0;
-    if (value < 0) return 0;
-    if (value > 1) return 1;
-    return value;
-  };
-
-  const scoreToPercent = (score) => Math.round(clampScore(score) * 100);
-
   const applyInterestScore = (markerFill, markerValue, score) => {
-    const percent = scoreToPercent(score);
+    const percent = interestIndicator.scoreToPercent(score);
     markerFill.style.height = `${percent}%`;
     markerValue.textContent = `${percent}%`;
+  };
+
+  const refreshMarkerHighlighting = () => {
+    const visibleScores = [];
+    for (const pubId of state.visible) {
+      const item = state.items.get(pubId);
+      if (!item) continue;
+      const score = interestScores.getScore(pubId) ?? interestScores.scoreItem(item);
+      visibleScores.push({ pubId, score });
+    }
+
+    const { topIds } = interestIndicator.resolveTopInterestRange(visibleScores);
+    for (const [pubId, marker] of state.markers.entries()) {
+      const isTopInterest = topIds.has(pubId);
+      marker.root.classList.toggle('interest-marker--top', isTopInterest);
+      marker.value.classList.toggle('interest-marker__value--top', isTopInterest);
+    }
   };
 
   const refreshAllScores = () => {
@@ -199,6 +208,7 @@ if (feedRoot) {
       const score = interestScores.getScore(pubId) ?? interestScores.scoreItem(item);
       applyInterestScore(marker.fill, marker.value, score);
     }
+    refreshMarkerHighlighting();
   };
 
   const renderItem = (item) => {
@@ -306,7 +316,7 @@ if (feedRoot) {
     details.append(summary, overview, actions);
 
     card.append(meta, body, details);
-    state.markers.set(item.id, { fill: markerFill, value: markerValue });
+    state.markers.set(item.id, { root: marker, fill: markerFill, value: markerValue });
     applyInterestScore(markerFill, markerValue, interestScores.resolveScore(item));
 
     return card;
@@ -396,6 +406,7 @@ if (feedRoot) {
           state.visible.delete(Number(pubId));
         }
       }
+      refreshMarkerHighlighting();
     },
     { rootMargin: '0px 0px -10% 0px' }
   );

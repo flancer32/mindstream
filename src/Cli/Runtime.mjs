@@ -26,3 +26,9 @@ export default class Mindstream_Back_Cli_Runtime {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Cli_Runtime_Web$': 'Mindstream_Back_Cli_Runtime_Web$',
+  },
+});

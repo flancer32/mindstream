@@ -92,3 +92,11 @@ export default class Mindstream_Back_Process_Publication_Store {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+    'Mindstream_Back_Process_Publication_Status$': 'Mindstream_Back_Process_Publication_Status$',
+  },
+});

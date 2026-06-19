@@ -136,3 +136,13 @@ export default class Mindstream_Back_Process_Generate_Summaries {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+    'Mindstream_Back_Integration_OpenAi$': 'Mindstream_Back_Integration_OpenAi$',
+    'Mindstream_Back_Process_Publication_Store$': 'Mindstream_Back_Process_Publication_Store$',
+    'Mindstream_Back_Process_Publication_SummaryStore$': 'Mindstream_Back_Process_Publication_SummaryStore$',
+    'Mindstream_Back_Process_Publication_Status$': 'Mindstream_Back_Process_Publication_Status$',
+  },
+});

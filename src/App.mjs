@@ -31,3 +31,11 @@ export default class Mindstream_Back_App {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_App_Configuration$': 'Mindstream_Back_App_Configuration$',
+    'Mindstream_Back_App_Cli_Dispatcher$': 'Mindstream_Back_App_Cli_Dispatcher$',
+    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
+  },
+});

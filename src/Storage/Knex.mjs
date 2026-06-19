@@ -4,7 +4,7 @@
  * @description Provides a singleton knex instance for the Storage layer.
  */
 export default class Mindstream_Back_Storage_Knex {
-  constructor({ "node:knex": knexModule, Mindstream_Back_App_Configuration$: config }) {
+  constructor({ knexModule, Mindstream_Back_App_Configuration$: config }) {
     const knexFactory = knexModule?.default ?? knexModule;
     let knexInstance = null;
 
@@ -42,3 +42,10 @@ export default class Mindstream_Back_Storage_Knex {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    knexModule: 'npm:knex',
+    'Mindstream_Back_App_Configuration$': 'Mindstream_Back_App_Configuration$',
+  },
+});

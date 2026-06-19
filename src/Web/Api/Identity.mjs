@@ -86,3 +86,11 @@ export default class Mindstream_Back_Web_Api_Identity {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+    'Fl32_Web_Back_Helper_Respond$': 'Fl32_Web_Back_Helper_Respond$',
+  },
+});

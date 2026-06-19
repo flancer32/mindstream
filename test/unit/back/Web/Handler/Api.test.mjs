@@ -3,12 +3,16 @@ import test from 'node:test';
 
 import { createTestContainer } from '../../../di-node.mjs';
 
-const buildResponse = function () {
+const buildContext = function ({ url = '/' } = {}) {
   return {
-    headersSent: false,
-    writableEnded: false,
-    writeHead() {},
-    end() {},
+    request: { url },
+    response: {
+      headersSent: false,
+      writableEnded: false,
+      writeHead() {},
+      end() {},
+    },
+    complete() {},
   };
 };
 
@@ -37,9 +41,10 @@ test('Mindstream_Back_Web_Handler returns false for non-api path', async () => {
   });
 
   const handler = await container.get('Mindstream_Back_Web_Handler$');
-  const result = await handler.handle({ url: '/non-api/path' }, buildResponse());
+  const ctx = buildContext({ url: '/non-api/path' });
+  const result = await handler.handle(ctx);
 
-  assert.equal(result, false);
+  assert.equal(result, undefined);
 });
 
 test('Mindstream_Back_Web_Handler uses fallback for unknown endpoint', async () => {
@@ -57,9 +62,9 @@ test('Mindstream_Back_Web_Handler uses fallback for unknown endpoint', async () 
   });
 
   const handler = await container.get('Mindstream_Back_Web_Handler$');
-  const result = await handler.handle({ url: '/api/unknown?x=1' }, buildResponse());
+  const ctx = buildContext({ url: '/api/unknown?x=1' });
+  await handler.handle(ctx);
 
-  assert.equal(result, true);
   assert.deepEqual(calls, ['/unknown']);
 });
 
@@ -84,8 +89,8 @@ test('Mindstream_Back_Web_Handler dispatches to endpoint handler', async () => {
   });
 
   const handler = await container.get('Mindstream_Back_Web_Handler$');
-  const result = await handler.handle({ url: '/api/attention' }, buildResponse());
+  const ctx = buildContext({ url: '/api/attention' });
+  await handler.handle(ctx);
 
-  assert.equal(result, true);
   assert.deepEqual(calls, ['/attention']);
 });

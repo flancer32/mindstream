@@ -12,9 +12,9 @@
     "test:unit": "node --test \"test/unit/**/*.test.mjs\""
   },
   "dependencies": {
-    "@flancer32/teq-web": "*",
-    "@teqfw/di": "*",
-    "knex": "*",
-    "pg": "*"
+    "@flancer32/teq-web": "^0.11.0",
+    "@teqfw/di": "^2.6.2",
+    "knex": "^3.2.10",
+    "pg": "^8.22.0"
   }
 }

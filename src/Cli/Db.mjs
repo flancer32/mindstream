@@ -27,3 +27,10 @@ export default class Mindstream_Back_Cli_Db {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Cli_Db_Schema_Create$': 'Mindstream_Back_Cli_Db_Schema_Create$',
+    'Mindstream_Back_Cli_Db_Schema_Renew$': 'Mindstream_Back_Cli_Db_Schema_Renew$',
+  },
+});

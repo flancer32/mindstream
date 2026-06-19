@@ -9,7 +9,7 @@
  * @description Backend application configuration singleton.
  */
 export default class Mindstream_Back_App_Configuration {
-  constructor({ 'node:process': processModule, 'node:fs': fsModule, 'node:path': pathModule, Mindstream_Shared_Logger$: logger }) {
+  constructor({ processModule, fsModule, pathModule, Mindstream_Shared_Logger$: logger }) {
     const processRef = processModule?.default ?? processModule;
     const fsRef = fsModule?.default ?? fsModule;
     const pathRef = pathModule?.default ?? pathModule;
@@ -120,3 +120,12 @@ export default class Mindstream_Back_App_Configuration {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    processModule: 'node:process',
+    fsModule: 'node:fs',
+    pathModule: 'node:path',
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+  },
+});

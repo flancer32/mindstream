@@ -102,3 +102,9 @@ export default class Mindstream_Back_Attention_Ingress {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
+  },
+});

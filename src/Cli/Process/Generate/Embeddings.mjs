@@ -13,3 +13,9 @@ export default class Mindstream_Back_Cli_Process_Generate_Embeddings {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Process_Generate_Embeddings$': 'Mindstream_Back_Process_Generate_Embeddings$',
+  },
+});

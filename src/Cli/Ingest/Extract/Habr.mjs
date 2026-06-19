@@ -13,3 +13,9 @@ export default class Mindstream_Back_Cli_Ingest_Extract_Habr {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Ingest_Extract_Habr$': 'Mindstream_Back_Ingest_Extract_Habr$',
+  },
+});

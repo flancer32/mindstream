@@ -9,16 +9,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 
-/** @type {TeqFw_Di_Container} */
 const container = new Container();
-// @LLM-DOC: don't use `container.register` in this boostrap, it's for tests only
-
-/** @type {TeqFw_Di_Api_Container_Resolver} */
-const resolver = container.getResolver();
-resolver.addNamespaceRoot('Mindstream_Back_', path.join(projectRoot, 'src'), 'mjs');
-resolver.addNamespaceRoot('Mindstream_Shared_', path.join(projectRoot, 'web', 'app', 'Shared'), 'mjs');
-resolver.addNamespaceRoot('Fl32_Web_', path.join(projectRoot, 'node_modules', '@flancer32', 'teq-web', 'src'), 'js');
-resolver.addNamespaceRoot('Teqfw_Di_', path.join(projectRoot, 'node_modules', '@teqfw', 'di', 'src'));
+container.addNamespaceRoot('Mindstream_Back_', path.join(projectRoot, 'src'), '.mjs');
+container.addNamespaceRoot('Mindstream_Shared_', path.join(projectRoot, 'web', 'app', 'Shared'), '.mjs');
+container.addNamespaceRoot('Fl32_Web_', path.join(projectRoot, 'node_modules', '@flancer32', 'teq-web', 'src'), '.mjs');
+container.addNamespaceRoot('Teqfw_Di_', path.join(projectRoot, 'node_modules', '@teqfw', 'di', 'src'), '.mjs');
 
 const ensureError = function (err) {
   if (err instanceof Error) return err;

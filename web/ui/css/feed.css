@@ -11,6 +11,7 @@
   --link: #1a4d5c;
   --accent: #d56b2d;
   --interest-marker: var(--link);
+  --interest-marker-top: #d9480f;
   --shadow: 0 18px 40px rgba(28, 28, 26, 0.12);
   --radius: 18px;
   --max-width: 720px;
@@ -272,6 +273,11 @@ main#feed {
   color: var(--interest-marker);
 }
 
+.interest-marker--top {
+  color: var(--interest-marker-top);
+  border-color: var(--interest-marker-top);
+}
+
 .interest-marker__fill {
   position: absolute;
   left: 0;
@@ -291,6 +297,10 @@ main#feed {
   letter-spacing: 0.02em;
   color: var(--muted);
   text-align: center;
+}
+
+.interest-marker__value--top {
+  color: var(--interest-marker-top);
 }
 
 .feed-details {
@@ -382,6 +392,7 @@ main#feed {
     --border: #2a2e31;
     --link: #89c2d9;
     --accent: #f29f70;
+    --interest-marker-top: #ff6b35;
     --shadow: 0 18px 36px rgba(0, 0, 0, 0.4);
   }
 }

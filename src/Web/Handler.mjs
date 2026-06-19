@@ -9,6 +9,7 @@ export default class Mindstream_Back_Web_Handler {
     Mindstream_Back_Web_Api_FeedView$: feedView,
     Mindstream_Back_Web_Api_Attention$: attention,
     Mindstream_Back_Web_Api_Identity$: identity,
+    Fl32_Web_Back_Enum_Stage$: STAGE,
   }) {
     const PREFIX = '/api';
     const handlers = new Map([
@@ -45,22 +46,34 @@ export default class Mindstream_Back_Web_Handler {
     this.getRegistrationInfo = function () {
       return Object.freeze({
         name: 'Mindstream_Back_Web_Handler',
-        stage: 'process',
+        stage: STAGE.PROCESS,
         before: [],
         after: [],
       });
     };
 
-    this.handle = async function (req, res) {
+    this.handle = async function (context) {
+      const req = context.request;
+      const res = context.response;
       const apiPath = extractApiPath(req?.url);
-      if (!apiPath) return false;
+      if (!apiPath) return;
       const endpoint = handlers.get(apiPath);
       if (endpoint) {
         await invokeEndpoint(endpoint, { req, res, path: apiPath });
       } else {
         await fallback.handle({ req, res, path: apiPath });
       }
-      return true;
+      context.complete();
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Web_Api_Fallback$': 'Mindstream_Back_Web_Api_Fallback$',
+    'Mindstream_Back_Web_Api_FeedView$': 'Mindstream_Back_Web_Api_FeedView$',
+    'Mindstream_Back_Web_Api_Attention$': 'Mindstream_Back_Web_Api_Attention$',
+    'Mindstream_Back_Web_Api_Identity$': 'Mindstream_Back_Web_Api_Identity$',
+    'Fl32_Web_Back_Enum_Stage$': 'Fl32_Web_Back_Enum_Stage$',
+  },
+});

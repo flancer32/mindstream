@@ -21,7 +21,6 @@ test('Mindstream_Back_Web_Server registers api handler and starts once', async (
   const container = await createTestContainer();
   const logger = buildLogger();
   const calls = [];
-  const configs = [];
 
   container.register('Mindstream_Shared_Logger$', logger);
   container.register('Mindstream_Back_App_Configuration$', {
@@ -29,7 +28,7 @@ test('Mindstream_Back_Web_Server registers api handler and starts once', async (
       return { server: { port: 3001, type: 'http2' } };
     },
   });
-  container.register('Fl32_Web_Back_Dispatcher$', {
+  container.register('Fl32_Web_Back_PipelineEngine$', {
     addHandler(handler) {
       calls.push({ type: 'add', handler });
     },
@@ -39,10 +38,12 @@ test('Mindstream_Back_Web_Server registers api handler and starts once', async (
       calls.push({ type: 'start', cfg });
     },
   });
-  container.register('Fl32_Web_Back_Server_Config$', {
-    create(payload) {
-      configs.push(payload);
-      return payload;
+  container.register('Fl32_Web_Back_Config_Runtime__Factory$', {
+    configure(payload) {
+      calls.push({ type: 'configure', payload });
+    },
+    freeze() {
+      return { port: 3001, type: 'http2' };
     },
   });
   const apiHandler = { name: 'api-handler' };
@@ -51,9 +52,9 @@ test('Mindstream_Back_Web_Server registers api handler and starts once', async (
   const server = await container.get('Mindstream_Back_Web_Server$');
   await server.start();
 
-  assert.deepEqual(configs, [{ port: 3001, type: 'http2' }]);
   assert.deepEqual(calls, [
     { type: 'add', handler: apiHandler },
+    { type: 'configure', payload: { port: 3001, type: 'http2' } },
     { type: 'start', cfg: { port: 3001, type: 'http2' } },
   ]);
   assert.equal(logger.calls.length, 1);
@@ -70,15 +71,16 @@ test('Mindstream_Back_Web_Server exposes wait promise', async () => {
       return { server: { port: 3001 } };
     },
   });
-  container.register('Fl32_Web_Back_Dispatcher$', {
+  container.register('Fl32_Web_Back_PipelineEngine$', {
     addHandler() {},
   });
   container.register('Fl32_Web_Back_Server$', {
     async start() {},
   });
-  container.register('Fl32_Web_Back_Server_Config$', {
-    create(payload) {
-      return payload;
+  container.register('Fl32_Web_Back_Config_Runtime__Factory$', {
+    configure() {},
+    freeze() {
+      return { port: 3001 };
     },
   });
   container.register('Mindstream_Back_Web_Handler$', {});

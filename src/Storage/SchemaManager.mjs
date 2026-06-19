@@ -8,9 +8,9 @@ export default class Mindstream_Back_Storage_SchemaManager {
     Mindstream_Back_Storage_Schema$: schemaProvider,
     Mindstream_Shared_Logger$: logger,
     Mindstream_Back_Storage_Knex$: knexProvider,
-    'node:fs/promises': fsModule,
-    'node:path': pathModule,
-    'node:process': processModule,
+    fsModule,
+    pathModule,
+    processModule,
   }) {
     const NAMESPACE = 'Mindstream_Back_Storage_SchemaManager';
     const SCHEMA_TABLE = 'schema_version';
@@ -675,3 +675,14 @@ export default class Mindstream_Back_Storage_SchemaManager {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Storage_Schema$': 'Mindstream_Back_Storage_Schema$',
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
+    fsModule: 'node:fs/promises',
+    pathModule: 'node:path',
+    processModule: 'node:process',
+  },
+});

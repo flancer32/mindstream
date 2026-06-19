@@ -30,3 +30,11 @@ export default class Mindstream_Back_Ingest_Discover_Habr {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Ingest_Source_Habr$': 'Mindstream_Back_Ingest_Source_Habr$',
+    'Mindstream_Back_Ingest_Publication_Store$': 'Mindstream_Back_Ingest_Publication_Store$',
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+  },
+});

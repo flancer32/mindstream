@@ -34,3 +34,10 @@ export default class Mindstream_Back_Cli_Ingest {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Cli_Ingest_Discover_Habr$': 'Mindstream_Back_Cli_Ingest_Discover_Habr$',
+    'Mindstream_Back_Cli_Ingest_Extract_Habr$': 'Mindstream_Back_Cli_Ingest_Extract_Habr$',
+  },
+});

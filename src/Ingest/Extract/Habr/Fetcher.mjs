@@ -45,3 +45,9 @@ export default class Mindstream_Back_Ingest_Extract_Habr_Fetcher {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Platform_Fetch$': 'Mindstream_Back_Platform_Fetch$',
+  },
+});

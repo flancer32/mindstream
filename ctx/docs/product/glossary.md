@@ -28,6 +28,7 @@ Does NOT define:
 - Participation terms — user context, user profile, profile UUID, demo mode.
 - Attention terms — attention signal, interest profile, interest vector, aggregated attention statistics.
 - Projection terms — feed, similarity.
+- Composition terms — interest indicator.
 
 ## Core Terms
 
@@ -85,6 +86,9 @@ Local personal projection of the corpus for one user context and not a shared gl
 **Similarity**  
 Numerical correspondence measure between semantic representations, user preference vectors, and shared attention statistics.
 
+**Interest Indicator**  
+User-visible vertical percentage indicator that shows the degree of correspondence between a publication and the current user's interests. In Russian project documentation, the preferred name is `индикатор интереса`.
+
 ## Naming Principles
 
 - Product terms are defined by product meaning, not by current implementation names.
@@ -98,6 +102,7 @@ Numerical correspondence measure between semantic representations, user preferen
 - Demo corpus and full corpus are modes of corpus availability, not separate products.
 - User profile and profile UUID are related, but UUID is only the identifier of the profile.
 - Interest profile, interest vector, and feed describe different layers of one personal projection model.
+- Interest indicator is a UI projection of local publication scoring, not a separate product or architecture entity.
 
 ## Terminology Invariants
 

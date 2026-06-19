@@ -12,7 +12,7 @@ export default class Mindstream_Back_Ingest_Extract_Habr {
     Mindstream_Back_Ingest_Extract_Habr_Fetcher$: fetcher,
     Mindstream_Back_Ingest_Extract_Habr_Parser$: parser,
     Mindstream_Shared_Logger$: logger,
-    'node:timers/promises': timersModule,
+    timersModule,
   }) {
     const NAMESPACE = 'Mindstream_Back_Ingest_Extract_Habr';
     const BATCH_SIZE = 4;
@@ -107,3 +107,16 @@ export default class Mindstream_Back_Ingest_Extract_Habr {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Ingest_Source_Habr$': 'Mindstream_Back_Ingest_Source_Habr$',
+    'Mindstream_Back_Ingest_Publication_Store$': 'Mindstream_Back_Ingest_Publication_Store$',
+    'Mindstream_Back_Ingest_Publication_ExtractionStore$': 'Mindstream_Back_Ingest_Publication_ExtractionStore$',
+    'Mindstream_Back_Ingest_Publication_Status$': 'Mindstream_Back_Ingest_Publication_Status$',
+    'Mindstream_Back_Ingest_Extract_Habr_Fetcher$': 'Mindstream_Back_Ingest_Extract_Habr_Fetcher$',
+    'Mindstream_Back_Ingest_Extract_Habr_Parser$': 'Mindstream_Back_Ingest_Extract_Habr_Parser$',
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+    timersModule: 'node:timers/promises',
+  },
+});

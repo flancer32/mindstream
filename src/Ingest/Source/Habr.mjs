@@ -8,7 +8,7 @@ export default class Mindstream_Back_Ingest_Source_Habr {
     Mindstream_Back_Ingest_Rss_Client$: rssClient,
     Mindstream_Back_Ingest_Rss_Parser$: rssParser,
     Mindstream_Shared_Logger$: logger,
-    'node:crypto': cryptoModule,
+    cryptoModule,
   }) {
     const NAMESPACE = 'Mindstream_Back_Ingest_Source_Habr';
     const RSS_URL = 'https://habr.com/ru/rss/articles/';
@@ -75,3 +75,12 @@ export default class Mindstream_Back_Ingest_Source_Habr {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    'Mindstream_Back_Ingest_Rss_Client$': 'Mindstream_Back_Ingest_Rss_Client$',
+    'Mindstream_Back_Ingest_Rss_Parser$': 'Mindstream_Back_Ingest_Rss_Parser$',
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+    cryptoModule: 'node:crypto',
+  },
+});
