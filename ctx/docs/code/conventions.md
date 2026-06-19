@@ -1,6 +1,8 @@
 # Code Conventions — MVP
 
-Path: `./ctx/docs/code/conventions.md`
+- Path: `ctx/docs/code/conventions.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

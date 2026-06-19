@@ -1,6 +1,8 @@
 # Mindstream — Composition Interaction
 
-Path: `./ctx/docs/composition/interaction.md`
+- Path: `ctx/docs/composition/interaction.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

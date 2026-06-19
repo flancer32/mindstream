@@ -1,6 +1,8 @@
 # PostgreSQL — среда исполнения Mindstream (pgvector)
 
-**Path:** `ctx/docs/environment/setup/postgresql.md`
+- Path: `ctx/docs/environment/setup/postgresql.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ---
 

@@ -1,31 +1,40 @@
-# Composition Layer — AGENTS
+# Composition Documentation
 
-Path: `./ctx/docs/composition/AGENTS.md`
+- Path: `ctx/docs/composition/AGENTS.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Каталог `ctx/docs/composition/` фиксирует прикладную форму MVP Mindstream как целостный опыт чтения и фиксации внимания пользователя без описания архитектуры, алгоритмов, технологий и реализации интерфейса.
+Defines the project-specific documentation branch for applied user-facing composition.
 
-## Карта уровня
+This branch records presentation shape, interaction framing, and user-visible state projections without redefining product meaning or architecture.
 
-- `AGENTS.md` — текущий документ границ слоя.
-- `interaction.md` — проекция допустимых действий пользователя как фактов активности.
-- `overview.md` — краткая рамка прикладной формы и проекций слоя.
-- `state.md` — проекция допустимых состояний пользовательского опыта.
-- `ui.md` — визуально-прикладная проекция: что представлено пользователю как форма чтения.
+## Level Map
 
-## Границы слоя
+- `attention/` — deeper composition notes for attention-related user-visible projections.
+- `AGENTS.md` — level definition for `ctx/docs/composition/`.
+- `interaction.md` — admissible user actions as composition-level facts.
+- `overview.md` — compact overview of the composition branch and its role.
+- `state.md` — user-visible experience states and their composition-level distinctions.
+- `ui.md` — visual and presentational composition of the user-facing surface.
 
-Композиционный слой описывает прикладные формы пользовательского опыта, используя термины `ctx/docs/product/terminology.md` и не вводя новых продуктовых сущностей, режимов доступа или сигналов внимания.
+## Level Boundary
 
-Композиционный слой не фиксирует архитектурные контуры, потоки и вычисления, не описывает алгоритмы и параметры персонализации, не вводит UX-сценарии и последовательности действий и не содержит технологических и инженерных решений.
+Defines:
 
-## Связи и приоритеты
+- User-facing composition structure and presentation-level distinctions.
+- Interaction framing and experience-state projections subordinate to product meaning.
+- The local document set for supervising project-specific composition extensions.
 
-`product/` задаёт язык и смысл, которыми оперирует композиция, а `constraints/` задают обязательные рамки, имеющие приоритет над композиционным слоем.
+Does NOT define:
 
-`architecture/` фиксирует форму системы и допустимые потоки, а `code/` и `environment/` реализуют композицию без расширения её границ.
+- Product vocabulary, roles, or semantic entities.
+- Architecture boundaries, internal flows, or state authority.
+- Implementation details such as components, source files, or CSS/JS mechanics.
 
-## Итог
+## Dependency Position
 
-`ctx/docs/composition/` является слоем прикладной формы MVP Mindstream: представление, состояния опыта и действия пользователя фиксируются как независимые проекции без перехода к механике, реализации и расширению модели.
+This branch is a project-specific extension under `ctx/docs/`.
+
+It must remain consistent with product meaning and must not override architecture, environment, or code constraints.

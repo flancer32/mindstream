@@ -1,25 +1,29 @@
-# Code Storage — AGENTS
+# Code Storage Documentation
 
-Path: `./ctx/docs/code/storage/AGENTS.md`
+- Path: `ctx/docs/code/storage/AGENTS.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует границы и состав документации уровня `code/storage` в ветви `ctx/docs/`. Уровень описывает инженерные инварианты и нормативную форму DB-слоя, реализующего архитектурный контур `Storage` на кодовом уровне, без изменения архитектуры и без продуктовой логики.
+Defines the local code documentation level for the storage implementation layer.
 
-## Карта уровня
+## Level Map
 
-- `AGENTS.md` — текущий документ; определяет границы уровня `code/storage` и навигацию по его документации.
-- `overview.md` — обзор роли и инвариантов DB-слоя как инженерного слоя хранения данных.
-- `schema.md` — нормативная форма декларативного описания схемы данных DB-слоя.
+- `AGENTS.md` — level definition for `ctx/docs/code/storage/`.
+- `overview.md` — overview of the storage implementation layer and its engineering role.
+- `schema.md` — declarative schema-shape rules for the storage implementation layer.
 
-## Границы уровня
+## Level Boundary
 
-Документация уровня `code/storage` описывает инженерные инварианты и нормативную форму слоя хранения данных. Она не вводит продуктовые смыслы, архитектурные контуры, эксплуатационные режимы или организационные правила работы агента.
+Defines:
 
-## Требования
+- Engineering invariants for the storage implementation layer.
+- The local document set for schema-oriented storage rules.
+- Code-level boundaries for persistence realization beneath architecture.
 
-Документы уровня оформляются декларативно, без ручных переносов строк внутри абзацев, и фиксируют только нормы и инварианты данного уровня, не дублируя утверждений вышестоящих уровней.
+Does NOT define:
 
-## Итог
-
-Уровень `code/storage` служит нормативной опорой для реализации DB-слоя и его декларативной схемы данных в рамках MVP Mindstream.
+- Product semantics or product-facing state meaning.
+- Architecture-level ownership of state or trust boundaries.
+- Agent procedures, runtime deployment rules, or higher-level environment requirements.

@@ -1,6 +1,8 @@
 # DI Compatibility — @teqfw/di
 
-Path: `./ctx/docs/code/di-compatibility.md`
+- Path: `ctx/docs/code/di-compatibility.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

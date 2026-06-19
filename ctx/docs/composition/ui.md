@@ -1,6 +1,8 @@
 # Mindstream — Composition UI
 
-Path: `./ctx/docs/composition/ui.md`
+- Path: `ctx/docs/composition/ui.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

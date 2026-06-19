@@ -1,6 +1,8 @@
 # Code Layer — Overview
 
-Path: `./ctx/docs/code/overview.md`
+- Path: `ctx/docs/code/overview.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

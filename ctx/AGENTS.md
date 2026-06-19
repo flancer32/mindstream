@@ -1,78 +1,127 @@
-# Когнитивный слой проекта
+# Cognitive Context
 
-- Path: `./ctx/AGENTS.md`
-- Version: `20251227`
+- Path: `ctx/AGENTS.md`
+- Template Version: `20260605`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Каталог `ctx/` служит декларативным ядром когнитивного слоя проекта. Он синхронизирует организационные инструкции агента и проектную документацию, фиксирует общие инварианты роли агента и определяет две согласованные ветви контекста: `agent/`, отвечающую за поведение и отчётность агента, и `docs/`, аккумулирующую архитектуру, ограничения, инженерные правила и смысл продукта. Обе ветви наследуют контекст этого уровня, работают в рамках единых критериев качества ADSM и не перекрывают друг друга.
+This level defines the cognitive context of the project.
 
-## Карта уровня
+The cognitive context is located under `./ctx/` during execution, which is its canonical location.
+It may also be developed and maintained as a standalone repository.
 
-- `agent/` — операционный уровень: локальные инструкции, отчётность и режимы взаимодействия агента, определённые в `ctx/agent/AGENTS.md`.
-- `docs/` — ветвь проектной документации: ядро архитектуры, кода, композиции, ограничений среды и продуктовых описаний, определённых в `ctx/docs/AGENTS.md`.
-- `AGENTS.md` — текущий документ, объявляющий структуру `ctx/` и обеспечивающий точку входа в контекст.
+The cognitive context consists of declarative documentation that governs project knowledge across the documentation levels, including product meaning, architecture, environment, code constraints, and project-level conventions, without including product implementation.
 
-## Структура и связи
+## Level Map
 
-Внутри `ctx/` сосуществуют два пространства контекста: организационное (то, как агент работает) и декларативное (то, как описан проект). Ветвь `agent/` фиксирует и контролирует взаимодействие с человеком, проверяет изменения на соответствие инвариантам и ведёт отчётность в рамках `ctx/agent/AGENTS.md`. Ветвь `docs/` отвечает за описание смыслов, архитектуры и инженерных норм так, чтобы они могли воспроизводиться в кодовом слое без конфликтов.
+- `agent/` — context for agent behavior and project-local operational flows.
+- `assets/` — non-normative supporting materials for the cognitive context.
+- `docs/` — declarative project documentation and domain guidance.
+- `AGENTS.md` — level definition for the cognitive context.
+- `README.md` — brief entry description for the cognitive context.
+- `adsm.json` — baseline metadata describing the ADSM context schema and version.
 
-Между ветвями действует прозрачная граница:  
-`agent/` не содержит продуктовых или архитектурных описаний,  
-`docs/` не дублирует организационные режимы и отчёты.
+The cognitive context MUST include:
 
-Обе ветви дополняют общее наследование гарантиями, зафиксированными на уровне `ctx/`.
+- `docs/filesystem.md` — declarative description of top-level repository directories and root-level files, defining repository boundaries and serving as a navigation map for the agent.
 
-## Принцип иерархии контекстов
+## Level Boundary
 
-Исходный контекст для работы на уровне `ctx/` определяется документами на пути от корневого `AGENTS.md` к текущему пространству. При переходе в `ctx/docs/` агент учитывает сначала декларации этого файла, затем `ctx/docs/AGENTS.md`, и только после этого — локальные инструкции. Подкаталоги могут ссылаться на вышележащие уровни и друг на друга, но не выходят за границы, определённые текущим `AGENTS.md`.
+Defines:
 
-## Критерии качества документации ADSM
+- The cognitive context as the authoritative project knowledge space shared by humans and agents.
+- The dependency order and governance model for project documentation levels.
+- Structural rules for context documents, including how declarative knowledge is organized and maintained.
 
-Документы уровня `ctx/` формируются в соответствии с восемью критериями качества ADSM.
+Does NOT define:
 
-### 1. Декларативность
+- Product implementation, source code structure, or runtime behavior as such.
+- Testing artifacts, deployment infrastructure, or execution-environment specifics outside documented context governance.
+- Project-specific product or architecture facts that must instead live in subordinate context documents.
 
-Документ фиксирует свойства, границы и инварианты уровня. Он описывает **что истинно в модели**, а не процедуры, инструкции или последовательности действий.
+Each `Level Boundary` section in context `AGENTS.md` documents should expose exactly three primary `Defines` items and exactly three primary `Does NOT define` items.
 
-### 2. Полнота
+Project knowledge is distributed across documentation levels and refined through the dependency order:
 
-Отражены назначение, границы, связи и обязательные инварианты. Отсутствуют смысловые пробелы, требующие домысливания.
-
-### 3. Непротиворечивость
-
-Утверждения согласованы внутри уровня и с вышестоящими декларациями. Исключены конфликтующие определения и пересечения.
-
-### 4. Связность
-
-Элементы документа образуют цельную структуру. Определения, границы и выводы выстраиваются в единый контекст.
-
-### 5. Плотность
-
-Каждый фрагмент вносит самостоятельное знание. Исключено дублирование, пустые и расплывчатые формулировки.
-
-### 6. Компактность
-
-Сущность изложена минимальными средствами без потери точности. Документ не перегружён второстепенными деталями.
-
-### 7. Неизбыточность
-
-Документ не повторяет утверждений, зафиксированных на других уровнях. Каждый слой несёт только то, что относится к его границам.
-
-### 8. Отсутствие описаний очевидного
-
-Не фиксируются свойства, автоматически следующие из стандартного поведения технологий, если они не являются инвариантами уровня. Закрепляется только то, что требует явного описания.
-
-## Требования
-
-Каждый документ в каталоге `ctx/` обязан указывать свой путь сразу после заголовка:
-
-```md
-Path: `./ctx/.../doc-name.md`
+```text
+product
+  -> architecture
+  -> environment
+  -> code
 ```
 
-Обновления в ветви `docs/` должны сохранять декларативный стиль, соблюдать критерии качества ADSM и границы между ветвями `agent/` и `docs/`.
+Within this model, the context acts as the authoritative project memory used by both humans and agents.
 
-## Итог
+## Human-Agent Knowledge Space
 
-`ctx/AGENTS.md` определяет структуру когнитивного пространства проекта и координирует ветви `agent/` и `docs/`, обеспечивая согласованное и непересекающееся описание организационных и продуктовых знаний.
+Humans and agents use the context as a shared knowledge space because they have different cognitive capabilities.
+
+- Humans primarily operate in the direction-setting and result-evaluation loop.
+- Agents primarily operate in the refinement, analysis, planning, and execution-support loop.
+- Documentation connects these loops by carrying goals, constraints, decisions, findings, and corrections across the project.
+
+## Document Attributes
+
+Each document of the cognitive context must include an attribute block placed immediately after the document title.
+
+```md
+- Path: `ctx/{{subdir}}/file.md`
+- Template Version: `YYYYMMDD`
+- Changed: `YYYYMMDD`
+```
+
+- `Path` must exactly match the canonical location of the document under `./ctx/`, regardless of the current repository layout.
+- `Template Version` must use the `YYYYMMDD` format and identify the template revision on which the document is based.
+- `Changed` must use the `YYYYMMDD` format and be updated when the document changes.
+
+## Structural Constraints
+
+These constraints apply to all documents of the cognitive context.
+
+- Documents should be primarily declarative and describe structure, boundaries, and invariants.
+- Procedural instructions and workflows are allowed but must not dominate or redefine the declarative model.
+- Declarative definitions have priority over any procedural descriptions.
+
+## Level Map Rules
+
+Each `AGENTS.md` within the cognitive context must contain a `Level Map` section.
+
+The `Level Map` must:
+
+- list all subdirectories and files of the level
+- list subdirectories before files
+- use alphabetical order within each group
+- include `AGENTS.md`
+- match the actual filesystem exactly
+
+Each entry must include a declarative description of its purpose.
+
+## Hierarchy Rules
+
+These rules apply only to `AGENTS.md` files within the cognitive context.
+
+This file operates:
+
+- as a root level when the context is used independently
+- as a subordinate level when mounted into a product repository
+
+Within this level:
+
+- Subdirectories inherit constraints defined by this `AGENTS.md`
+- Lower-level `AGENTS.md` files may refine but must not redefine invariants
+
+Hierarchy resolution:
+
+- When a root `AGENTS.md` is present, it defines the hierarchy model.
+- Otherwise, this file defines it: the working context is the aggregate of `AGENTS.md` files along the path; deeper levels override higher levels within their scope; invariants must not be contradicted.
+
+## Change Policy
+
+This file is a template-level definition and is not subject to modification within the project.
+
+- The agent must not modify, replace, delete, or relocate this file
+- The agent must not introduce changes that effectively alter its content or presence in the repository
+- Updates to this file are performed only at the template level and propagated explicitly
+
+Violation of these rules constitutes an execution error.

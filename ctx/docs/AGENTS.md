@@ -1,39 +1,95 @@
-# Проектная документация (`./ctx/docs/`)
+# Project Documentation
 
-- Path: `./ctx/docs/AGENTS.md`
-- Version: `20251218`
+- Path: `ctx/docs/AGENTS.md`
+- Template Version: `20260605`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Каталог `ctx/docs/` аккумулирует декларативные знания о проекте: его смыслах, архитектуре, инженерных нормах, композиции и эксплуатационной среде. Этот уровень формирует проектную перспективу, фиксируя контуры и инварианты предметной области без включения организационных режимов работы агента. Он наследует критерии качества из `ctx/AGENTS.md`, а каждый подкаталог уточняет границы контекста, сохраняя декларативный характер описаний.
+Defines the structure of project-level declarative documentation organized by ADSM levels.
 
-## Карта уровня
+Documents at this level describe the system as a design object, including meaning, structure, environment, and implementation constraints.
 
-- `_img/` — схемы для документации.
-- `architecture/` — архитектурная форма системы: обзор, структуры и границы, в которых зафиксированы контуры, события, фазы и интерфейсы.
-- `code/` — инженерные нормы: конвенции организации кода, правила модульности, контракты времени выполнения и требования к тестированию.
-- `composition/` — прикладная композиция: пользовательские интерфейсы, компоненты, состояния, маршруты и прикладные механики, сгруппированные по контурам.
-- `constraints/` — обязательные ограничения реализации, обеспечивающие соблюдение смысловых и архитектурных инвариантов.
-- `environment/` — описание эксплуатационной среды: конфигурация runtime, сервисы, системные зависимости и параметры окружения.
-- `product/` — смысловое ядро: назначение, терминология, описания способностей системы и потоков взаимодействия.
-- `AGENTS.md` — текущий документ уровня `docs/`, определяющий границы проектной документации и служащий точкой входа для агента.
+## Level Map
 
-## Границы уровня
+- `_img/` — non-normative diagrams and visual aids used by documentation files in this branch.
+- `architecture/` — structural form of the system, architectural entities, boundaries, and interaction model.
+- `code/` — engineering invariants governing how architecture is expressed in source code.
+- `composition/` — project-specific applied composition documents for user-facing form and interaction shape.
+- `constraints/` — project-specific constraint documents that add hard limits below product meaning and above implementation.
+- `environment/` — runtime environment and infrastructural prerequisites required for system operation.
+- `product/` — system meaning, domain entities, and product-level invariants.
+- `AGENTS.md` — level definition for `ctx/docs/`.
+- `filesystem.md` — declarative description of top-level repository directories and root-level files, defining repository boundaries and serving as a navigation map.
 
-Документация уровня `docs/` ограничена описанием смыслов, архитектуры, инженерных правил и эксплуатационных характеристик. Она не содержит инструкций по поведению агента, отчётности или процедур взаимодействия. Каждый подкаталог концентрируется на собственном типе знаний: `product/` — смысл, `constraints/` — обязательства, `architecture/` — форма, `composition/` — прикладная структура, `code/` — инженерные нормы, `environment/` — среда исполнения.
+## Level Boundary
 
-Связи между каталогами описываются декларативно, без пересечения ролей и без дублирования утверждений, зафиксированных на вышележащих уровнях.
+Defines:
 
-## Структура и связи
+- System meaning and domain intent through the documentation dependency chain rooted in `product`.
+- System realization guardrails through `architecture`, `environment`, and `code`.
+- Mandatory declarative constraints that bound any valid implementation.
 
-Уровень `docs/` наследует контекст `ctx/AGENTS.md` и уточняется собственными декларациями. Файл `ctx/docs/AGENTS.md` фиксирует, что данная ветвь содержит проектные описания; далее каждый подкаталог вводит свой `AGENTS.md`, определяющий локальные границы. Связи между подкаталогами задаются через декларативные ссылки (`ctx/docs/...`), а принципы наследования обеспечивают согласованность смыслов и отсутствие процедурных описаний.
+All statements defined at this level and below are mandatory constraints for any valid implementation.
 
-## Требования
+Violation of these constraints constitutes an incorrect result, regardless of functional correctness.
 
-Документы уровня `docs/` оформлены в декларативном стиле, не повторяют утверждений, закреплённых на других уровнях контекста, и не вводят инструкции по поведению агента.
+Does NOT define:
 
-Абзацы оформлены без ручных переносов строк, а каждый абзац представляет собой непрерывную строку.
+- Agent operations, workflow execution, or prompt-routing assets under `ctx/agent/`.
+- Concrete implementation artifacts such as `src/`, `bin/`, `test/`, or other product files.
+- Ad hoc task instructions that bypass or override the documentation dependency order.
 
-## Итог
+## Level Order
 
-`ctx/docs/AGENTS.md` фиксирует структуру и иерархию проектной документации, гарантируя, что смыслы, архитектура, инженерные нормы, композиция, ограничения и среда исполнения описываются в едином согласованном пространстве и не пересекаются с организационной ветвью агента.
+Documentation levels form a strict dependency order:
+
+```text
+product
+↓
+architecture
+↓
+environment
+↓
+code
+```
+
+`architecture` translates product intent into stable engineering structure.
+
+Lower levels may refine but must not redefine statements established at higher levels.
+
+Lower levels may increase explicitness, constraint, and operational precision, but must not introduce new meaning absent from higher levels.
+
+They must not add new product capabilities, invariants, authority, or semantic boundaries unless those are first named upstream.
+
+## Project Extensions
+
+This project currently keeps additional documentation branches beyond the minimal baseline:
+
+- `composition/` captures applied user-facing composition and presentation structure.
+- `constraints/` captures project-local hard limits that complement architecture and environment constraints.
+- `_img/` stores non-normative diagrams referenced by documents in this branch.
+
+These branches may refine the documentation landscape of this project, but they remain subordinate to the baseline dependency order rooted in `product`.
+
+## Documentation As A Cognitive Interface
+
+Project documentation is the cognitive interface through which humans and agents cooperate across the documentation levels.
+
+- It communicates human goals, constraints, and decisions to agents.
+- It communicates agent findings, inconsistencies, and refinements back to humans.
+- It connects the human direction-setting and result-evaluation loop with the agent refinement and execution-support loop.
+- It must remain compact enough for human control and precise enough for agent execution.
+- It must support the full dependency order from product through architecture, environment, and code.
+
+## Document Attributes
+
+Documents under `ctx/docs/` use:
+
+```md
+- Path: `ctx/docs/{{subdir}}/file.md`
+- Template Version: `YYYYMMDD`
+- Changed: `YYYYMMDD`
+```
+
+All stable documents use `Path`, `Template Version`, and `Changed` attributes.

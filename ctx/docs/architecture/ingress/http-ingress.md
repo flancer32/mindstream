@@ -1,6 +1,8 @@
 # HTTP Ingress
 
-Path: `./ctx/docs/architecture/ingress/http-ingress.md`
+- Path: `ctx/docs/architecture/ingress/http-ingress.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

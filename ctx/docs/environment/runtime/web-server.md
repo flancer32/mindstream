@@ -1,6 +1,8 @@
 # Web Server Runtime
 
-Path: `ctx/docs/environment/runtime/web-server.md`
+- Path: `ctx/docs/environment/runtime/web-server.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение документа
 

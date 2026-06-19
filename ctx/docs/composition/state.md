@@ -1,6 +1,8 @@
 # Mindstream — Composition State
 
-Path: `./ctx/docs/composition/state.md`
+- Path: `ctx/docs/composition/state.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

@@ -1,6 +1,8 @@
 # Code Configuration — MVP
 
-Path: `./ctx/docs/code/configuration.md`
+- Path: `ctx/docs/code/configuration.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

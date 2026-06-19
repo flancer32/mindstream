@@ -1,6 +1,8 @@
 # Content Collection Invariants
 
-Path: `./ctx/docs/architecture/content-collection/invariants.md`
+- Path: `ctx/docs/architecture/content-collection/invariants.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

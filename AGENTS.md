@@ -1,158 +1,116 @@
-# AGENTS.md — входная инструкция для LLM-агентов
+# Root Level
 
 - Path: `AGENTS.md`
-- Version: `20251218`
+- Template Version: `20260605`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Корневой файл для проектов, использующих ADSM (Agent-Driven Software Management).
-Определяет роли Человека и Агента, структуру контекста и инварианты работы.
-Читается агентом первым, до загрузки локальных инструкций.
+This file defines the root invariants of ADSM (Agent-Driven Software Management) for the entire project.
 
----
+This file is the first instruction source for every Agent operating within the repository.
 
-## Принципы ADSM
+## Level Boundary
 
-### Пространства проекта
+Defines:
 
-Проект состоит из двух взаимосвязанных пространств:
+- ADSM methodological invariants and Human-Agent responsibility boundaries.
+- Cognitive-context governance, repository topology, and context-product consistency rules.
+- `AGENTS.md` hierarchy resolution and root-level file protection rules.
 
-- **Когнитивный контекст** (`./ctx/`) — документация, правила, спецификации.
-- **Программный продукт** (всё вне `ctx/`) — исходники и исполняемые артефакты.
+Does NOT define:
 
-Контекст задаёт правила изменения продукта; продукт отражает применение контекста.
+- Product-specific meaning, requirements, or domain knowledge.
+- Implementation-level structure such as source code, runtime details, or filesystem layout.
+- Task-specific instructions, workflows, or local operational procedures.
 
-### Взаимодействие
+Each `Level Boundary` section in `AGENTS.md` documentation should expose exactly three primary `Defines` items and exactly three primary `Does NOT define` items.
 
-- Человек формулирует цели, управляет контекстом и утверждает изменения.
-- Агент интерпретирует контекст и изменяет продукт в его пределах.
-- Итерация завершается отчётом.
+Such information belongs to the cognitive context.
 
----
+## ADSM Project Model
 
-## Роли
+An ADSM project consists of two interconnected spaces:
 
-**Человек:** цели, контекст, утверждение изменений, развитие структуры.
-**Агент:** выполнение задач в рамках контекста, изменение продукта, поддержание согласованности, отчётность.
+- the **Cognitive Context** located in `./ctx/`
+- the **Software Product** located outside `./ctx/`
 
----
+The cognitive context is the long-term textual memory of the project.
 
-## Минимальная структура проекта
+The cognitive context is the primary communication medium between Humans and Agents working on the project.
 
-```text
-/
-├─ ctx/         ← когнитивный контекст
-├─ AGENTS.md    ← инструкция для агентов
-└─ README.md    ← описание проекта
-```
+The cognitive context is the authoritative knowledge source used by Agents when modifying the project.
 
----
+The software product is the implementation that must be kept consistent with the cognitive context.
 
-## Контекстные зависимости
+## Human and Agent Roles
 
-Поведение Агента определяется документами в каталоге:
+The Human defines goals, authorizes work, evaluates outcomes, and evolves the project.
 
-```text
-./ctx/
-```
+The Agent interprets the cognitive context, performs assigned tasks, modifies the project within task boundaries, and maintains consistency between the cognitive context and the software product.
 
-Рекомендуемые документы:
+The Agent operates through text and must treat project documentation as operational memory, not as secondary commentary.
 
-- `ctx/AGENTS.md` — структура когнитивного контекста проекта;
-- `ctx/agent/AGENTS.md` — локальные правила агента;
-- `ctx/docs/product/AGENTS.md` — базовое описание продукта;
+## Cognitive Context
 
----
+The canonical execution location of the cognitive context is `./ctx/`.
 
-## Иерархия AGENTS.md в проекте
+Project-specific knowledge, requirements, architecture, environment descriptions, and implementation guidance are defined within the cognitive context.
 
-Если в проекте присутствуют дополнительные файлы `AGENTS.md`
-(например, `ctx/docs/architecture/AGENTS.md`, `src/module/AGENTS.md`), они считаются частью когнитивного контекста **в пределах своего уровня**.
+The Agent must consult `./ctx/AGENTS.md` for project-specific instructions when `./ctx/` exists.
 
-### Правило ADSM
+The Agent must consult `./ctx/docs/filesystem.md` for the project filesystem structure and documentation layout when that file exists.
 
-При выполнении задачи в каталоге `X` рабочим контекстом агента является совокупность всех файлов `AGENTS.md` на пути от корня проекта до каталога `X`.
-Приоритет: более глубокий каталог перекрывает правила вышележащих уровней в пределах своего пространства.
+Documentation distributed with the software product may exist outside `./ctx/`, but it does not replace, redefine, or supersede the cognitive context.
 
-Агент обязан:
+## Bootstrap and Repository Topology
 
-- учитывать инструкции всех найденных `AGENTS.md` как единую систему правил;
-- разрешать пересечения по иерархии каталогов;
-- соблюдать инварианты, описанные в корневом `AGENTS.md`.
+An ADSM project may use one repository or two repositories.
 
----
+In a one-repository topology, the software product and the cognitive context are versioned together.
 
-## Требования к локальным AGENTS.md (карты уровня)
+In a two-repository topology, the software product and the cognitive context are independent version-controlled repositories, and the cognitive context repository is mounted under `./ctx/`.
 
-Каждый `AGENTS.md`, расположенный в подкаталогах `ctx/`, обязан содержать **Карту уровня** — формализованное описание состава документации данного каталога.
+The Agent must detect whether `./ctx/` is part of the current repository or an independent repository.
 
-### Инвариант «Карты уровня»
+The Agent must preserve repository boundaries.
 
-#### Обязательная секция
+The Agent must not mix changes between independent repositories.
 
-```md
-## Карта уровня
+The Agent must not remove, replace, relocate, or unmount `./ctx/`.
 
-- `<directory>/` — описание назначения каталога.
-- …
-- `<file>.md` — назначение файла.
-- …
-```
+If `./ctx/` does not exist, the Agent may perform bootstrap operations required to create the initial cognitive context structure.
 
-#### Правила оформления
+After bootstrap is complete, `./ctx/AGENTS.md` becomes the entry point for project-specific instructions.
 
-- Перечень начинается с **каталогов**, затем идут **файлы**.
-- Каталоги сортируются **по алфавиту**.
-- Файлы сортируются **по алфавиту**.
-- Описание каждого элемента декларативно указывает его назначение.
-- Файл `AGENTS.md` самого уровня включается в перечень как элемент карты.
-- Карта уровня должна соответствовать реальной структуре каталога и быть навигационной опорой для агента.
+## Context and Product Consistency
 
-### Назначение Карты уровня
+The cognitive context is the source of truth for the project.
 
-- определяет границы пространства, в котором работают правила уровня;
-- задаёт навигацию по документации уровня без анализа структуры файловой системы;
-- обеспечивает единообразие оформления всех уровней контекста в соответствии с корневым документом.
+If the cognitive context and the software product diverge, the Agent must treat the cognitive context as authoritative.
 
----
+The Agent must maintain consistency between the cognitive context and the software product.
 
-## Комментарии `@LLM-DOC`
+The Agent may modify the cognitive context when required by the assigned task and when the modification remains consistent with higher-level context constraints.
 
-`@LLM-DOC` — встроенный защищённый контекст в исходном коде.
+The Agent may modify the software product when required by the assigned task and when the modification remains consistent with the cognitive context.
 
-Правила:
+## AGENTS.md Hierarchy
 
-1. Используется только в исходниках.
-2. Оформляется на английском языке.
-3. Агент обязан распознавать метку, не изменять и не удалять её.
-4. Нарушение — `execution error`.
+Additional `AGENTS.md` files may exist in subdirectories.
 
----
+The effective working context of the Agent is the aggregate of all `AGENTS.md` files located along the path from the repository root to the target directory.
 
-## Отчётность
+Rules:
 
-Каждая итерация завершается отчётом:
+- deeper levels override higher levels within their scope
+- root-level invariants cannot be overridden
+- all levels must remain mutually consistent
 
-```text
-./ctx/agent/report/YYYY/MM/DD/HH-MM-{title}.md
-```
+## Root File Protection
 
-Отчёт содержит цель, выполненные действия и артефакты.
-Отсутствие отчёта — `execution error`.
-Если существует `ctx/agent/report-template.md`, агент обязан использовать его.
-Каждая итерация завершается отчётом и без него итерация считается незавершённой,
+This file defines ADSM template-level invariants.
 
----
+The Agent must not modify, replace, delete, relocate, or reinterpret this file unless explicitly instructed by the Human.
 
-## Совместимость
-
-Корневой `AGENTS.md` задаёт инварианты методологии и используется **без изменений** во всех проектах.
-Проектные правила размещаются в `./ctx/` и в `@LLM-DOC`.
-
----
-
-## Файлы `output.md`
-
-Файлы `output.md` не входят в контекст и игнорируются агентом.
-
----
+Violation of this rule constitutes an execution error.

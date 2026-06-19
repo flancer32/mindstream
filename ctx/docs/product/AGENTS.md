@@ -1,35 +1,44 @@
-# Product Layer — AGENTS
+# Product Documentation
 
-Path: `./ctx/docs/product/AGENTS.md`
+- Path: `ctx/docs/product/AGENTS.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует границы продуктового слоя документации Mindstream и его роль как смыслового ядра проекта.
+Defines the product documentation level as the semantic root of the project documentation chain.
 
-## Карта уровня
+## Level Map
 
-- `AGENTS.md` — текущий файл границ продуктового слоя.
-- `terminology.md` — словарь продуктовых терминов и их значений.
-- `vision.md` — декларативная фиксация назначения и фокуса продукта Mindstream.
+- `AGENTS.md` — level definition for `ctx/docs/product/`.
+- `terminology.md` — project vocabulary and semantic term definitions.
+- `vision.md` — product purpose, scope focus, and high-level intent.
 
-## Роль уровня
+## Level Boundary
 
-Каталог `ctx/docs/product/` является базовым смысловым уровнем проектной документации и определяет продуктовые инварианты, от которых зависят все последующие уровни контекста.
+Defines:
 
-Изменения на этом уровне означают пересмотр продуктового видения или терминологии и влекут необходимость согласования зависимых документов ниже по иерархии.
+- Product meaning, vocabulary, and high-level intent.
+- The semantic source of truth for downstream documentation levels.
+- The local document set used to supervise product-level invariants.
 
-## Границы уровня
+Does NOT define:
 
-В рамках данного каталога фиксируются только продуктовые смыслы и язык их описания.
+- Architecture structure, internal flows, or state authority.
+- Runtime environment prerequisites or implementation-level engineering rules.
+- Agent operations, workflow routing, or task procedures.
 
-Рассуждения об архитектуре, потоках данных, алгоритмах, интерфейсах, инженерных и эксплуатационных решениях находятся вне границ продуктового слоя.
+## Dependency Role
 
-## Интерпретация
+This level is the root of the baseline documentation dependency order:
 
-Формулировки `vision.md` являются продуктовыми инвариантами, а термины используются исключительно в значениях, закреплённых в `terminology.md`.
+```text
+product
+  -> architecture
+  -> environment
+  -> code
+```
 
-Новые продуктовые сущности или свойства отсутствуют без явного изменения продуктового слоя.
+Lower levels may refine this meaning but must not redefine it.
 
-## Итог
-
-`ctx/docs/product/AGENTS.md` фиксирует границы продуктового смыслового уровня Mindstream и обеспечивает стабильность базового контекста MVP.
+Changes here imply possible downstream alignment work in architecture, environment, and code documentation.

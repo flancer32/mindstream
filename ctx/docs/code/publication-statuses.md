@@ -1,6 +1,8 @@
 # Code — Publication Statuses
 
-Path: `./ctx/docs/code/publication-statuses.md`
+- Path: `ctx/docs/code/publication-statuses.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

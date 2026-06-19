@@ -1,76 +1,61 @@
-# Code — AGENTS
+# Code Documentation
 
-Path: `./ctx/docs/code/AGENTS.md`
+- Path: `ctx/docs/code/AGENTS.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ определяет границы и состав документации уровня `code/` в ветви `ctx/docs/`.
+Defines the engineering documentation level that governs how architecture is realized in source code.
 
-Уровень `code/` аккумулирует **инженерные нормы и инварианты кодовой формы**, необходимые для воспроизводимой реализации архитектуры и продукта. Документ не содержит инструкций по поведению агента и не дублирует организационные или методологические правила, зафиксированные на вышележащих уровнях контекста.
+Documents at this level record code-shaping invariants, implementation constraints, and engineering guidance that remain subordinate to product, architecture, and environment documentation.
 
----
+## Level Map
 
-## Границы уровня
+- `cli/` — deeper code-level documentation for the command-line surface and its execution model.
+- `configuration/` — deeper code-level documentation for configuration structure and subordinate configuration contracts.
+- `storage/` — deeper code-level documentation for the storage implementation layer and schema-oriented engineering rules.
+- `AGENTS.md` — level definition for `ctx/docs/code/`.
+- `bootstrap-reference.md` — reference bootstrap shape for backend startup.
+- `configuration.md` — top-level configuration model and access invariants.
+- `conventions.md` — engineering conventions for language use, modularity, dependencies, and code shape.
+- `di-compatibility.md` — invariants for DI compatibility and expected integration boundaries.
+- `es6-modules.md` — normative ES module shape used in the project.
+- `logging.md` — logging invariants, namespace expectations, and observability rules.
+- `overview.md` — compact overview of the code documentation level and its role in the dependency chain.
+- `publication-statuses.md` — normative registry of publication statuses and transitions.
+- `testing.md` — testing constraints, scope expectations, and isolation rules.
 
-Уровень `code/` ограничен описанием:
+## Level Boundary
 
-- формы кодовой базы как инженерного объекта;
-- обязательных конвенций реализации;
-- норм структурирования, модульности и тестирования;
-- требований, обеспечивающих согласованность кода с архитектурой, ограничениями и средой исполнения.
+Defines:
 
-Уровень `code/` не описывает:
+- Engineering constraints governing how architecture is expressed in source code.
+- Code-shaping rules for configuration, modularity, logging, storage, CLI, and testing.
+- Implementation-level guardrails that remain consistent with higher documentation levels.
 
-- продуктовые смыслы;
-- архитектурные контуры;
-- эксплуатационную среду;
-- организационные режимы работы агента.
+Does NOT define:
 
----
+- Product meaning, domain vocabulary, or user-facing outcomes.
+- Architectural ownership, system boundaries, or environment-level runtime prerequisites.
+- Agent workflow routing or operational procedures under `ctx/agent/`.
 
-## Карта уровня
+## Dependency Position
 
-- `storage/` — документация по кодовому слою хранения: схемы, обзор и правила доступа.
-- `AGENTS.md` — текущий документ; определяет границы уровня `code/` и навигацию по его документации.
-- `bootstrap-reference.md` — референсная кодовая форма bootstrap-запуска backend-приложения для Node.js.
-- `configuration.md` — нормативная модель конфигурации backend-приложения Mindstream: статус, инварианты и допустимые формы доступа.
-- `conventions.md` — инженерные конвенции реализации; язык, стиль, модульность, зависимости, тестирование и требования к качеству кода.
-- `di-compatibility.md` — правила совместимости DI-инфраструктуры: инварианты, ограничения и ожидаемые интеграционные контракты.
-- `es6-modules.md` — нормативная форма ES6-модулей проекта для совместимости с DI-контейнером `@teqfw/di`.
-- `logging.md` — нормативные принципы логирования кодового слоя: обязательный наблюдательный слой, уровни логирования, семантика исключений и требования к namespace.
-- `overview.md` — обзор кодового слоя как части системы; фиксирует роль кода, его инварианты и нормативную структурную форму.
-- `publication-statuses.md` — нормативный реестр статусов публикаций и допустимых переходов между ними.
-- `testing.md` — инварианты тестирования кодового слоя: режимы, ограничения, инструменты и нормы изоляции.
+This level is the last stage in the baseline dependency order:
 
----
+```text
+product
+  -> architecture
+  -> environment
+  -> code
+```
 
-## Связи с другими уровнями
+It may refine implementation precision, but it must not introduce new meaning or redefine higher-level constraints.
 
-Документация уровня `code/`:
+## Authoring Rules
 
-- опирается на архитектурные формы, зафиксированные в `ctx/docs/architecture/`;
-- соблюдает ограничения, зафиксированные в `ctx/docs/constraints/`;
-- согласуется со средой исполнения, описанной в `ctx/docs/environment/`;
-- не переопределяет и не дублирует утверждения вышележащих уровней.
-
-Все связи между уровнями носят декларативный характер и не вводят процедурных зависимостей.
-
----
-
-## Требования к документам уровня
-
-Документы уровня `code/`:
-
-- оформляются в декларативном стиле;
-- фиксируют только инженерные инварианты данного уровня;
-- не повторяют утверждений, зафиксированных на других уровнях контекста;
-- не содержат инструкций по поведению агента;
-- не включают описаний очевидного, автоматически следующего из стандартного поведения технологий.
-
-Абзацы оформляются без ручных переносов строк. Переносы строк используются только для структурных элементов Markdown.
-
----
-
-## Итог
-
-Уровень `code/` служит инженерным слоем проектной документации, обеспечивающим воспроизводимую и согласованную реализацию системы. Данный файл фиксирует его границы и состав и используется как навигационная и нормативная опора для всех последующих итераций разработки.
+- Keep this level declarative and implementation-governing rather than task-procedural.
+- Use deeper subdirectories only where a stable engineering subdomain already exists.
+- Reflect actual filesystem structure exactly in the level map.
+- Surface conflicts with architecture or environment documentation instead of normalizing them locally.

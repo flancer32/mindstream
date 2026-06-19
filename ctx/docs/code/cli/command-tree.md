@@ -1,6 +1,8 @@
 # Code CLI — Command Tree
 
-Path: `ctx/docs/code/cli/command-tree.md`
+- Path: `ctx/docs/code/cli/command-tree.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

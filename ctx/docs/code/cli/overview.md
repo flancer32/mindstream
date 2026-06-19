@@ -1,6 +1,8 @@
 # Code CLI — Overview
 
-Path: `ctx/docs/code/cli/overview.md`
+- Path: `ctx/docs/code/cli/overview.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

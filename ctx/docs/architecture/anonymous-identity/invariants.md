@@ -1,6 +1,8 @@
 # Anonymous Identity
 
-Path: `./ctx/docs/architecture/anonymous-identity/invariants.md`
+- Path: `ctx/docs/architecture/anonymous-identity/invariants.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

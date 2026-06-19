@@ -1,6 +1,8 @@
 # Attention Storage Invariants
 
-Path: `./ctx/docs/architecture/attention/storage-invariants.md`
+- Path: `ctx/docs/architecture/attention/storage-invariants.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

@@ -1,6 +1,8 @@
 # Mindstream — Architecture Overview
 
-Path: `./ctx/docs/architecture/overview.md`
+- Path: `ctx/docs/architecture/overview.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 
@@ -14,7 +16,7 @@ Path: `./ctx/docs/architecture/overview.md`
 
 - **Content Collection** — технический набор публикаций и их производных представлений, общий для всех контекстов чтения.
 - **Attention** — статистические сигналы наблюдения в браузерном контексте, фиксируемые как write-факты.
-- **Anonymous Identity** — технический UUID-идентификатор источника сигналов внимания, не субъект и не модель пользователя.
+- **Anonymous Identity** — архитектурная write-path проекция UUID профиля как технического идентификатора источника сигналов внимания; не субъект и не самостоятельная продуктовая модель пользователя.
 
 ---
 

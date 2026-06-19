@@ -1,6 +1,8 @@
 # Deployment Environment — MVP
 
-Path: `ctx/docs/environment/deployment.md`
+- Path: `ctx/docs/environment/deployment.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

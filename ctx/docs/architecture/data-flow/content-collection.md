@@ -1,6 +1,8 @@
 # Mindstream — Content Collection Flows
 
-Path: `./ctx/docs/architecture/data-flow/content-collection.md`
+- Path: `ctx/docs/architecture/data-flow/content-collection.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

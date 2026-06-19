@@ -1,26 +1,30 @@
-# Code CLI — AGENTS
+# Code CLI Documentation
 
-Path: `./ctx/docs/code/cli/AGENTS.md`
+- Path: `ctx/docs/code/cli/AGENTS.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ определяет границы и состав документации уровня `code/cli`, фиксируя роль CLI как инженерного слоя backend-приложения и обеспечивая навигацию по нормативным материалам уровня.
+Defines the local code documentation level for the command-line surface.
 
-## Границы уровня
+## Level Map
 
-Уровень `code/cli` описывает модель CLI и её инженерные инварианты в рамках MVP, не затрагивая продуктовые смыслы, архитектурные контуры, среду исполнения и организационные режимы работы агента.
+- `AGENTS.md` — level definition for `ctx/docs/code/cli/`.
+- `command-tree.md` — normative command-tree structure and admissible command branches.
+- `dispatcher.md` — dispatcher model for command routing and termination semantics.
+- `overview.md` — compact overview of the CLI role and its engineering boundaries.
 
-## Карта уровня
+## Level Boundary
 
-- `AGENTS.md` — текущий документ, фиксирующий границы уровня и навигацию по документации `code/cli`.
-- `command-tree.md` — нормативный скелет CLI: пространство допустимых команд и веток дерева.
-- `dispatcher.md` — нормативная модель диспетчеризации CLI-команд, дерево модулей и правила завершения.
-- `overview.md` — рамочная модель CLI в MVP: статус, роль, инварианты и границы описания.
+Defines:
 
-## Связи с другими уровнями
+- The engineering model of the CLI surface.
+- Stable command-routing and dispatch constraints.
+- The local document set used to supervise CLI-specific implementation rules.
 
-Документация уровня `code/cli` наследует требования и стиль уровня `ctx/docs/code/AGENTS.md` и использует рамочную модель из `overview.md` как базу для специализированных описаний CLI.
+Does NOT define:
 
-## Итог
-
-Файл `AGENTS.md` уровня `code/cli` задаёт декларативные границы локальной документации и обеспечивает единый навигационный вход для CLI-модели MVP.
+- Product meaning or user-facing outcomes outside the CLI surface.
+- Broader architectural ownership outside CLI-related execution entry points.
+- Runtime deployment procedures or agent operations.

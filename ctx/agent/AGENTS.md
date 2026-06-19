@@ -1,69 +1,41 @@
-# Обзор поведения агента
+# Agent Operational Context
 
 - Path: `ctx/agent/AGENTS.md`
-- Version: `20251218`
+- Template Version: `20260610`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ определяет роль и поведение агента в рамках проекта. Он фиксирует границы ответственности, режимы взаимодействия с когнитивным и кодовым слоями, а также порядок ведения отчётности. Агент опирается на принципы, зафиксированные в корневом `AGENTS.md`, и конкретизирует, как именно он действует внутри данной ветви контекста.
+Defines the structure of agent-facing operational context for a typical ADSM project.
 
-## Карта уровня
+This level contains service assets that guide agent execution through project-local operational flows.
 
-- `plan/` — планы для рефакторинга, составленные вручную или агентом.
-- `prompt/` — различные типовые промпты для общения с ChatGPT.
-- `report/` — отчёты по итерациям с локальной инструкцией в `report/AGENTS.md`.
-- `AGENTS.md` — текущий документ, описывающий режимы работы агента и его согласование с остальной документацией.
+This level does not contain documents that regulate how agents design or generate product source code.
 
----
+Its documents exist to organize interaction with agents and other AI collaborators through repository-local operational routines, routing, and workflow configuration.
 
-## Область ответственности
+## Level Map
 
-Агент преобразует цели человека в согласованные когнитивные и кодовые артефакты, поддерживает их целостность и проверяет соответствие установленным инвариантам проекта. Агент не отвечает за эксплуатационную инфраструктуру и не принимает решений о развёртывании, если это явно не закреплено на более высоком уровне контекста.
+- `flows/` — operational flow documentation and configuration for agent-executed project routines.
+- `AGENTS.md` — level definition for `ctx/agent/`.
 
-## Режимы работы
+## Level Boundary
 
-- **Контекстный режим** — работа с документацией `ctx/`, декларациями смыслов и правилами роли агента.
-- **Кодовый режим** — работа с исходным кодом и связанными инженерными артефактами.
+Defines:
 
-Режим работы задаётся человеком. В рамках одной итерации допускается только один активный режим.
+- Agent-facing operational guidance for the project.
+- Flow-routing context and execution boundaries for project-local routines.
+- The structure of operational assets that support recurring agent work.
 
-## Навигация по контексту
+Does NOT define:
 
-- `ctx/agent/` — управление деятельностью агента и отчётность по итерациям.
-- `ctx/docs/` — проектная документация: смыслы, архитектура, ограничения и инженерные нормы.
-- Другие ветви `ctx/` — используются только в пределах границ, заданных соответствующими `AGENTS.md`.
+- Product meaning, domain scope, or user-facing requirements.
+- Architecture ownership, system structure, or product-level engineering constraints.
+- Runtime implementation behavior, source-code generation rules, coding style, or implementation decisions outside project-local agent operations.
 
-Все ссылки внутри контекста оформляются относительными путями, что обеспечивает переносимость структуры и непротиворечивую навигацию.
+## Operational Constraints
 
-## Правила согласованности
-
-- Все документы в `ctx/` оформляются в декларативном стиле.
-- Структура и наименование файлов сохраняются стабильными в пределах уровня.
-- Все изменения проверяются на целостность, связность, логическую непротиворечивость, отсутствие избыточности и полноту.
-- Результаты итерации передаются человеку на утверждение.
-- Агент работает с проектом как с внешней памятью и взаимодействует с ним исключительно через человека.
-
-## Управляющие документы
-
-- `../../AGENTS.md` — общие правила работы агентов в рамках ADSM.
-- `../../ctx/docs/AGENTS.md` — границы и структура проектной документации.
-- Локальные `AGENTS.md` подкаталогов — уточняют контекст и инварианты соответствующих уровней.
-
----
-
-## Правила тестирования
-
-Если проект содержит тесты, агент обязан учитывать правила их выполнения, зафиксированные в документации уровня `docs/` или `code/`.
-
-- По умолчанию изменения считаются завершёнными только после успешного выполнения обязательных тестов.
-- Если постановка задачи явно допускает отсутствие тестирования (например, работа исключительно с документацией или подготовка структуры), агент фиксирует это в отчёте итерации.
-
-Конкретные команды и инструменты тестирования не фиксируются на этом уровне.
-
----
-
-## Указания агенту
-
-- Поддерживать актуальность данного документа при изменении структуры `ctx/agent/`.
-- Сохранять декларативный стиль при всех обновлениях.
-- Проверять документ и результаты своей работы по критериям: целостность, связность, логическая непротиворечивость, отсутствие избыточности и полнота.
+- Documents at this level may be more procedural than `ctx/docs/`, but must remain subordinate to declarative constraints defined there.
+- Operational assets at this level should stay generic enough for the project type and should not duplicate product documentation.
+- Operational assets at this level are service documentation for agent coordination and must not be treated as product-code authoring instructions.
+- If only one operational branch exists, it should be represented as `flows/` and treated as the entry point for repository-local agent routines.

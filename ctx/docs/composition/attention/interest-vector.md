@@ -1,6 +1,8 @@
 # Расчёт и использование interest vector на фронте
 
-Path: `./ctx/docs/composition/attention/interest-vector.md`
+- Path: `ctx/docs/composition/attention/interest-vector.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

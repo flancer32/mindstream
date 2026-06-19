@@ -1,30 +1,37 @@
-# Constraints Layer — AGENTS
+# Constraints Documentation
 
-Path: `./ctx/docs/constraints/AGENTS.md`
+- Path: `ctx/docs/constraints/AGENTS.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует границы слоя ограничений `constraints/` и определяет его роль как источника обязательных рамок MVP Mindstream.
+Defines the project-specific constraint branch under `ctx/docs/`.
 
-## Карта уровня
+## Level Map
 
-- `AGENTS.md` — текущий документ границ слоя.
-- `mvp-scope.md` — фиксированная рамка допустимого и исключённого в MVP.
+- `AGENTS.md` — level definition for `ctx/docs/constraints/`.
+- `mvp-scope.md` — fixed boundary of what is included and excluded in the MVP.
+- `overview.md` — compact overview of how this branch constrains the project.
 
-## Роль слоя
+## Level Boundary
 
-Слой `constraints/` задаёт жёсткие и обязательные рамки MVP Mindstream, которым подчиняются все нижележащие уровни документации и реализации.
+Defines:
 
-## Границы слоя
+- Project-local hard constraints that bound valid implementation space.
+- Constraint documents that complement product, architecture, and environment guardrails.
+- The local document set used to supervise non-negotiable scope restrictions.
 
-Документы слоя ограничений содержат декларации допустимых и недопустимых свойств MVP и не вводят продуктовые смыслы, терминологию, архитектурные формы, интерфейсные решения или инженерные детали.
+Does NOT define:
 
-## Интерпретация и приоритет
+- Product meaning, domain vocabulary, or role definitions.
+- Architecture structure, runtime environment topology, or code-shaping rules.
+- Agent workflow procedures or implementation task instructions.
 
-Формулировки ограничений трактуются буквально и не предполагают расширительного толкования, а отсутствие явного разрешения считается запретом в рамках MVP.
+## Priority Rule
 
-Ограничения имеют приоритет над архитектурой, композицией, кодом и средой исполнения и не ослабляются на нижележащих уровнях.
+Constraint statements in this branch are literal and restrictive.
 
-## Итог
+Lower levels must not weaken them.
 
-`ctx/docs/constraints/AGENTS.md` фиксирует слой ограничений как источник обязательных рамок MVP и локальный фильтр допустимых свойств продукта.
+This branch remains subordinate to product meaning while taking priority over downstream realization choices.

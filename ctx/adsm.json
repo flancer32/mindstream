@@ -1,0 +1,7 @@
+{
+  "schema": "adsm-context",
+  "version": "0.1.0",
+  "notes": [
+    "Context migrated toward the canonical adsm-ctx template baseline on 2026-06-19."
+  ]
+}

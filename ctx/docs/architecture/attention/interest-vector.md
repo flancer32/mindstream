@@ -1,6 +1,8 @@
 # Модель внимания пользователя
 
-Path: `./ctx/docs/architecture/attention/interest-vector.md`
+- Path: `ctx/docs/architecture/attention/interest-vector.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

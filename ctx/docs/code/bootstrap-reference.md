@@ -1,10 +1,12 @@
 # Bootstrap Reference (Node.js)
 
-Path: `./ctx/docs/code/bootstrap-reference.md`
+- Path: `ctx/docs/code/bootstrap-reference.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 
-Документ фиксирует референсную кодовую форму bootstrap-запуска backend-приложения Mindstream для Node.js (ESM) и служит иллюстрацией нормативной архитектурной модели, зафиксированной в `ctx/docs/architecture/runtime/bootstrap.md`.
+Документ фиксирует референсную кодовую форму bootstrap-запуска backend-приложения Mindstream для Node.js (ESM) и служит иллюстрацией нормативной архитектурной и environment-модели запуска, зафиксированной в документах `ctx/docs/architecture/` и `ctx/docs/environment/`.
 
 ## Референсная реализация
 
@@ -32,4 +34,4 @@ await app.run({ projectRoot });
 
 ## Статус
 
-Документ является кодовой справкой и не определяет архитектурных инвариантов запуска. Источник инвариантов: `ctx/docs/architecture/runtime/bootstrap.md`.
+Документ является кодовой справкой и не определяет архитектурных инвариантов запуска. Источники инвариантов находятся в документах уровней `architecture/` и `environment/`.

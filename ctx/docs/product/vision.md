@@ -1,6 +1,8 @@
 # Mindstream — Product Vision
 
-Path: `ctx/docs/product/vision.md`
+- Path: `ctx/docs/product/vision.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

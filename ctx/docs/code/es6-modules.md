@@ -1,6 +1,8 @@
 # ES6 Module Form — @teqfw/di
 
-Path: `./ctx/docs/code/es6-modules.md`
+- Path: `ctx/docs/code/es6-modules.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

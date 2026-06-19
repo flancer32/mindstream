@@ -1,6 +1,8 @@
 # Attention Storage Data Model
 
-Path: `./ctx/docs/architecture/storage/attention-storage-model.md`
+- Path: `ctx/docs/architecture/storage/attention-storage-model.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

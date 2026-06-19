@@ -1,6 +1,8 @@
 # Mindstream — MVP Scope Constraints
 
-Path: `ctx/docs/constraints/mvp-scope.md`
+- Path: `ctx/docs/constraints/mvp-scope.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

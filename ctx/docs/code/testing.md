@@ -1,6 +1,8 @@
 # Code Testing — Invariants
 
-Path: `./ctx/docs/code/testing.md`
+- Path: `ctx/docs/code/testing.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 

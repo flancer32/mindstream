@@ -1,6 +1,8 @@
 # Runtime Environment — MVP
 
-Path: `./ctx/docs/environment/runtime.md`
+- Path: `ctx/docs/environment/runtime.md`
+- Template Version: `20260619`
+- Changed: `20260619`
 
 ## Назначение
 
