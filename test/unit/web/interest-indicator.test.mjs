@@ -81,22 +81,22 @@ test('resolveTopInterestRange prevents single click outlier from skewing the thr
   assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [35, 36]);
 });
 
-test('resolveTopInterestRangeManual marks items above absolute percentile threshold', async () => {
+test('resolveTopInterestRangeManual marks items above absolute score threshold', async () => {
   const indicator = await loadModule();
 
-  // percentile=80 → threshold = 0.1 + (0.9 - 0.1) * 0.8 = 0.74
+  // 80% means absolute threshold 0.8
   const result = indicator.resolveTopInterestRangeManual([
     { pubId: 41, score: 0.1 },
     { pubId: 42, score: 0.5 },
-    { pubId: 43, score: 0.74 },
+    { pubId: 43, score: 0.8 },
     { pubId: 44, score: 0.9 },
   ], 80);
 
-  assert.ok(Math.abs(result.threshold - 0.74) < 1e-12);
+  assert.ok(Math.abs(result.threshold - 0.8) < 1e-12);
   assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [43, 44]);
 });
 
-test('resolveTopInterestRangeManual with percentile=0 marks all entries', async () => {
+test('resolveTopInterestRangeManual with threshold=0 marks all entries', async () => {
   const indicator = await loadModule();
 
   const result = indicator.resolveTopInterestRangeManual([
@@ -105,11 +105,11 @@ test('resolveTopInterestRangeManual with percentile=0 marks all entries', async 
     { pubId: 53, score: 0.9 },
   ], 0);
 
-  assert.equal(result.threshold, 0.1);
+  assert.equal(result.threshold, 0);
   assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [51, 52, 53]);
 });
 
-test('resolveTopInterestRangeManual with percentile=100 marks only max', async () => {
+test('resolveTopInterestRangeManual with threshold=100 marks no entries below 100%', async () => {
   const indicator = await loadModule();
 
   const result = indicator.resolveTopInterestRangeManual([
@@ -118,11 +118,11 @@ test('resolveTopInterestRangeManual with percentile=100 marks only max', async (
     { pubId: 63, score: 0.9 },
   ], 100);
 
-  assert.equal(result.threshold, 0.9);
-  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [63]);
+  assert.equal(result.threshold, 1);
+  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), []);
 });
 
-test('resolveTopInterestRangeManual handles degenerate range', async () => {
+test('resolveTopInterestRangeManual keeps absolute threshold for degenerate range', async () => {
   const indicator = await loadModule();
 
   const result = indicator.resolveTopInterestRangeManual([
@@ -130,11 +130,11 @@ test('resolveTopInterestRangeManual handles degenerate range', async () => {
     { pubId: 72, score: 0.5 },
   ], 60);
 
-  assert.equal(result.threshold, 0.5);
-  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [71, 72]);
+  assert.equal(result.threshold, 0.6);
+  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), []);
 });
 
-test('resolveTopInterestRangeManual clamps percentile to 0..100', async () => {
+test('resolveTopInterestRangeManual clamps threshold to 0..100', async () => {
   const indicator = await loadModule();
 
   const over = indicator.resolveTopInterestRangeManual([
@@ -142,14 +142,26 @@ test('resolveTopInterestRangeManual clamps percentile to 0..100', async () => {
     { pubId: 82, score: 0.8 },
   ], 150);
 
-  assert.equal(over.threshold, 0.8);
-  assert.deepEqual(Array.from(over.topIds), [82]);
+  assert.equal(over.threshold, 1);
+  assert.deepEqual(Array.from(over.topIds), []);
 
   const under = indicator.resolveTopInterestRangeManual([
     { pubId: 83, score: 0.2 },
     { pubId: 84, score: 0.8 },
   ], -10);
 
-  assert.equal(under.threshold, 0.2);
+  assert.equal(under.threshold, 0);
   assert.deepEqual(Array.from(under.topIds).sort((a, b) => a - b), [83, 84]);
+});
+
+test('resolveTopInterestRangeManual correlates directly with visible indicator numbers', async () => {
+  const indicator = await loadModule();
+
+  const result = indicator.resolveTopInterestRangeManual([
+    { pubId: 91, score: 0.71 },
+    { pubId: 92, score: 0.73 },
+  ], 72);
+
+  assert.equal(result.threshold, 0.72);
+  assert.deepEqual(Array.from(result.topIds).sort((a, b) => a - b), [92]);
 });

@@ -113,31 +113,69 @@ if (feedRoot) {
   thresholdSlider.value = state.manualThreshold !== null ? String(state.manualThreshold) : '80';
   thresholdSlider.setAttribute('aria-label', 'Порог интереса');
 
+  const thresholdControls = document.createElement('div');
+  thresholdControls.className = 'identity-menu__threshold-controls';
+
+  const thresholdStepDown = document.createElement('button');
+  thresholdStepDown.className = 'identity-menu__threshold-step';
+  thresholdStepDown.type = 'button';
+  thresholdStepDown.textContent = '←';
+  thresholdStepDown.setAttribute('aria-label', 'Уменьшить порог интереса на 1%');
+
+  const thresholdStepUp = document.createElement('button');
+  thresholdStepUp.className = 'identity-menu__threshold-step';
+  thresholdStepUp.type = 'button';
+  thresholdStepUp.textContent = '→';
+  thresholdStepUp.setAttribute('aria-label', 'Увеличить порог интереса на 1%');
+
+  thresholdControls.append(thresholdStepDown, thresholdSlider, thresholdStepUp);
+
   const thresholdReset = document.createElement('button');
   thresholdReset.className = 'identity-menu__threshold-reset';
   thresholdReset.type = 'button';
   thresholdReset.textContent = 'Сбросить (авто)';
   thresholdReset.hidden = state.manualThreshold === null;
 
-  thresholdSlider.addEventListener('input', () => {
-    const value = Number(thresholdSlider.value);
-    state.manualThreshold = value;
-    thresholdValue.textContent = `${value}%`;
-    thresholdReset.hidden = false;
-    saveThreshold(value);
+  const syncThresholdControls = () => {
+    thresholdValue.textContent = state.manualThreshold !== null ? `${state.manualThreshold}%` : 'авто';
+    thresholdSlider.value = state.manualThreshold !== null ? String(state.manualThreshold) : '80';
+    thresholdReset.hidden = state.manualThreshold === null;
+
+    const value = state.manualThreshold ?? Number(thresholdSlider.value);
+    thresholdStepDown.disabled = thresholdSlider.disabled || value <= 0;
+    thresholdStepUp.disabled = thresholdSlider.disabled || value >= 100;
+  };
+
+  const applyManualThreshold = (value) => {
+    const nextValue = Math.min(100, Math.max(0, Math.round(value)));
+    state.manualThreshold = nextValue;
+    saveThreshold(nextValue);
+    syncThresholdControls();
     refreshAllScores();
+  };
+
+  thresholdSlider.addEventListener('input', () => {
+    applyManualThreshold(Number(thresholdSlider.value));
+  });
+
+  thresholdStepDown.addEventListener('click', () => {
+    applyManualThreshold((state.manualThreshold ?? Number(thresholdSlider.value)) - 1);
+  });
+
+  thresholdStepUp.addEventListener('click', () => {
+    applyManualThreshold((state.manualThreshold ?? Number(thresholdSlider.value)) + 1);
   });
 
   thresholdReset.addEventListener('click', () => {
     state.manualThreshold = null;
-    thresholdSlider.value = '80';
-    thresholdValue.textContent = 'авто';
-    thresholdReset.hidden = true;
     saveThreshold(null);
+    syncThresholdControls();
     refreshAllScores();
   });
 
-  thresholdSection.append(thresholdHeader, thresholdSlider, thresholdReset);
+  syncThresholdControls();
+
+  thresholdSection.append(thresholdHeader, thresholdControls, thresholdReset);
 
   identityPanel.append(identityAction, identityValue, thresholdDivider, thresholdSection);
   identityMenu.append(identityToggle, identityPanel);
@@ -278,10 +316,7 @@ if (feedRoot) {
       ? interestIndicator.resolveTopInterestRangeManual(allScores, state.manualThreshold)
       : interestIndicator.resolveTopInterestRange(allScores);
     const { topIds } = result;
-
-    const isDegenerate = Math.abs(result.max - result.min) < 1e-12;
-    thresholdSection.classList.toggle('identity-menu__threshold--disabled', isDegenerate);
-    thresholdSlider.disabled = isDegenerate;
+    syncThresholdControls();
 
     for (const [pubId, marker] of state.markers.entries()) {
       const isTopInterest = topIds.has(pubId);
@@ -465,6 +500,7 @@ if (feedRoot) {
       }
 
       appendItems(items, visibilityObserver);
+      refreshAllScores();
       state.cursor = payload.cursor || null;
       updateStatus('');
     } catch (err) {

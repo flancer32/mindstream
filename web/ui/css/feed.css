@@ -203,6 +203,39 @@ main#feed {
   cursor: pointer;
 }
 
+.identity-menu__threshold-controls {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.identity-menu__threshold-step {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--link);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease, opacity 160ms ease;
+}
+
+.identity-menu__threshold-step:hover,
+.identity-menu__threshold-step:focus {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(0, 0, 0, 0.04);
+  outline: none;
+}
+
+.identity-menu__threshold-step:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .identity-menu__threshold-reset {
   font-size: 0.8rem;
   color: var(--link);
@@ -219,6 +252,11 @@ main#feed {
 }
 
 .identity-menu__threshold--disabled .identity-menu__threshold-slider {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.identity-menu__threshold--disabled .identity-menu__threshold-step {
   opacity: 0.4;
   cursor: not-allowed;
 }
