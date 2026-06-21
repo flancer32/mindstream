@@ -4,34 +4,34 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **Content Collection flows** в MVP Mindstream.
+This document defines **Content Collection flows** in the Mindstream MVP.
 
-Под Content Collection flows понимаются серверные потоки данных, в результате которых формируется и поддерживается технический набор публикаций и их производных представлений, используемый всеми контекстами чтения.
+Content Collection flows are the server-side data flows by which the technical set of publications and their derived representations is formed and maintained for use by all reading contexts.
 
-Документ описывает только Content Collection flows и не затрагивает Attention flows или браузерные вычислительные петли.
-
----
-
-## Архитектурная позиция
-
-Content Collection flows исполняются исключительно в серверной части системы и формируют каноническое состояние Content Collection.
-
-Эти потоки:
-
-- не зависят от anonymous identity;
-- не зависят от attention-сигналов;
-- не имеют обратных связей с браузерными контурами;
-- не моделируют «реальность», а фиксируют технический набор публикаций.
-
-Публикация рассматривается как атомарный артефакт Content Collection.
+This document describes only Content Collection flows and does not cover Attention flows or browser-side computational loops.
 
 ---
 
-## Общая структура Content Collection flows
+## Architectural Position
 
-В рамках MVP Content Collection flows образуют последовательность:
+Content Collection flows run exclusively on the server side and form the canonical Content Collection state.
+
+These flows:
+
+- do not depend on anonymous identity;
+- do not depend on attention signals;
+- have no feedback loops with browser contours;
+- do not model “reality,” but record a technical set of publications.
+
+A publication is treated as the atomic artifact of the Content Collection.
+
+---
+
+## General Structure Of Content Collection Flows
+
+Within the MVP, Content Collection flows form this sequence:
 
 `ingestion → content processing → storage`
 
@@ -41,13 +41,13 @@ Content Collection flows исполняются исключительно в с
 
 (`Publication Sources → Ingestion`)
 
-**Назначение** — получение публикаций из внешних источников и формирование внутреннего текстового представления, пригодного для дальнейшей обработки.
+**Purpose**: obtain publications from external sources and form an internal text representation suitable for further processing.
 
-**Инварианты**
+**Invariants**
 
-- поток инициируется исключительно серверным контуром;
-- публикация либо принимается целиком, либо исключается из Content Collection;
-- результат потока не зависит от браузерного контекста.
+- the flow is initiated only by a server contour;
+- a publication is either accepted as a whole or excluded from the Content Collection;
+- the flow result does not depend on the browser context.
 
 ---
 
@@ -55,13 +55,13 @@ Content Collection flows исполняются исключительно в с
 
 (`Ingestion → Content Processing`)
 
-**Назначение** — формирование производных представлений публикации, необходимых для read-представлений и дальнейшего использования.
+**Purpose**: create the derived publication representations required for read models and further use.
 
-**Инварианты**
+**Invariants**
 
-- производные представления формируются как алгоритмические проекции подготовленного текста публикации;
-- процесс не зависит от attention-сигналов;
-- повторная обработка одной и той же публикации не допускается в рамках MVP.
+- derived representations are formed as algorithmic projections of the prepared publication text;
+- the process does not depend on attention signals;
+- reprocessing the same publication is not allowed in the MVP.
 
 ---
 
@@ -69,28 +69,28 @@ Content Collection flows исполняются исключительно в с
 
 (`Content Processing → Storage`)
 
-**Назначение** — сохранение результатов Content Collection flows в каноническом storage.
+**Purpose**: store the results of Content Collection flows in canonical storage.
 
-**Сохраняемые данные**
+**Stored Data**
 
-- публикации и их внутренние представления;
-- производные представления (annotation, overview);
-- embeddings, полученные из производных представлений.
+- publications and their internal representations;
+- derived representations such as annotation and overview;
+- embeddings derived from those representations.
 
-**Инварианты**
+**Invariants**
 
-- состояние storage является каноническим по отношению ко всем контекстам;
-- сохранённые данные не изменяются реактивно в ответ на внимание;
-- обновление Content Collection допускается только как результат серверных потоков формирования.
-
----
-
-## Ограничения
-
-Content Collection flows не содержат read-/write API, не задают форматы передачи данных и не определяют реализационные механизмы выполнения потоков.
+- storage state is canonical with respect to all contexts;
+- stored data is not reactively changed in response to attention;
+- updates to the Content Collection are allowed only as the result of server-side formation flows.
 
 ---
 
-## Итог
+## Constraints
 
-Документ фиксирует Content Collection flows Mindstream как замкнутую серверную последовательность `ingestion → content processing → storage`, формирующую канонический технический набор публикаций без участия anonymous identity, без зависимости от attention и без глобальной реактивности в рамках MVP.
+Content Collection flows do not define read/write APIs, transport formats, or implementation mechanisms for executing the flows.
+
+---
+
+## Summary
+
+This document defines Mindstream Content Collection flows as a closed server-side sequence `ingestion → content processing → storage` that forms the canonical technical set of publications without participation of anonymous identity, without dependence on attention, and without global reactivity in the MVP.

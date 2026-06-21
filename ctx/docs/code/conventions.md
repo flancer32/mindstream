@@ -2,137 +2,110 @@
 
 - Path: `ctx/docs/code/conventions.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **инженерные конвенции кода MVP Mindstream**.  
-Он определяет допустимые языки, формы организации кода, модели исполнения и инженерные инварианты, обязательные для всей кодовой базы MVP.
+This document defines the **engineering code conventions of the Mindstream MVP**.
 
-Документ не описывает архитектуру системы, продуктовые свойства и пользовательский интерфейс.
+It specifies allowed languages, code-organization forms, execution models, and engineering invariants mandatory for the whole MVP codebase.
 
----
+This document does not describe system architecture, product properties, or the user interface.
 
-## Язык и диалект
+## Language And Dialect
 
-- Основной язык кода — **JavaScript**.
-- Серверный и клиентский код пишутся на JavaScript.
-- Иные форматы допускаются только в статусе:
-  - декларативной конфигурации;
-  - инфраструктурных скриптов.
-- Исполняемым кодом продукта считается только JavaScript.
-- Собственный код проекта использует философию **Tequila Framework**:
-  - внедрение зависимостей через конструктор;
-  - использование `@teqfw/di` как DI-контейнера.
-- Статические импорты допускаются только в composition root.
-- В остальном коде зависимости разрешаются через DI и динамический импорт контейнера.
-- CommonJS допускается только внутри сторонних зависимостей.
+- The primary code language is **JavaScript**.
+- Server and client code are written in JavaScript.
+- Other formats are allowed only for declarative configuration and infrastructure scripts.
+- Only JavaScript counts as executable product code.
+- Project-owned code follows **Tequila Framework** principles:
+- dependency injection through the constructor;
+- use of `@teqfw/di` as the DI container.
+- Static imports are allowed only in the composition root.
+- In all other code, dependencies are resolved through DI and container-driven dynamic import.
+- CommonJS is allowed only inside third-party dependencies.
 
----
+## Code Execution Environment
 
-## Среда исполнения кода
+- Code may be **shared** and used both on the server and in the browser.
+- Code intended only for Node.js or only for the browser is allowed.
+- Separation between server and client does not affect the dependency-injection model.
+- Conditional runtime logic and feature detection are allowed.
 
-- Код может быть **shared** и использоваться как на сервере, так и в браузере.
-- Допускается код, предназначенный исключительно для Node.js или исключительно для браузера.
-- Разделение ролей server / client не влияет на модель внедрения зависимостей.
-- Условная логика по runtime и feature detection **допускается**.
+## Environment Configuration
 
----
+- Environment configuration is read from `process.env`.
+- `.env` support is implemented **natively** through platform means such as `fs`, without third-party libraries.
+- `.env` loading is performed explicitly in the **composition root**, either the application entry point or CLI.
+- Values from `.env` must not overwrite already defined environment variables.
+- Packages such as `dotenv`, `env`, and similar are **not allowed by default** and require explicit human approval.
+- `process.env` is treated as an allowed form of platform-provided global state.
 
-## Конфигурация окружения
+## Dependencies And Imports
 
-- Конфигурация окружения читается из переменных среды (`process.env`).
-- Поддержка файлов `.env` реализуется **нативно**, средствами платформы (например, через `fs`), без использования сторонних библиотек.
-- Загрузка `.env` выполняется явно в **composition root** (точке входа приложения или CLI).
-- Значения из `.env` не должны перезаписывать уже заданные переменные окружения.
-- Использование пакетов типа `dotenv`, `env` и аналогичных **не допускается по умолчанию** и требует явного согласования с человеком.
-- `process.env` рассматривается как допустимая форма глобального состояния, предоставляемого платформой.
+- Third-party libraries may be used only with explicit human approval.
+- Native platform capabilities are preferred.
+- The following are prohibited:
+- large frameworks;
+- code generation;
+- decorators.
+- `@teqfw/di` is the only allowed DI container.
+- Direct use of platform APIs such as DOM, Fetch, `fs`, and `process` is allowed without abstraction layers.
+- Adding dependencies that duplicate standard platform capabilities is undesirable and requires justification.
 
----
+## Asynchrony And Execution Control
 
-## Зависимости и импорт
+- Asynchrony is the base execution mode through `async/await`.
+- The following are allowed:
+- callbacks, including public contracts;
+- event emitters;
+- reactive abstractions such as streams and observables.
+- Background execution such as timers and workers is allowed.
 
-- Использование сторонних библиотек допускается только при явном согласовании с человеком.
-- Предпочтение отдаётся нативным возможностям платформы.
-- Запрещены:
-  - крупные фреймворки;
-  - кодогенерация;
-  - декораторы.
-- В качестве DI-контейнера используется только `@teqfw/di`.
-- Прямая работа с API платформы (DOM, Fetch, fs, process и т.п.) допускается без абстракций.
-- Добавление зависимостей, дублирующих стандартные возможности платформы, считается нежелательным и требует обоснования.
+## State And Mutability
 
----
+- Mutable state is allowed but undesirable.
+- Functional style has priority.
+- The code should adhere as much as possible to:
+- data immutability;
+- one-way state changes.
+- Global state is allowed only in platform-provided forms such as `process` and `window`.
+- User-defined global state should be avoided.
 
-## Асинхронность и управление выполнением
+## Errors And Failures
 
-- Асинхронность является базовым режимом исполнения (`async/await`).
-- Допускаются:
-  - callbacks, включая публичные контракты;
-  - event emitters;
-  - реактивные абстракции (streams, observables).
-- Допускается фоновое выполнение (timers, workers).
+- Errors are treated as **observable facts**.
+- Errors must be logged.
+- After recording an error, code must not crash the application.
+- Error suppression is allowed only after logging.
 
----
+## Code Format And Structure
 
-## Состояние и мутабельность
+- Module and class names follow Tequila Framework rules.
+- The project root namespace is declared explicitly.
+- No rigid module-length limit is fixed, but keeping modules within roughly three screens is recommended.
+- “Quick code” without structure is not allowed, including in the MVP.
+- Code duplication is allowed as a temporary measure.
+- The project maintains `types.d.ts` for public class declarations of the codebase.
+- Whenever a new class is added, the matching class declaration and source-file reference **must** be added to `types.d.ts`.
+- Absence of a new class declaration in `types.d.ts` is an engineering violation of the code layer.
 
-- Мутабельное состояние допускается, но считается нежелательным.
-- Приоритет отдаётся функциональному стилю.
-- Следует максимально придерживаться:
-  - иммутабельности данных;
-  - однонаправленного изменения состояния.
-- Глобальное состояние допускается только в форме,
-  предоставляемой платформой (`process`, `window`).
-- Пользовательское глобальное состояние должно избегаться.
+## Testing
 
----
+- **Unit tests** are sufficient for the MVP.
+- Integration tests are not used in the MVP.
+- Absence of tests is allowed only for application entry points and stable interfaces unlikely to change.
 
-## Ошибки и сбои
+## Prohibited
 
-- Ошибки трактуются как **факты наблюдения**.
-- Ошибки подлежат обязательному логированию.
-- После фиксации ошибки код не должен приводить к падению приложения.
-- Подавление ошибок допускается после логирования.
+- **TypeScript** is prohibited.
+- `eval` is prohibited.
+- Dynamic imports are allowed only through the DI container.
+- Reflection-like techniques are prohibited.
 
----
+## Role Of Conventions
 
-## Формат и структура кода
-
-- Имена модулей и классов соответствуют правилам Tequila Framework.
-- Корневой namespace проекта указывается явно.
-- Жёсткие ограничения на длину модулей не заданы;
-  рекомендуется удерживаться в пределах до трёх экранов.
-- «Быстрый код» без структуры **не допускается**, включая MVP.
-- Дублирование кода допускается как временная мера.
-- В проекте поддерживается файл деклараций `types.d.ts`, используемый для описания публичных классов кодовой базы.
-- При добавлении нового класса в проект соответствующая декларация класса и указание файла-источника **обязаны** быть добавлены в `types.d.ts`.
-- Отсутствие декларации нового класса в `types.d.ts` считается нарушением инженерной нормы кодового слоя.
-
----
-
-## Тестирование
-
-- Для MVP достаточно **unit-тестов**.
-- Интеграционные тесты в MVP не используются.
-- Отсутствие тестов допускается только для:
-  - точек входа приложения;
-  - стабильных интерфейсов, не подверженных изменениям.
-
----
-
-## Запрещённое
-
-- **TypeScript** запрещён.
-- `eval` запрещён.
-- Динамические импорты допускаются только через DI-контейнер (`@teqfw/di`).
-- Reflection-подобные техники запрещены.
-
----
-
-## Роль конвенций
-
-- Конвенции задают минимальные инженерные рамки.
-- Отклонения от конвенций допускаются.
-- Нарушение конвенций считается **техническим долгом**.
-- Технический долг подлежит фиксации в отчёте агента по итерации.
+- Conventions define the minimal engineering frame.
+- Deviations from conventions are allowed.
+- Violations of conventions are treated as **technical debt**.
+- Technical debt must be recorded in the agent iteration report.

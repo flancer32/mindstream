@@ -4,76 +4,76 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует архитектурную форму MVP Mindstream: оси архитектуры, контуры, границу системы и внешней среды, а также базовые инварианты потоков без перехода к реализации, API, SQL или пользовательскому интерфейсу.
+This document defines the architectural form of the Mindstream MVP: its architectural axes, contours, the boundary between the system and the external environment, and the base flow invariants, without moving into implementation, API, SQL, or user interface details.
 
-Архитектура выводится из продуктового смысла и ограничений MVP и не вводит новых продуктовых сущностей.
-
----
-
-## Архитектурные оси
-
-- **Content Collection** — технический набор публикаций и их производных представлений, общий для всех контекстов чтения.
-- **Attention** — статистические сигналы наблюдения в браузерном контексте, фиксируемые как write-факты.
-- **Anonymous Identity** — архитектурная write-path проекция UUID профиля как технического идентификатора источника сигналов внимания; не субъект и не самостоятельная продуктовая модель пользователя.
+The architecture is derived from product meaning and MVP constraints and does not introduce new product entities.
 
 ---
 
-## Архитектурные контуры
+## Architectural Axes
 
-- **ingress** — внешние границы принятия read/write запросов.
-- **data flow** — допустимые потоки данных между контурами.
-- **storage** — каноническое хранение Content Collection и storage статистики внимания.
-- **runtime** — границы исполнения серверных контуров без спецификации реализации.
-
----
-
-## Граница системы и внешняя среда
-
-К системе Mindstream относятся серверные контуры Content Collection и storage сигналов внимания, а также браузерный контур фиксации attention-сигналов.
-
-К внешней среде относятся источники публикаций, LLM/Embedding сервисы, сеть и инфраструктура исполнения.
-
-### Ingress-границы
-
-Взаимодействие внешней среды с системой осуществляется через архитектурные ingress-границы:
-
-- `ingress/http-ingress.md` — HTTP boundary для read/write запросов.
-- `ingress/attention-write-ingress.md` — write-only boundary для сигналов внимания.
+- **Content Collection** — the technical set of publications and their derived representations shared by all reading contexts.
+- **Attention** — statistical observation signals captured in the browser context as write facts.
+- **Anonymous Identity** — the architectural write-path projection of a profile UUID as a technical identifier for the source of attention signals; not a subject and not an independent product user model.
 
 ---
 
-## Архитектурная схема
+## Architectural Contours
+
+- **ingress** — the external boundaries that accept read/write requests.
+- **data flow** — the permitted data flows between contours.
+- **storage** — the canonical storage of the Content Collection and attention statistics.
+- **runtime** — the execution boundary of server contours without implementation specifics.
+
+---
+
+## System Boundary And External Environment
+
+The Mindstream system includes the server-side Content Collection contours, the attention-signal storage contour, and the browser-side contour that captures attention signals.
+
+The external environment includes publication sources, LLM and embedding services, the network, and execution infrastructure.
+
+### Ingress Boundaries
+
+Interaction between the external environment and the system happens through architectural ingress boundaries:
+
+- `ingress/http-ingress.md` — the HTTP boundary for read/write requests.
+- `ingress/attention-write-ingress.md` — the write-only boundary for attention signals.
+
+---
+
+## Architectural Diagram
 
 ![Mindstream architecture contours](../_img/mindstream_arch_conturs.svg)
 
-Схема носит пояснительный характер и не фиксирует реализационные или технологические решения.
+The diagram is explanatory and does not define implementation or technology choices.
 
 ---
 
-## Потоки данных и направленность
+## Data Flows And Directionality
 
-- **Content Collection flows** исполняются только в серверных контурах и образуют последовательность `ingestion → content processing → storage`.
-- **Attention flows** направлены из браузерного контура в storage и являются write-only потоками.
-- Передача attention-сигналов допускается только при наличии зарегистрированной anonymous identity.
-
----
-
-## Архитектурные инварианты MVP
-
-- Content Collection является каноническим состоянием и не зависит от attention-сигналов.
-- Attention-сигналы не инициируют пересчёт Content Collection и не создают глобальных обратных связей.
-- Anonymous identity фиксирует источник внимания как техническую сущность и не используется для персонализации на уровне архитектуры.
+- **Content Collection flows** run only inside server contours and form the sequence `ingestion → content processing → storage`.
+- **Attention flows** move from the browser contour into storage and are write-only.
+- Attention signals may be transmitted only when a registered anonymous identity exists.
 
 ---
 
-## Границы документа
+## MVP Architectural Invariants
 
-Данный overview не описывает источники публикаций, алгоритмы обработки, форматы хранения и передачи данных, API-контракты, UI/UX и инженерные решения runtime.
+- The Content Collection is canonical state and does not depend on attention signals.
+- Attention signals do not trigger recalculation of the Content Collection and do not create global feedback loops.
+- Anonymous identity records the source of attention as a technical entity and is not used for personalization at the architectural level.
 
 ---
 
-## Итог
+## Document Boundary
 
-Архитектура MVP Mindstream определяется тремя осями (Content Collection, Attention, Anonymous Identity), чёткими ingress-границами и однонаправленными потоками данных, где storage фиксирует каноническое состояние Content Collection и статистику внимания без реактивных обратных связей.
+This overview does not describe publication sources, processing algorithms, storage and transport formats, API contracts, UI/UX, or runtime engineering decisions.
+
+---
+
+## Summary
+
+The Mindstream MVP architecture is defined by three axes (Content Collection, Attention, Anonymous Identity), explicit ingress boundaries, and one-way data flows in which storage records the canonical Content Collection state and attention statistics without reactive feedback loops.

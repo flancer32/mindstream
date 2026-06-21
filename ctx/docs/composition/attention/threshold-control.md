@@ -1,58 +1,58 @@
-# Ручной порог маркировки индикатора интереса
+# Manual Threshold For Interest-Indicator Highlighting
 
 - Path: `ctx/docs/composition/attention/threshold-control.md`
 - Template Version: `20260619`
 - Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует прикладную форму ручного управления порогом цветовой маркировки индикатора интереса.
+This document defines the applied form of manual control over the color-highlighting threshold of the interest indicator.
 
-Пользователь может через ползунок в панели настроек (меню-гамбургер в правом верхнем углу) задать пороговое значение индикатора интереса.
+The user can set the threshold value through a slider in the settings panel (hamburger menu in the top-right corner).
 
-Это значение интерпретируется прямо: публикации с таким же или более высоким значением индикатора маркируются ярким цветом.
+The value is interpreted directly: publications with the same or higher interest-indicator value are highlighted with a bright color.
 
-Для точной подстройки рядом с ползунком доступны стрелки уменьшения и увеличения порога на `1%` за одно действие.
+For fine adjustment, decrease and increase arrows are available next to the slider and change the threshold by `1%` per action.
 
-## Мотивация
+## Motivation
 
-Автоматический алгоритм вычисляет порог на основе относительного разброса оценок в загруженном наборе. Пользователь может захотеть вручную управлять чувствительностью маркировки:
+The automatic algorithm computes the threshold from the relative spread of scores in the loaded set. A user may want to control highlighting sensitivity manually:
 
-- снизить порог, чтобы видеть больше потенциально релевантных публикаций;
-- повысить порог, чтобы маркировались только самые высокие оценки.
+- lower the threshold to see more potentially relevant publications;
+- raise the threshold so that only the highest-scored publications are highlighted.
 
-## Правило ручного порога
+## Manual-Threshold Rule
 
-Когда пользователь задал ручной порог `p%` (целое число от 0 до 100), публикация маркируется, если её видимое значение индикатора интереса `>= p%`.
+When the user sets a manual threshold `p%`, where `p` is an integer from `0` to `100`, a publication is highlighted if its visible interest-indicator value is `>= p%`.
 
-Внутреннее правило полностью совпадает с видимыми числами индикатора:
+The internal rule exactly matches the visible indicator numbers:
 
 `markThreshold = p / 100`
 
-Ручной порог **полностью замещает** автоматический алгоритм, описанный в `interest-indicator-coloring.md`.
+The manual threshold **fully replaces** the automatic algorithm described in `interest-indicator-coloring.md`.
 
-Ползунок и стрелки изменяют одно и то же пороговое значение `p%`.
+The slider and arrows modify the same threshold value `p%`.
 
-Стрелки:
+The arrows:
 
-- уменьшают или увеличивают порог ровно на `1%`;
-- не выводят значение за пределы `0..100`;
-- сохраняют результат так же, как и изменение через ползунок.
+- decrease or increase the threshold by exactly `1%`;
+- do not allow the value to leave the `0..100` range;
+- persist the result the same way as slider-based changes.
 
-## Возврат к автоматическому режиму
+## Return To Automatic Mode
 
-Пользователь может сбросить ручной порог, после чего маркировка снова вычисляется автоматическим алгоритмом.
+The user may reset the manual threshold, after which highlighting is computed by the automatic algorithm again.
 
-## Поведение при однородном наборе
+## Behavior For A Uniform Set
 
-Если в загруженном наборе несколько публикаций имеют одинаковое значение индикатора, ручной порог всё равно сравнивается с их фактическим значением.
+If several publications in the loaded set share the same indicator value, the manual threshold is still compared against their actual value.
 
-Контрол ручного порога при этом остаётся активным, так как пользователь задаёт прямой числовой порог индикатора, а не относительное положение внутри текущего набора.
+The manual-threshold control remains active because the user sets a direct numeric threshold for the indicator, not a relative position inside the current set.
 
-## Границы документа
+## Document Boundary
 
-Документ:
+This document:
 
-- относится только к браузерной композиции UI;
-- не требует участия бэкенда;
-- не фиксирует CSS, DOM-структуру, имена компонентов или технологию реализации.
+- applies only to browser-side UI composition;
+- requires no backend participation;
+- does not define CSS, DOM structure, component names, or implementation technology.

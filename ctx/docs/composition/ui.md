@@ -2,87 +2,87 @@
 
 - Path: `ctx/docs/composition/ui.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует визуально-прикладную форму MVP Mindstream: какие прикладные сущности представлены пользователю и в каких устойчивых формах осуществляется чтение публикаций, углубление в смысл и переход к оригинальному источнику, без описания механики, алгоритмов, архитектурных потоков и UX-реализации.
+This document defines the visual applied form of the Mindstream MVP: which applied entities are presented to the user and in which stable forms publication reading, semantic deepening, and transition to the original source occur, without describing mechanics, algorithms, architectural flows, or UX implementation.
 
-## Единая поверхность взаимодействия
+## Single Interaction Surface
 
-В рамках MVP Mindstream существует ровно одна визуально-прикладная поверхность.
+The Mindstream MVP has exactly one visual interaction surface.
 
-Отдельные экраны для инициализации профиля, смены режима доступа, справки или объяснений отсутствуют, а все формы взаимодействия реализуются в рамках единой поверхности чтения и ориентации.
+There are no separate screens for profile initialization, access-mode switching, help, or explanations. All interaction forms exist within one unified reading and orientation surface.
 
-## Лента как базовая форма
+## Feed As The Base Form
 
-Лента является основной визуальной формой продукта и представляет собой список публикаций.
+The feed is the primary visual form of the product and is presented as a list of publications.
 
-Каждая публикация в ленте представлена названием, мета-информацией и визуальными признаками пользовательского внимания, включая положительную отметку публикации.
+Each publication is shown in the feed with a title, meta information, and visual signs of user attention, including a positive publication mark.
 
-Лента не содержит элементов управления, фильтрации или сортировки.
+The feed has no controls for filtering or sorting.
 
-Исключение составляет ручной числовой порог маркировки индикатора интереса, доступный в панели настроек (меню-гамбургер). Правило работы контрола описано в `ctx/docs/composition/attention/threshold-control.md`.
+The only exception is the manual numeric threshold for interest-indicator highlighting available in the settings panel. Its rule is defined in `ctx/docs/composition/attention/threshold-control.md`.
 
-## Формы присутствия публикации
+## Forms Of Publication Presence
 
-Каждая публикация в MVP последовательно присутствует в следующих визуально-прикладных формах:
+Each publication appears in the MVP in these sequential visual forms:
 
-1. название и мета-информация — базовая форма присутствия публикации в ленте;
-2. аннотация (Annotation) — обязательная форма первичного смыслового ознакомления, доступная при фокусе на публикации в ленте;
-3. обзор (Overview) — обязательная форма углублённого ознакомления, открываемая из аннотации;
-4. переход к оригиналу — прикладная форма выхода к внешней публикации.
+1. title and meta information as the base form of feed presence;
+2. annotation as the mandatory first form of semantic orientation;
+3. overview as the mandatory deeper form opened from the annotation;
+4. transition to the original as the applied exit to the external publication.
 
-Отсутствие любой из указанных форм в MVP не допускается.
+Absence of any of these forms is not allowed in the MVP.
 
-## Аннотация и обзор
+## Annotation And Overview
 
-Аннотация и обзор представлены как читаемые смысловые проекции публикации и не раскрывают структуру или детали оригинального текста.
+Annotation and overview are presented as readable semantic projections of the publication and do not expose the structure or details of the original text.
 
-Аннотация используется для первичного ориентирования, обзор — для принятия решения о переходе к оригинальной публикации.
+The annotation is used for initial orientation. The overview is used for deciding whether to open the original publication.
 
-## Переход к оригинальной публикации
+## Transition To The Original Publication
 
-Переход к оригинальной публикации является полноценной прикладной сущностью UI.
+Opening the original publication is a full applied UI entity.
 
-Факт перехода учитывается как форма пользовательского внимания и имеет визуальное представление в интерфейсе.
+The fact of transition is counted as a form of user attention and has visual representation in the interface.
 
-## Визуализация внимания пользователя
+## Visualization Of User Attention
 
-UI визуально отражает какие публикации привлекли внимание пользователя и формы этого внимания, включая чтение аннотации, чтение обзора, переход к оригиналу и положительную отметку публикации.
+The UI visually reflects which publications attracted user attention and which forms that attention took, including reading the annotation, reading the overview, opening the original, and marking the publication positively.
 
-Визуализация внимания относится исключительно к текущему пользователю и не раскрывает коллективную статистику.
+Attention visualization applies only to the current user and does not reveal collective statistics.
 
-Вертикальный визуальный элемент с процентным значением, показывающий степень соответствия публикации интересам пользователя, в документации проекта называется **индикатор интереса**.
+The vertical visual element with a percentage value that shows how closely a publication matches user interests is called the **interest indicator** in project documentation.
 
-Индикатор интереса относится к визуализации результатов локальной оценки публикации и не является самостоятельной формой внимания пользователя.
+The interest indicator visualizes results of local publication scoring and is not an independent form of user attention.
 
-Для индикатора интереса допускается относительная цветовая интерпретация внутри текущей страницы ленты, где зелёным цветом выделяется верхний локальный диапазон публикаций с наибольшим соответствием интересам пользователя.
+Relative color interpretation of the interest indicator is allowed within the current feed page, where green highlights the upper local range of publications with the strongest match to user interests.
 
-Правило вычисления этого диапазона фиксируется отдельно в `ctx/docs/composition/attention/interest-indicator-coloring.md`.
+The rule for computing that range is defined in `ctx/docs/composition/attention/interest-indicator-coloring.md`.
 
-## Режим доступа
+## Access Mode
 
-UI явно сигнализирует, в каком режиме доступа находится пользователь (демо-режим или полный доступ).
+The UI explicitly signals which access mode the user is currently in: demo mode or full access.
 
-Сигнал режима доступа является свойством визуальной поверхности, а не самостоятельной прикладной сущностью.
+This signal is a property of the visual surface, not an independent applied entity.
 
-Структура и форма ленты остаются одинаковыми, различия режимов проявляются только через доступный корпус данных и источники профиля интересов, а UI не предоставляет средств управления режимами доступа и не объясняет их различия.
+The structure and form of the feed remain the same. Mode differences appear only through the available corpus and the sources of the interest profile. The UI provides no controls for changing access modes and does not explain the differences between them.
 
-## Пустоты и допустимые формы
+## Empty And Allowed Forms
 
-В рамках MVP считаются нормальными визуальными формами пустая лента и крайне малая лента.
+An empty feed and a very small feed are normal visual forms in the MVP.
 
-Повторяющиеся публикации в ленте не допускаются и не рассматриваются как допустимая форма представления.
+Repeated publications in the feed are not allowed and are not treated as a valid form of presentation.
 
-## Отсутствия как инварианты
+## Absent Forms As Invariants
 
-Отсутствуют визуально-прикладные формы, запрещённые в `constraints/mvp-scope.md`, включая настройки персонализации, фильтры и сортировки, объяснения причин формирования ленты, отрицательные оценки, социальные элементы и сообщения об ошибках как отдельный класс UI-сущностей.
+Visual applied forms prohibited by `constraints/mvp-scope.md` are absent, including personalization settings, filters and sorting controls, feed explanations, negative ratings, social elements, and error messages as a separate class of UI entities.
 
-## Границы документа
+## Document Boundary
 
-Документ не описывает алгоритмы формирования ленты и профиля интересов, события, триггеры и переходы, архитектурные контуры и потоки данных, конкретные UI-компоненты, жесты и элементы управления и технологию реализации интерфейса.
+This document does not describe feed-formation or interest-profile algorithms, events, triggers, or transitions, architectural contours or data flows, concrete UI components, gestures or controls, or interface implementation technology.
 
-## Итог
+## Summary
 
-`composition/ui.md` фиксирует MVP Mindstream как единую поверхность чтения, в которой публикации последовательно представлены через название, аннотацию, обзор и переход к оригиналу, с явной визуализацией пользовательского внимания и режима доступа, без управляющих механизмов, объяснимости и реактивного поведения.
+`composition/ui.md` defines the Mindstream MVP as a single reading surface in which publications are presented through title, annotation, overview, and transition to the original, with explicit visualization of user attention and access mode, and without control mechanisms, explainability, or reactive behavior.

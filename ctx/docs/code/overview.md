@@ -4,148 +4,148 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ описывает **смысл, роль и устойчивую форму кодового слоя** в корпусе документации Mindstream.
+This document describes the **meaning, role, and stable form of the code layer** within the Mindstream documentation corpus.
 
-Он предназначен для фиксации того, **что считается кодовым слоем как объектом системы**, независимо от текущей итерации разработки, набора задач или состава агентов.
+Its purpose is to define **what counts as the code layer as a system object**, regardless of the current development iteration, task set, or agent composition.
 
-Документ не задаёт процедур и не описывает поведение агентов. Он фиксирует **инварианты формы кода**, внутри которых возможна итеративная реализация.
-
----
-
-## Роль кодового слоя в корпусе
-
-Кодовый слой является **производным** по отношению к другим уровням корпуса:
-
-- продукту и его целевой картине;
-- ограничениям MVP;
-- архитектурной форме;
-- композиции пользовательского опыта;
-- среде исполнения.
-
-Код **не формирует смысл системы** и не расширяет её рамки. Он служит исполняемым выражением уже зафиксированных решений.
+The document does not define procedures or agent behavior. It defines **code-form invariants** within which iterative implementation may happen.
 
 ---
 
-## Код как форма, а не источник истины
+## Role Of The Code Layer In The Corpus
 
-В рамках Mindstream код:
+The code layer is **derivative** relative to the other corpus levels:
 
-- не является источником требований;
-- не используется для фиксации архитектурных или продуктовых решений;
-- не подменяет документацию контекста.
+- the product and its target shape;
+- MVP constraints;
+- architectural form;
+- user-experience composition;
+- runtime environment.
 
-Любые смысловые допущения, зашитые в код, считаются ошибкой проектирования, если они не отражены на соответствующем уровне корпуса.
-
----
-
-## Код как исполняемое приложение
-
-В рамках MVP Mindstream кодовая база рассматривается как **исполняемое Node.js-приложение**, а не как библиотека.
-
-Это означает, что:
-
-- код обладает собственным жизненным циклом выполнения;
-- существует явная точка входа исполнения;
-- сервер и служебные задачи запускаются как приложение;
-- код не предназначен для встраивания в сторонние проекты.
-
-Данная позиция является **устойчивым свойством кодового слоя** и не зависит от конкретной итерации.
+Code **does not define system meaning** and does not expand system boundaries. It serves as the executable expression of decisions already fixed elsewhere.
 
 ---
 
-## Структурная форма кодовой базы
+## Code As Form, Not Source Of Truth
 
-Кодовый слой имеет **нормативную структурную форму**, отражающую разделение ролей, а не текущую реализацию.
+In Mindstream, code:
 
-Структура рассматривается как **инвариант формы**, необходимый для устойчивой агентной работы.
+- is not a source of requirements;
+- is not used to fix architectural or product decisions;
+- does not replace context documentation.
 
-### Ролевые зоны кода
-
-В кодовой базе различаются следующие устойчивые зоны:
-
-- **зона входа выполнения** — код, инициирующий запуск приложения и задач;
-- **серверная прикладная зона** — реализация API и серверной логики;
-- **клиентская зона** — статические фронтенд-артефакты, поставляемые как PWA;
-- **зона тестирования** — код проверки корректности серверной и клиентской частей.
-
-Зоны отражают **различные роли кода** и не смешиваются между собой.
+Any meaning-bearing assumptions embedded in code are treated as a design error if they are not reflected at the proper corpus level.
 
 ---
 
-## Принцип разделения ролей
+## Code As An Executable Application
 
-В рамках кодового слоя считается недопустимым:
+In the Mindstream MVP, the codebase is treated as an **executable Node.js application**, not as a library.
 
-- смешение логики запуска и прикладной логики;
-- размещение клиентской статики в серверных модулях;
-- использование серверного кода для обслуживания статики;
-- появление альтернативных точек входа, не согласованных с формой проекта.
+This means that:
 
-Структурная форма служит опорой для итеративного развития, а не временным соглашением конкретной задачи.
+- the code has its own execution lifecycle;
+- there is an explicit execution entry point;
+- the server and maintenance tasks run as an application;
+- the code is not intended for embedding into third-party projects.
+
+This position is a **stable property of the code layer** and does not depend on a specific iteration.
 
 ---
 
-## Внешние вычислительные сервисы
+## Structural Form Of The Codebase
 
-В кодовом слое допускается использование внешних вычислительных сервисов как **инфраструктурных зависимостей**, при соблюдении следующих инвариантов:
+The code layer has a **normative structural form** that reflects role separation rather than the current implementation.
 
-- внешний сервис не формирует продуктовые или архитектурные смыслы системы;
-- взаимодействие с сервисом не влияет на архитектурные контуры и потоки данных;
-- сервис используется как технический ресурс, а не как доменная подсистема.
+The structure is treated as a **form invariant** required for stable agent work.
+
+### Role Zones Of The Code
+
+The following stable zones exist in the codebase:
+
+- **execution entry zone** — code that initiates application and task startup;
+- **server application zone** — implementation of API and server logic;
+- **client zone** — static frontend artifacts delivered as a PWA;
+- **testing zone** — code that verifies correctness of the server and client parts.
+
+These zones reflect **different code roles** and must not be mixed.
+
+---
+
+## Principle Of Role Separation
+
+Within the code layer, the following are considered invalid:
+
+- mixing startup logic with application logic;
+- placing client static assets inside server modules;
+- using server code to serve static assets;
+- introducing alternative entry points that are inconsistent with the project form.
+
+Structural form supports iterative evolution and is not a temporary per-task convention.
+
+---
+
+## External Computational Services
+
+The code layer may use external computational services as **infrastructure dependencies** under the following invariants:
+
+- the external service does not define product or architectural meaning;
+- interaction with the service does not change architectural contours or data flows;
+- the service is used as a technical resource, not as a domain subsystem.
 
 ### LLM API
 
-В рамках MVP Mindstream взаимодействие с внешними LLM API (включая OpenAI API) подчиняется следующим нормам:
+Within the Mindstream MVP, interaction with external LLM APIs, including the OpenAI API, follows these rules:
 
-- работа с LLM API рассматривается как **инфраструктурная интеграция**;
-- в кодовой базе существует **единственная выделенная сущность**, инкапсулирующая доступ к LLM API;
-- данная сущность является **тонким клиентом**, выполняющим вызовы API без доменной интерпретации;
-- прямое использование SDK, HTTP-клиентов или иных средств доступа к LLM API вне этой сущности **запрещено**.
+- LLM API usage is treated as an **infrastructure integration**;
+- the codebase contains **exactly one dedicated entity** that encapsulates access to the LLM API;
+- this entity is a **thin client** that performs API calls without domain interpretation;
+- direct use of SDKs, HTTP clients, or other access mechanisms to the LLM API outside this entity is **prohibited**.
 
-Данные нормы относятся исключительно к форме кодового слоя и не вводят архитектурных или продуктовых обязательств.
-
----
-
-## Связь с архитектурой
-
-Архитектура задаёт **форму системы**, но не детализирует кодовую организацию.
-
-Кодовый слой реализует архитектурные решения, не расширяет их самостоятельно и не вводит скрытых архитектурных допущений.
-
-Архитектурные решения должны быть видимы **на уровне документации**, а не реконструироваться по коду.
+These rules apply only to code-layer form and do not introduce architectural or product obligations.
 
 ---
 
-## Ограничения MVP на кодовом уровне
+## Relation To Architecture
 
-Ограничения MVP считаются жёсткими и обязательными для кодового слоя.
+Architecture defines the **form of the system**, but not the detailed organization of code.
 
-Код не используется для скрытого расширения scope, не содержит заделов, меняющих форму продукта, и не вводит функциональность «на будущее», выходящую за рамки MVP.
+The code layer implements architectural decisions, does not extend them independently, and does not introduce hidden architectural assumptions.
 
-Любое отклонение от ограничений фиксируется вне кода.
-
----
-
-## Runtime как граница
-
-Среда исполнения задаёт **границы допустимого**, а не оптимальные решения.
-
-Кодовый слой ориентируется на зафиксированный runtime, не использует альтернативные технологии по умолчанию и не подменяет среду исполнения логикой кода.
+Architectural decisions must be visible **in documentation**, not reconstructed from code.
 
 ---
 
-## Неопределённости
+## MVP Constraints At The Code Level
 
-При отсутствии явных указаний в корпусе документов код не принимает решений по умолчанию, не опирается на незафиксированные практики и не вводит неявных соглашений.
+MVP constraints are rigid and mandatory for the code layer.
 
-Пробелы считаются поводом для уточнения, а не для импровизации.
+Code must not be used to expand scope implicitly, include preparatory structures that alter product form, or introduce “future” functionality outside the MVP.
+
+Any deviation from these constraints must be fixed outside the code.
 
 ---
 
-## Итоговая позиция
+## Runtime As A Boundary
 
-Кодовый слой Mindstream вторичен по отношению к контексту, исполняем, а не концептуален, структурно определён и подчинён архитектуре, ограничениям и среде исполнения.
+The runtime environment defines the **boundary of what is allowed**, not the optimal solution.
 
-Документ фиксирует **форму кода как слоя системы**, а не правила работы с ним.
+The code layer targets the fixed runtime, does not default to alternative technologies, and does not substitute the runtime with code-level logic.
+
+---
+
+## Uncertainties
+
+When the document corpus gives no explicit guidance, code must not make default decisions, rely on undocumented practices, or introduce implicit conventions.
+
+Gaps are a reason for clarification, not improvisation.
+
+---
+
+## Summary Position
+
+The Mindstream code layer is secondary to the context, executable rather than conceptual, structurally defined, and subordinate to architecture, constraints, and runtime.
+
+This document defines **code as a system layer**, not the procedures for working with it.

@@ -1,217 +1,189 @@
-# Модель внимания пользователя
+# User Attention Model
 
 - Path: `ctx/docs/architecture/attention/interest-vector.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Вектор интересов пользователя (interest vector) — это локальное агрегированное представление смысловых предпочтений пользователя, формируемое на основе **явных актов внимания** и используемое для оценки потенциального интереса к публикациям.
+The user interest vector is a local aggregated representation of a user's semantic preferences, formed from **explicit acts of attention** and used to estimate the user's potential interest in publications.
 
-Interest vector применяется для:
+The interest vector is used for:
 
-- оценки релевантности публикаций относительно текущего внимания пользователя;
-- локального переупорядочивания элементов персональной ленты.
+- estimating publication relevance relative to the user's current attention;
+- locally reordering items in the personal feed.
 
-Вектор **не является**:
+The vector is **not**:
 
-- профилем пользователя;
-- историей просмотров;
-- каноническим состоянием системы;
-- моделью личности или долгосрочных намерений.
+- a user profile;
+- a viewing history;
+- canonical system state;
+- a personality model or long-term-intent model.
 
-Он отражает **текущее и накопленное внимание**, с учётом устаревания прошлых вкладов.
+It reflects **current and accumulated attention**, including decay of past contributions.
 
----
+## Responsibility Boundary
 
-## Граница ответственности
+This document defines:
 
-Данный документ фиксирует:
+- the architectural role of the interest vector;
+- the sources of attention signals;
+- qualitative signal priorities;
+- accumulation and decay principles;
+- storage and usage boundaries in the MVP.
 
-- архитектурную роль interest vector;
-- источники сигналов внимания;
-- качественные приоритеты сигналов;
-- принципы накопления и устаревания;
-- границы хранения и использования в рамках MVP.
+This document does **not** define:
 
-Документ **не описывает**:
+- interest-vector update algorithms;
+- formulas, coefficients, or numeric parameters;
+- concrete UI events or handlers;
+- storage mechanisms;
+- server-side personalization models.
 
-- алгоритмы обновления interest vector;
-- формулы, коэффициенты и численные параметры;
-- конкретные UI-события или обработчики;
-- технические механизмы хранения;
-- серверные модели персонализации.
+## Placement And Lifecycle
 
----
+In the MVP:
 
-## Расположение и жизненный цикл
+- the interest vector is formed and used **only on the frontend**;
+- it is stored in the local frontend context and survives application reloads;
+- the server does not receive, store, or interpret the interest vector;
+- the interest vector is not canonical state and may be lost completely without breaking system integrity.
 
-В рамках MVP:
+Loss of the local interest vector is treated as an acceptable loss of derived state.
 
-- interest vector формируется и используется **исключительно на фронте**;
-- он хранится в локальном фронтенд-контексте и переживает перезагрузки приложения;
-- сервер не получает, не хранит и не интерпретирует interest vector;
-- interest vector не считается каноническим состоянием и может быть полностью утрачeн без нарушения целостности системы.
+## Formation Principle
 
-Локальная утрата interest vector трактуется как допустимая потеря производного состояния.
+The interest vector is updated **only from deliberate user actions** interpreted as attention signals.
 
----
+Showing content without user action is **not** an attention signal and does not affect the interest vector.
 
-## Принцип формирования
+The vector is an aggregate derivative of:
 
-Interest vector обновляется **только на основании осознанных действий пользователя**, интерпретируемых как сигналы внимания.
+- semantic representations of publications;
+- user attention acts.
 
-Факт показа контента без действия пользователя **не является сигналом внимания** и не влияет на interest vector.
+## Accumulation And Decay
 
-Вектор является агрегированной производной от:
+The interest vector is **accumulating but decaying state**.
 
-- семантических представлений публикаций;
-- пользовательских актов внимания.
+Architectural principles:
 
----
+- the contribution of each attention signal is preserved over time;
+- signal contribution **decreases as time passes from the interaction moment**;
+- the interest vector reflects current interests rather than the full interaction history.
 
-## Накопление и устаревание
+Decay mechanisms are:
 
-Interest vector является **накапливаемым, но устаревающим состоянием**.
+- local;
+- deterministic within the frontend;
+- not synchronized with the server;
+- not numerically fixed at the architectural level.
 
-Архитектурные принципы:
+## Attention Signals
 
-- вклад каждого сигнала внимания сохраняется во времени;
-- вклад сигналов **уменьшается по мере удаления от момента взаимодействия**;
-- interest vector отражает актуальные интересы, а не всю историю взаимодействий.
+### Counted Signals
 
-Механизмы устаревания:
+#### 1. Interaction With A Publication Overview
 
-- локальны;
-- детерминированы в рамках фронта;
-- не синхронизируются с сервером;
-- не фиксируются на уровне архитектуры численно.
+Opening an overview is an attention signal.
 
----
+- Overview reading time is not taken into account.
+- The opening action itself is treated as sufficient evidence of interest.
 
-## Сигналы внимания
+Signal character:
 
-### Учитываемые сигналы
+- medium strength;
+- reflects interest in the interpretation and semantic content of the publication.
 
-#### 1. Взаимодействие с обзором публикации
+#### 2. Opening The Source Link (`source_url`)
 
-Факт открытия обзора считается сигналом внимания.
+Opening the source is an attention signal of higher strength.
 
-- Время чтения обзора не учитывается.
-- Само действие открытия трактуется как достаточное проявление интереса.
+- Repeated openings of the same publication are not normalized in the MVP.
+- Each opening is interpreted as a separate attention fact.
 
-Характер сигнала:
+Signal character:
 
-- средняя сила;
-- отражает интерес к интерпретации и смысловому содержанию публикации.
+- strong;
+- reflects confirmed interest in the source material.
 
----
+#### 3. Combined Signal: Overview + Source Link
 
-#### 2. Переход по ссылке на источник (`source_url`)
+The scenario where the user:
 
-Переход к первоисточнику считается сигналом внимания более высокой силы.
+- opens the publication overview;
+- and then opens the source link,
 
-- Повторные переходы по одной и той же публикации в рамках MVP не нормализуются.
-- Каждый переход интерпретируется как отдельный факт внимания.
+is treated as the **strongest expression of attention**.
 
-Характер сигнала:
+The combined signal:
 
-- сильный;
-- отражает подтверждённый интерес к исходному материалу.
+- does not cancel previous signals;
+- is interpreted as a reinforced contribution to the interest vector.
 
----
+### Signals Not Counted
 
-#### 3. Комбинированный сигнал: обзор + переход по ссылке
+#### Publication Annotation
 
-Сценарий, при котором пользователь:
+The annotation:
 
-- открывает обзор публикации;
-- и затем переходит по ссылке на источник,
+- is always available to the user by default;
+- is part of the background interface context.
 
-считается **наиболее сильным проявлением внимания**.
+The annotation is **not treated as an attention signal** and does **not participate** in interest-vector updates.
 
-Комбинированный сигнал:
+#### Passive Feed Scrolling
 
-- не отменяет предыдущие сигналы;
-- интерпретируется как усиленный вклад в interest vector.
+Feed scrolling without explicit actions:
 
----
+- is not treated as a deliberate choice;
+- is not used to update the interest vector in the MVP.
 
-### Неучитываемые сигналы
+## Signal Priority
 
-#### Аннотация публикации
+Attention signals differ in priority as follows, from weaker to stronger:
 
-Аннотация:
+1. Opening the overview.
+2. Opening the source link.
+3. Opening the overview and then the source link.
 
-- всегда доступна пользователю по умолчанию;
-- является частью фонового контекста интерфейса.
+These priorities are qualitative and are used to interpret contributions without numeric coefficients at the architectural level.
 
-Аннотация **не считается сигналом внимания** и **не участвует** в обновлении interest vector.
+## Use Of The Interest Vector
 
----
+The interest vector is used:
 
-#### Пассивный скролл ленты
+- for local estimation of the user's potential interest in each publication;
+- as input to ranking items in the personal feed.
 
-Прокрутка ленты без явных действий:
+The interest vector is **not used**:
 
-- не трактуется как осознанный выбор;
-- не используется для обновления interest vector в MVP.
+- to filter the Content Collection;
+- to change server-side data;
+- to form canonical read models.
 
----
+## MVP Constraints
 
-## Приоритет сигналов
+- The interest vector is not synchronized across devices.
+- There is no server-side interpretation of the interest vector.
+- There is no shared user profile.
+- Decay mechanics are not numerically normalized.
+- Loss of local state is acceptable.
 
-Сигналы внимания различаются по приоритету следующим образом (от слабого к сильному):
+All of these constraints are **architectural properties of the MVP**.
 
-1. Открытие обзора.
-2. Переход по ссылке на источник.
-3. Открытие обзора + переход по ссылке.
+## Invariants
 
-Приоритеты фиксируются качественно и используются для интерпретации вкладов, без задания численных коэффициентов на архитектурном уровне.
+- The interest vector is local and non-canonical state.
+- The interest vector is updated only by user actions.
+- Absence of actions does not change the vector.
+- Showing text is not an attention signal.
+- The annotation does not participate in interest-vector calculation.
+- Signal contribution decreases over time.
+- Combining actions strengthens contribution but does not cancel previous contributions.
 
----
+## Related Documents
 
-## Использование interest vector
-
-Interest vector используется:
-
-- для локальной оценки потенциального интереса пользователя к каждой публикации;
-- как вход в ранжирование элементов персональной ленты.
-
-Interest vector **не используется**:
-
-- для фильтрации Content Collection;
-- для изменения серверных данных;
-- для формирования канонических read-моделей.
-
----
-
-## Ограничения MVP
-
-- Interest vector не синхронизируется между устройствами.
-- Нет серверной интерпретации interest vector.
-- Нет общего профиля пользователя.
-- Механика устаревания не нормирована численно.
-- Потеря локального состояния допустима.
-
-Все перечисленные ограничения считаются **архитектурными свойствами MVP**.
-
----
-
-## Инварианты
-
-- Interest vector является локальным и неканоническим состоянием.
-- Interest vector обновляется только действиями пользователя.
-- Отсутствие действий не изменяет вектор.
-- Факт показа текста не является сигналом внимания.
-- Аннотация не участвует в расчёте interest vector.
-- Вклад сигналов со временем уменьшается.
-- Комбинация действий усиливает вклад, но не отменяет предыдущие.
-
----
-
-## Связанные документы
-
-- Документы архитектуры UI (источники пользовательских действий).
-- Документы data-flow внимания.
-- Документы embeddings и семантических представлений.
+- UI architecture documents that define sources of user actions.
+- Attention data-flow documents.
+- Embedding and semantic-representation documents.

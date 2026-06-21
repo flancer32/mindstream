@@ -2,147 +2,127 @@
 
 - Path: `ctx/docs/code/storage/overview.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **инженерную роль и форму слоя работы с реляционной базой данных** в MVP Mindstream.
+This document defines the **engineering role and form of the relational-database layer** in the Mindstream MVP.
 
-Слой хранения данных (`storage`) относится исключительно к уровню `code/` и реализует архитектурный контур `Storage`, уже зафиксированный в архитектурной документации, **без расширения или изменения архитектуры системы**.
+The data-storage layer belongs only to the `code/` level and implements the architectural `Storage` contour already fixed in the architecture documents, **without extending or changing system architecture**.
 
-Документ описывает, что считается DB-слоем как инженерным объектом, какие обязанности он выполняет и какие инварианты считаются обязательными в рамках MVP.
+This document describes what counts as the DB layer as an engineering object, what responsibilities it carries, and which invariants are mandatory in the MVP.
 
----
+## Architectural Position Of The Layer
 
-## Архитектурная позиция слоя
+The DB layer:
 
-DB-слой:
+- is not an architectural contour;
+- introduces no new data flows;
+- does not extend the architectural storage model;
+- implements the existing `Storage` contour at the engineering level.
 
-- не является архитектурным контуром;
-- не вводит новых потоков данных;
-- не расширяет архитектурную модель хранения;
-- реализует существующий архитектурный контур `Storage` на инженерном уровне.
+All architectural properties of `Storage`, such as canonicity, monotonicity, and absence of reactivity and control feedback loops, are treated as **defined externally** and are not restated here.
 
-Все архитектурные свойства `Storage` (каноничность, монотонность, отсутствие реактивности и управляющих обратных связей) считаются **заданными извне** и не формулируются повторно в данном слое.
+## Role Of The DB Layer In The Codebase
 
----
+The DB layer is responsible for:
 
-## Роль DB-слоя в кодовой базе
+- implementing CRUD + L operations for canonical storage entities;
+- managing schema at the code-layer level;
+- ensuring reproducibility of database structure;
+- supporting controlled schema recreation with data preservation;
+- isolating application code from SQL details and concrete DBMS behavior.
 
-DB-слой выполняет следующие инженерные обязанности:
+The DB layer contains no product logic, does not interpret attention signals, and does not participate in formation of the personal feed.
 
-- реализация операций CRUD + L для канонических сущностей хранения;
-- управление схемой данных на уровне кодового слоя;
-- обеспечение воспроизводимости структуры базы данных;
-- поддержка контролируемого пересоздания схемы с сохранением данных;
-- изоляция прикладного кода от деталей SQL и конкретной СУБД.
+## Technology Base
 
-DB-слой не содержит продуктовой логики, не интерпретирует сигналы внимания и не участвует в формировании персональной ленты.
+In the Mindstream MVP:
 
----
+- `knex` is the **only DBAL**;
+- direct SQL use outside `knex` is prohibited;
+- the DB layer remains isolated from low-level SQL details but is implemented for **PostgreSQL 16+ with mandatory `pgvector`**, as fixed in the `environment/` layer.
 
-## Технологическая база
+The choice of PostgreSQL with `pgvector` is not an interchangeable option but part of the fixed runtime environment.
 
-В рамках MVP Mindstream:
+## Data Schema Model
 
-- используется `knex` как **единственный DBAL**;
-- прямое использование SQL вне `knex` запрещено;
-- код DB-слоя остаётся изолированным от низкоуровневых SQL-деталей, но реализуется под **PostgreSQL 16+ с обязательным расширением pgvector**, зафиксированным на уровне `environment/`.
+The data schema:
 
-Выбор PostgreSQL с pgvector является не произвольной заменяемой опцией, а частью зафиксированной среды исполнения MVP.
+- is described **declaratively** as JavaScript-based descriptions;
+- is treated as the **canonical source of truth** for database structure;
+- is not derived from code and is not formed as a side effect of application execution.
 
----
+The DB layer must support **full restoration of the schema** from declarative description without relying on the current database state.
 
-## Модель схемы данных
+The schema must remain compatible with storage of publication vector representations through types and capabilities provided by PostgreSQL and `pgvector`.
 
-Схема данных:
+## Schema Lifecycle Management
 
-- описывается **декларативно** в виде JS-описаний;
-- рассматривается как **канонический источник истины** о структуре базы данных;
-- не выводится из кода и не формируется как побочный эффект выполнения приложения.
+The DB layer owns schema-lifecycle operations as a separate engineering responsibility.
 
-DB-слой обязан поддерживать возможность **полного восстановления схемы данных** из декларативного описания без доступа к текущему состоянию базы данных.
+In the MVP, the following are allowed:
 
-Схема данных должна оставаться совместимой с хранением векторных представлений публикаций через типы и возможности, предоставляемые PostgreSQL + pgvector.
+- full schema recreation;
+- schema rebuild with preservation of existing data;
+- manual destructive operations on the schema.
 
----
+All destructive operations:
 
-## Управление жизненным циклом схемы
+- run **only manually**;
+- are triggered through CLI or an explicit engineering call;
+- are not part of the regular runtime application;
+- are not triggered automatically during system operation.
 
-DB-слой отвечает за операции управления схемой данных как за отдельную инженерную обязанность.
+In operational mode, the state of `Storage` is considered monotonic.
 
-В рамках MVP допускаются:
+## Domain And Persistence
 
-- пересоздание схемы базы данных;
-- пересборка схемы с сохранением существующих данных;
-- ручное выполнение destructive-операций над схемой.
+In the MVP, a **one-to-one correspondence** is allowed between:
 
-Все destructive-операции:
+- domain entities;
+- persistence model such as tables, fields, and indexes.
 
-- выполняются **только в ручном режиме**;
-- инициируются через CLI или явный инженерный вызов;
-- не являются частью обычного runtime-приложения;
-- не инициируются автоматически в процессе работы системы.
+There is no separate domain-to-persistence mapping layer.
 
-В эксплуатационном режиме системы состояние `Storage` считается монотонным.
+Domain entities are treated as canonical data structures, not rich domain models with encapsulated behavior.
 
----
+## Data-Access Contracts
 
-## Domain и persistence
+CRUD + L operations are implemented through **explicit domain-specific contracts** tied to each storage entity.
 
-В рамках MVP допускается **однозначное соответствие (1:1)** между:
+Generic repositories and generic contracts are not used in the MVP.
 
-- domain-сущностями;
-- persistence-моделью (таблицы, поля, индексы).
+Each storage module:
 
-Отдельный слой маппинга domain ↔ persistence отсутствует.
+- is responsible for one concrete entity;
+- implements only the operations required for that entity;
+- uses `knex` directly in its implementation.
 
-Domain-сущности рассматриваются как канонические структуры данных, а не как rich domain model с инкапсулированным поведением.
+## Testability
 
----
+The DB layer is designed with unit testing as a priority.
 
-## Контракты доступа к данным
+In the MVP:
 
-Операции CRUD + L реализуются через **предметно-явные контракты**, специфичные для каждой сущности хранения.
+- DB-layer unit tests run with a fully mocked DBAL;
+- real DBMS connections are not used in unit tests;
+- side effects such as filesystem, network, and real database access are excluded.
 
-Обобщённые репозитории и generic-контракты в рамках MVP не используются.
+Integration tests for the DB layer are outside the MVP scope.
 
-Каждый storage-модуль:
+## Document Boundary
 
-- отвечает за одну конкретную сущность;
-- реализует только необходимые для неё операции;
-- использует `knex` напрямую внутри своей реализации.
+This document does not describe:
 
----
+- concrete tables and fields;
+- SQL structures and indexes;
+- application-service APIs;
+- CLI interfaces and commands;
+- implementation of concrete storage modules.
 
-## Тестируемость
+These topics belong to later documents in `code/storage/`.
 
-DB-слой проектируется с приоритетом на unit-тестирование.
+## Summary
 
-В рамках MVP:
-
-- unit-тесты DB-слоя выполняются с полностью замоканным DBAL;
-- реальные подключения к СУБД в unit-тестах не используются;
-- side effects (файловая система, сеть, реальная БД) исключены.
-
-Интеграционные тесты DB-слоя находятся вне рамок MVP.
-
----
-
-## Границы документа
-
-Документ не описывает:
-
-- конкретные таблицы и поля;
-- SQL-структуры и индексы;
-- API прикладных сервисов;
-- CLI-интерфейсы и команды;
-- реализацию конкретных storage-модулей.
-
-Данные вопросы относятся к последующим документам уровня `code/storage/`.
-
----
-
-## Итог
-
-DB-слой MVP Mindstream является инженерным слоем кодовой базы, реализующим архитектурный контур `Storage` без его расширения, обеспечивающим декларативное описание схемы данных, предметно-явные CRUD + L контракты и контролируемое управление жизненным циклом схемы в рамках MVP.
+The DB layer of the Mindstream MVP is an engineering layer of the codebase that implements the architectural `Storage` contour without extending it, provides declarative schema description, explicit CRUD + L contracts, and controlled schema-lifecycle management within the MVP.

@@ -1,195 +1,161 @@
-# Расчёт и использование interest vector на фронте
+# Interest Vector Calculation And Use On The Frontend
 
 - Path: `ctx/docs/composition/attention/interest-vector.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Данный документ описывает **прикладную композицию** расчёта и использования interest vector во фронтенд-приложении Mindstream.
+This document describes the **applied composition** of interest-vector calculation and usage in the Mindstream frontend application.
 
-Документ фиксирует:
+It defines:
 
-- порядок и моменты обновления interest vector;
-- режим его хранения и восстановления;
-- правила применения interest vector при оценке публикаций;
-- границы взаимодействия attention-модуля с UI.
+- the order and moments of interest-vector updates;
+- its storage and restoration mode;
+- the rules for using the interest vector when scoring publications;
+- the interaction boundary between the attention module and the UI.
 
-Смысл и архитектурные инварианты interest vector определены в документе  
-`ctx/docs/architecture/attention/interest-vector.md` и здесь не дублируются.
+The meaning and architectural invariants of the interest vector are defined in `ctx/docs/architecture/attention/interest-vector.md` and are not duplicated here.
 
----
+## Role Of The Interest Vector In Frontend Composition
 
-## Роль interest vector во фронтенд-композиции
+The interest vector is:
 
-Interest vector является:
+- internal state of the attention module;
+- local and non-canonical applied state;
+- an aggregated derivative of user attention signals.
 
-- внутренним состоянием attention-модуля;
-- локальным и неканоническим прикладным состоянием;
-- агрегированной производной пользовательских сигналов внимания.
+It is **not** part of global UI state and is **not exposed directly** to external components.
 
-Interest vector **не является** частью глобального UI-состояния и **не экспонируется напрямую** во внешние компоненты.
+## Initialization
 
----
+When the frontend application starts:
 
-## Инициализация
+- the attention module attempts to restore the interest vector from browser-local storage;
+- if no saved data exists, the interest vector is initialized as zero.
 
-При старте фронтенд-приложения:
+Initialization:
 
-- attention-модуль пытается восстановить interest vector из локального хранилища браузера;
-- если сохранённые данные отсутствуют, interest vector инициализируется как нулевой.
+- does not use historical attention signals;
+- does not run background computation;
+- does not initiate server requests.
 
-Инициализация:
+## Interest Vector Update
 
-- не использует исторические сигналы внимания;
-- не выполняет фоновых вычислений;
-- не инициирует серверных запросов.
+### Update Triggers
 
----
+The interest vector is updated **strictly by user attention events**, namely:
 
-## Обновление interest vector
+- opening a publication overview;
+- opening the source link;
+- the sequence of overview opening followed by source-link opening.
 
-### Триггеры обновления
+Background or periodic updates are not allowed.
 
-Interest vector обновляется **строго по событиям внимания пользователя**, а именно:
+### Update Order
 
-- открытие обзора публикации;
-- переход по ссылке на источник;
-- последовательность «открытие обзора → переход по ссылке».
+On each attention event:
 
-Фоновые или периодические обновления **не допускаются**.
+1. The interest vector is updated.
+2. Publication scores are recalculated relative to the updated interest vector.
+3. Scoring results are cached until the next attention event.
 
----
+## Contribution Aggregation
 
-### Порядок обновления
+### General Principle
 
-При каждом событии внимания:
+The interest vector is a **normalized aggregated representation** of user interests in a shared semantic space.
 
-1. Выполняется обновление interest vector.
-2. Выполняется пересчёт оценок публикаций относительно обновлённого interest vector.
-3. Результаты оценок кэшируются до следующего события внимания.
+Each new contribution:
 
----
+- is always added to the current interest vector;
+- is followed by vector normalization;
+- must not increase the vector without normalization.
 
-## Агрегация вкладов
+### Combined Signals
 
-### Общий принцип
+The scenario `overview + link transition` is treated as **two sequential contributions**:
 
-Interest vector является **нормализованным агрегированным представлением** интересов пользователя в общем семантическом пространстве.
+1. contribution from opening the overview;
+2. contribution from opening the source link.
 
-Новый вклад:
+The contribution from the link after overview has higher priority than a standalone link click, reflecting lower confidence in accidental clicks.
 
-- всегда добавляется к текущему interest vector;
-- после добавления выполняется нормализация вектора;
-- рост вектора не допускается без нормализации.
+## Decay
 
----
+In the MVP:
 
-### Комбинированные сигналы
+- the interest vector accumulates and normalizes;
+- explicit contribution decay **may be absent**.
 
-Сценарий «обзор + переход по ссылке» трактуется как **два последовательных вклада**:
+Architecturally, this means:
 
-1. вклад от открытия обзора;
-2. вклад от перехода по ссылке.
+- without storing contribution statistics, the interest vector may stabilize around the user's current interests;
+- decay mechanisms may be added later without changing external composition.
 
-При этом:
+If decay is used:
 
-- вклад перехода после обзора имеет больший приоритет, чем вклад одиночного перехода;
-- это отражает снижение влияния случайных кликов по ссылке.
+- it is applied **when the interest vector is updated**;
+- it requires no background process;
+- it is not numerically fixed at the composition level.
 
----
+## Use Of The Interest Vector
 
-## Устаревание (decay)
+The attention module uses the interest vector for:
 
-В рамках MVP:
+- estimating a user's potential interest in each publication;
+- sorting items in the personal feed;
+- excluding publications with insufficient relevance.
 
-- interest vector накапливается и нормализуется;
-- явная механика устаревания вкладов **может отсутствовать**.
+Scores:
 
-Архитектурно допускается, что:
+- are recalculated on every interest-vector update;
+- are cached until the next attention event;
+- are used by the UI without direct access to the interest vector.
 
-- без хранения статистики вкладов interest vector со временем стабилизируется в точке актуальных интересов пользователя;
-- механизмы устаревания могут быть добавлены позже без изменения внешней композиции.
+## Interaction With The UI
 
-Если устаревание применяется:
+The interest vector:
 
-- оно выполняется **при обновлении interest vector**;
-- не требует фоновых процессов;
-- не фиксируется численно на уровне композиции.
+- is hidden internal state of the attention module;
+- is not read directly by the UI;
+- is not used by UI components for their own logic.
 
----
+The UI interacts with the attention module **only through publication-scoring results**, such as:
 
-## Использование interest vector
+- sorted lists;
+- priorities;
+- filtered items.
 
-Interest vector используется attention-модулем для:
+These results also include the value of the interest indicator and the derived visual rules used to present it on the current page.
 
-- оценки потенциального интереса пользователя к каждой публикации;
-- сортировки элементов персональной ленты;
-- отсечения публикаций с недостаточной релевантностью.
+Color interpretation of the interest indicator is defined separately in `ctx/docs/composition/attention/interest-indicator-coloring.md` and uses only the locally available range of already calculated publication scores.
 
-Оценки:
+## Persistence
 
-- пересчитываются при каждом обновлении interest vector;
-- кэшируются до следующего события внимания;
-- используются UI без прямого доступа к interest vector.
+The interest vector:
 
----
+- is stored locally in the frontend context;
+- survives browser restarts;
+- may be lost when the user manually clears browser storage.
 
-## Взаимодействие с UI
+Metadata such as last-update timestamp:
 
-Interest vector:
+- is treated as an internal implementation detail;
+- is not fixed at the composition level.
 
-- является скрытым внутренним состоянием attention-модуля;
-- не читается UI напрямую;
-- не используется компонентами UI для собственной логики.
+## Resetting The Interest Vector
 
-UI взаимодействует с attention-модулем **только через результаты оценки публикаций**, такие как:
+In the MVP, manual reset of the interest vector by the user is allowed.
 
-- отсортированный список;
-- приоритеты;
-- отфильтрованные элементы.
+Reset:
 
-К этим результатам относится и значение индикатора интереса, а также производные визуальные правила его представления на текущей странице.
+- returns the interest vector to the zero state;
+- requires no server interaction;
+- does not break system integrity.
 
-Цветовая интерпретация индикатора интереса описана отдельно в `ctx/docs/composition/attention/interest-indicator-coloring.md` и использует только локально доступный диапазон уже рассчитанных оценок публикаций.
+## Responsibility Boundary
 
----
+This document does not describe storage formats, data structures, formulas, or numeric coefficients.
 
-## Персистентность
-
-Interest vector:
-
-- сохраняется локально во фронтенд-контексте;
-- переживает перезапуск браузера;
-- может быть утрачeн при ручной очистке пользовательских хранилищ.
-
-Метаданные (например, timestamp последнего обновления):
-
-- считаются внутренней деталью реализации;
-- не фиксируются на уровне композиции.
-
----
-
-## Сброс interest vector
-
-В рамках MVP допускается:
-
-- ручной сброс interest vector пользователем.
-
-Сброс:
-
-- приводит к инициализации interest vector в нулевое состояние;
-- не требует серверного взаимодействия;
-- не нарушает целостность системы.
-
----
-
-## Границы ответственности
-
-Данный документ:
-
-- не описывает форматы хранения;
-- не описывает структуры данных;
-- не содержит формул или численных коэффициентов.
-
-Документ фиксирует **порядок действий и режимы прикладной логики фронта**, оставаясь в границах композиционного уровня.
+It defines the **order of operations and applied-logic modes of the frontend** while staying within composition-level boundaries.

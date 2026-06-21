@@ -87,12 +87,12 @@ Local personal projection of the corpus for one user context and not a shared gl
 Numerical correspondence measure between semantic representations, user preference vectors, and shared attention statistics.
 
 **Interest Indicator**  
-User-visible vertical percentage indicator that shows the degree of correspondence between a publication and the current user's interests. In Russian project documentation, the preferred name is `индикатор интереса`.
+User-visible vertical percentage indicator that shows the degree of correspondence between a publication and the current user's interests.
 
 ## Naming Principles
 
 - Product terms are defined by product meaning, not by current implementation names.
-- Russian and English labels may both be used when they anchor the same stable concept.
+- English labels are preferred across project documentation.
 - New terms should be added only when they introduce distinct product meaning.
 - Deprecated or ambiguous synonyms should be avoided once a preferred term is established.
 

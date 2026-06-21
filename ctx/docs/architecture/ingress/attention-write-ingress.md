@@ -2,143 +2,121 @@
 
 - Path: `ctx/docs/architecture/ingress/attention-write-ingress.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-**Attention Write Ingress** — специализированная архитектурная граница Mindstream, через которую система принимает **write-события сигналов внимания**, возникающие в браузерном контексте.
+**Attention Write Ingress** is a specialized architectural boundary of Mindstream through which the system accepts **write events for attention signals** that originate in the browser context.
 
-Данный ingress предназначен исключительно для фиксации статистических фактов внимания и не является каналом чтения данных или управления состоянием системы.
+This ingress exists only to record statistical facts of attention and is not a channel for reading data or controlling system state.
 
----
-
-## Архитектурная позиция
+## Architectural Position
 
 Attention Write Ingress:
 
-- является подмножеством HTTP Ingress;
-- обслуживает только write-потоки;
-- относится к классу **Attention flows**;
-- соединяет браузерный контур сигналов внимания с серверным контуром хранения.
+- is a subset of HTTP Ingress;
+- serves only write flows;
+- belongs to the class of **Attention flows**;
+- connects the browser contour of attention signals to the server-side storage contour.
 
-Ingress не участвует в **Content Collection flows** и не влияет на каноническое состояние Content Collection.
+This ingress does not participate in **Content Collection flows** and does not affect the canonical state of the Content Collection.
 
----
+## Responsibility Boundary
 
-## Границы ответственности
+Attention Write Ingress is responsible for:
 
-Attention Write Ingress отвечает за:
+- accepting write events for attention signals from the browser context;
+- checking architectural validity of an event;
+- passing valid events into the internal storage contour.
 
-- приём write-событий сигналов внимания из браузерного контекста;
-- проверку архитектурной допустимости события;
-- передачу допустимых событий во внутренний контур хранения.
+Attention Write Ingress is **not responsible** for:
 
-Attention Write Ingress **не отвечает** за:
+- forming or interpreting the interest vector;
+- aggregating statistics;
+- affecting the order or composition of read models;
+- providing read access to data.
 
-- формирование или интерпретацию interest vector;
-- агрегирование статистики;
-- влияние на порядок или состав read-представлений;
-- предоставление read-доступа к данным.
+## Ingress Invariants
 
----
+The following invariants are fixed for the MVP:
 
-## Инварианты ingress (MVP)
+1. **Write-only character**: Attention Write Ingress accepts only write events. Read operations through this ingress are architecturally prohibited.
+2. **Statistical nature of events**: events are treated as records of attention facts, not as commands or control inputs to the system.
+3. **No feedback loops**: accepting attention events does not trigger recalculation of the Content Collection, semantic representations, or embeddings.
+4. **Fire-and-forget model**: the ingress is not required to return data used for further browser-side logic.
 
-В рамках MVP зафиксированы следующие инварианты:
+## Anonymous Identity As A Mandatory Condition
 
-1. **Write-only характер** — Attention Write Ingress принимает только write-события. Read-операции через данный ingress архитектурно запрещены.
-2. **Статистическая природа событий** — события трактуются как фиксация факта внимания, а не как команда или управляющее воздействие на систему.
-3. **Отсутствие обратных связей** — приём событий внимания не инициирует пересчёт Content Collection, смысловых представлений или эмбеддингов.
-4. **Fire-and-forget модель** — ingress не обязан возвращать клиенту данные, используемые для дальнейшей логики браузерного контура.
+Every event accepted by Attention Write Ingress must be bound to a **registered anonymous identity**.
 
----
+Architectural rules:
 
-## Anonymous Identity как обязательное условие
+- the ingress accepts events **only** when a registered identity exists;
+- events without identity are architecturally invalid;
+- the ingress does not register identity;
+- the ingress does not interpret identity as a subject.
 
-Все события, принимаемые Attention Write Ingress, обязаны быть связаны с **зарегистрированной anonymous identity**.
+The anonymous-identity model is defined in `ctx/docs/architecture/anonymous-identity/invariants.md`.
 
-Архитектурные правила:
+## Allowed Classes Of Attention Events
 
-- ingress принимает события **только** при наличии зарегистрированной identity;
-- события без identity архитектурно недопустимы;
-- ingress не выполняет регистрацию identity;
-- ingress не интерпретирует identity как субъекта.
+In the MVP, Attention Write Ingress accepts only events that correspond to architecturally allowed classes of attention signals.
 
-Модель anonymous identity зафиксирована в документе `ctx/docs/architecture/anonymous-identity/invariants.md`.
+Allowed classes:
 
----
+- opening a publication overview;
+- opening the publication source link;
+- the combined fact of opening an overview and then opening the link.
 
-## Допустимые классы событий внимания
+This list is **closed** within the MVP. Expanding it requires revising the architectural documentation layer.
 
-В рамках MVP Attention Write Ingress принимает только события, соответствующие архитектурно допустимым классам сигналов внимания.
+## Deduplication And Idempotency
 
-Допустимые классы событий:
+Attention Write Ingress allows repeated submission of identical events from the browser contour.
 
-- факт открытия обзора публикации;
-- факт перехода по ссылке на источник публикации;
-- комбинированный факт: открытие обзора с последующим переходом по ссылке.
+Architectural invariants:
 
-Перечень классов событий является **закрытым** в рамках MVP. Расширение перечня требует пересмотра архитектурного слоя документации.
+- for one anonymous identity, at most one event of the same type is allowed for one publication;
+- repeated submission must not change aggregated state;
+- idempotency is a storage invariant, not an ingress-logic invariant.
 
----
+## Relation To Data Flows
 
-## Дедупликация и идемпотентность
-
-Attention Write Ingress допускает повторную отправку идентичных событий со стороны браузерного контура.
-
-Архитектурные инварианты:
-
-- для одной anonymous identity допускается не более одного события одного типа для одной публикации;
-- повторная отправка не должна приводить к изменению агрегированного состояния;
-- обеспечение идемпотентности является инвариантом хранения, а не ingress-логики.
-
----
-
-## Связь с потоками данных
-
-Attention Write Ingress является архитектурной точкой входа для **Attention flows**, зафиксированных в документе:
+Attention Write Ingress is the architectural entry point for **Attention flows** defined in:
 
 - `ctx/docs/architecture/data-flow/attention.md`
 
-Ingress не изменяет направленность потоков и не расширяет их роль.
+The ingress does not change flow direction or expand flow role.
 
----
+## Constraints And Prohibitions
 
-## Ограничения и запреты
+The following are prohibited through Attention Write Ingress in the MVP:
 
-В рамках MVP через Attention Write Ingress запрещено:
+- transmitting aggregated or interpreted data;
+- performing read requests;
+- requesting interest-vector state;
+- using attention events as control commands;
+- linking events to IP addresses or user-agent strings.
 
-- передавать агрегированные или интерпретированные данные;
-- выполнять read-запросы;
-- запрашивать состояние interest vector;
-- использовать события внимания как управляющие команды;
-- связывать события с IP-адресами или user-agent.
+## Document Boundary
 
----
+This document:
 
-## Границы документа
+- does not describe API endpoints or their formats;
+- does not define DTOs or payload structures;
+- does not define transport mechanisms;
+- does not describe implementation of ingress handlers;
+- does not contain product UI scenarios.
 
-Данный документ:
+All of these belong to the implementation or composition level and are not fixed at the architectural level.
 
-- не описывает API-эндпойнты и их форматы;
-- не фиксирует DTO и структуры payload;
-- не определяет транспортные механизмы;
-- не описывает реализацию ingress-обработчиков;
-- не содержит продуктовых сценариев UI.
-
-Все перечисленные вопросы относятся к уровню реализации или композиции и не фиксируются на архитектурном уровне.
-
----
-
-## Связанные архитектурные документы
+## Related Architectural Documents
 
 - `ctx/docs/architecture/anonymous-identity/invariants.md`
 - `ctx/docs/architecture/ingress/http-ingress.md`
 - `ctx/docs/architecture/data-flow/attention.md`
 - `ctx/docs/architecture/attention/interest-vector.md`
 
----
+## Summary
 
-## Итог
-
-Attention Write Ingress фиксирует архитектурно допустимый write-путь для статистических сигналов внимания в MVP Mindstream, обеспечивая изоляцию Content Collection от внимания, отсутствие реактивных эффектов и строгую привязку к модели anonymous identity.
+Attention Write Ingress defines the architecturally valid write path for statistical attention signals in the Mindstream MVP, preserving isolation of the Content Collection from attention, absence of reactive effects, and strict dependence on the anonymous-identity model.

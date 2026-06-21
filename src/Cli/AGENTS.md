@@ -2,65 +2,65 @@
 
 Path: `./src/Cli/AGENTS.md`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **инварианты формы CLI-кода** в каталоге `src/Cli/` и указывает нормативные источники, которым реализация обязана соответствовать.
+This document defines the **form invariants of CLI code** in the `src/Cli/` directory and identifies the normative sources that the implementation must follow.
 
-Документ не описывает модель CLI, дерево команд или семантику выполнения. Эти аспекты зафиксированы в документации более высокого уровня.
-
----
-
-## Нормативные источники
-
-Любые изменения CLI-кода **обязаны соответствовать** следующим документам:
-
-- `ctx/docs/code/cli/overview.md` — рамочная модель CLI в MVP.
-- `ctx/docs/code/cli/dispatcher.md` — нормативная модель диспетчеризации и ролей CLI-модулей.
-- `ctx/docs/code/cli/command-tree.md` — зафиксированное пространство допустимых CLI-команд.
-
-Данные документы являются источником истины. `src/Cli/AGENTS.md` их не расширяет и не уточняет.
+This document does not describe the CLI model, the command tree, or execution semantics. Those aspects are defined in higher-level documentation.
 
 ---
 
-## Инварианты формы CLI-кода
+## Normative Sources
 
-При работе с кодом в `src/Cli/` считается обязательным, что:
+Any changes to CLI code **must comply with** the following documents:
 
-- структура каталогов **изоморфна дереву CLI-команд**;
-- роль модуля (диспетчер или команда) определяется **только** его положением в дереве каталогов;
-- все CLI-модули предоставляются через DI-контейнер;
-- CLI-код не управляет жизненным циклом приложения и не завершает процесс напрямую;
-- leaf-модули реализуют исполняемые команды и не содержат диспетчерской логики.
+- `ctx/docs/code/cli/overview.md` — the framing model of the CLI in the MVP.
+- `ctx/docs/code/cli/dispatcher.md` — the normative model of dispatching and CLI module roles.
+- `ctx/docs/code/cli/command-tree.md` — the fixed space of admissible CLI commands.
 
----
-
-## Явные запреты
-
-В рамках `src/Cli/` запрещено:
-
-- вводить команды, отсутствующие в `command-tree.md`;
-- изменять иерархию команд без синхронного изменения `command-tree.md`;
-- реализовывать бизнес-логику, не относящуюся к выполнению конкретной команды;
-- добавлять интерактивность, диалоги или подтверждения;
-- управлять освобождением ресурсов или завершением процесса.
+These documents are the source of truth. `src/Cli/AGENTS.md` does not extend or refine them.
 
 ---
 
-## Граница ответственности
+## CLI Code Form Invariants
 
-`src/Cli/` реализует **выбор и запуск режима выполнения backend-приложения**.
+When working with code in `src/Cli/`, the following are mandatory:
 
-CLI-код не:
-
-- описывает архитектуру;
-- не определяет продуктовые смыслы;
-- не формирует корпус данных;
-- не интерпретирует пользовательское поведение.
+- the directory structure is **isomorphic to the CLI command tree**;
+- the role of a module (dispatcher or command) is determined **only** by its position in the directory tree;
+- all CLI modules are provided through the DI container;
+- CLI code does not manage the application lifecycle and does not terminate the process directly;
+- leaf modules implement executable commands and do not contain dispatch logic.
 
 ---
 
-## Итог
+## Explicit Prohibitions
 
-`src/Cli/AGENTS.md` служит **якорем формы**, а не описанием поведения.
+Within `src/Cli/`, it is prohibited to:
 
-Любые изменения CLI-кода должны быть механическим следствием нормативных документов уровня `ctx/docs/code/cli`.
+- introduce commands that are absent from `command-tree.md`;
+- change the command hierarchy without synchronously updating `command-tree.md`;
+- implement business logic unrelated to executing a specific command;
+- add interactivity, dialogs, or confirmations;
+- manage resource cleanup or process termination.
+
+---
+
+## Responsibility Boundary
+
+`src/Cli/` implements the **selection and startup of backend application execution modes**.
+
+CLI code does not:
+
+- describe the architecture;
+- define product meaning;
+- form the data corpus;
+- interpret user behavior.
+
+---
+
+## Summary
+
+`src/Cli/AGENTS.md` serves as a **form anchor**, not as a behavior description.
+
+Any changes to CLI code must be a mechanical consequence of the normative documents under `ctx/docs/code/cli`.

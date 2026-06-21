@@ -2,17 +2,15 @@
 
 - Path: `ctx/docs/code/cli/command-tree.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует каноническое пространство допустимых CLI-команд backend-приложения Mindstream. Он определяет иерархию команд, их назначение и форму входных параметров. Документ является нормативным и представляет скелет CLI-пространства; код CLI обязан соответствовать данному реестру.
+This document defines the canonical space of allowed CLI commands for the Mindstream backend application. It specifies command hierarchy, purpose, and input form. It is normative, and CLI code must match this registry.
 
----
+## Command Hierarchy
 
-## Иерархия команд
-
-```
+```text
 db:schema:create
 db:schema:renew
 ingest:discover:habr
@@ -22,172 +20,142 @@ process:generate:summaries
 runtime:web
 ```
 
-Команды, отсутствующие в данной иерархии, считаются недопустимыми.
+Commands absent from this hierarchy are invalid.
 
----
+## Command Registry
 
-## Реестр команд
+### `db:schema:create`
 
-### db:schema:create
+Contour: maintenance.
 
-Контур: maintenance.
+Purpose: create the application data schema in an empty database.
 
-Назначение: создание схемы данных приложения в пустой базе данных.
+Parameters: none.
 
-Параметры:
+Constraints:
 
-- отсутствуют.
+- assumes an empty database;
+- creates only DB structure such as tables, indexes, and constraints;
+- is not idempotent;
+- does not run migrations;
+- is not used in runtime.
 
-Ограничения:
+### `db:schema:renew`
 
-- предполагает пустую базу данных;
-- создаёт только структуру БД (tables, indexes, constraints);
-- не идемпотентна;
-- не выполняет миграции;
-- не используется в runtime-контуре.
+Contour: maintenance.
 
----
+Purpose: fully recreate the application data schema with a best-effort attempt to preserve existing data.
 
-### db:schema:renew
+Parameters: none.
 
-Контур: maintenance.
+Constraints:
 
-Назначение: полное пересоздание схемы данных приложения с попыткой best-effort переноса данных из существующей базы данных.
+- destructive, non-interactive operation without confirmations;
+- works with exactly one database from application configuration;
+- recreates the schema only from `Mindstream_Back_Storage_Schema`;
+- records the new schema in `schema_version` after successful creation;
+- during data transfer, matches tables and columns by name, drops extra structures, and attempts type conversion;
+- if data restoration fails, the command ends with error and no partial success.
 
-Параметры:
+### `ingest:discover:habr`
 
-- отсутствуют.
+Contour: ingest.
 
-Ограничения:
+Purpose: discover publications from the Habr RSS feed and register them as known publications without loading text and without starting processing.
 
-- destructive-операция без подтверждений и без интерактивности;
-- работает строго с одной базой данных из конфигурации приложения;
-- пересоздаёт схему исключительно на основе `Mindstream_Back_Storage_Schema`;
-- фиксирует новую схему в `schema_version` после успешного создания;
-- при переносе данных сопоставляет таблицы и колонки по именам, отбрасывает лишние структуры и пытается привести типы;
-- при ошибке восстановления данных завершается с ошибкой без частичного успеха.
+Parameters: none.
 
----
+Constraints:
 
-### ingest:discover:habr
+- uses a hardcoded Habr RSS source URL;
+- performs only discovery;
+- does not fetch HTML;
+- does not extract publication text;
+- is idempotent;
+- may be rerun without changing the result;
+- does not start processing and does not affect runtime.
 
-Контур: ingest.
+### `ingest:extract:habr`
 
-Назначение: обнаружение публикаций из RSS Хабра и фиксация их в системе как известных публикаций без загрузки текста и без инициирования processing.
+Contour: ingest.
 
-Параметры:
+Purpose: fetch Habr publication HTML and extract Markdown text within the ingestion contour without starting later processing stages.
 
-- отсутствуют.
+Parameters: none.
 
-Ограничения:
+Constraints:
 
-- использует хардкодированный RSS URL источника Habr;
-- выполняет только discovery;
-- не выполняет fetch HTML;
-- не извлекает текст публикаций;
-- идемпотентна;
-- допускает повторные запуски без изменения результата;
-- не инициирует processing и не влияет на runtime-контур.
+- extracts Markdown only for publications awaiting extraction;
+- stores HTML and Markdown as temporary ingestion artifacts;
+- uses Habr-specific extraction;
+- is idempotent and may be rerun without changing the result;
+- does not start processing and does not affect runtime.
 
-### ingest:extract:habr
+### `process:generate:embeddings`
 
-Контур: ingest.
+Contour: processing (engineering).
 
-Назначение: получение HTML публикаций Хабра и извлечение md-текста в рамках ingestion-контура без инициирования последующих этапов обработки.
+Purpose: compute publication embeddings from already generated semantic representations, overview and annotation, for every publication whose embeddings are still missing.
 
-Параметры:
+Parameters: none.
 
-- отсутствуют.
+Constraints:
 
-Ограничения:
+- processes only publications that already have **both** Markdown artifacts, overview and annotation;
+- computes exactly two embeddings: one for the Markdown overview and one for the Markdown annotation;
+- the only text sources are the Markdown overview and Markdown annotation stored in the database;
+- is strictly idempotent and does not recompute existing embeddings;
+- the result is canonical and immutable in the MVP;
+- recomputation for already processed publications is prohibited;
+- on failure, the command logs the error, moves the publication to an error state, and blocks it from runtime;
+- publications without **both** successful embeddings are not ready and do not participate in runtime;
+- the command does not start runtime or later processing stages;
+- the command is non-interactive and accepts no input parameters.
 
-- извлекает md-текст только для публикаций со статусом ожидания извлечения;
-- сохраняет HTML и md-текст как временные артефакты ingestion-контура;
-- использует source-specific извлечение для Habr;
-- идемпотентна и допускает повторные запуски без изменения результата;
-- не инициирует processing и не влияет на runtime-контур.
+### `process:generate:summaries`
 
-### process:generate:embeddings
+Contour: processing (engineering).
 
-Контур: processing (engineering).
+Purpose: generate publication semantic representations, overview and annotation, for all publications where those representations do not yet exist.
 
-Назначение: канонический расчёт эмбеддингов публикаций по уже сформированным смысловым представлениям (обзор и аннотация) для всех публикаций, для которых эмбеддинги ещё не рассчитаны.
+Parameters: none.
 
-Параметры:
+Constraints:
 
-- отсутствуют.
+- processes **only** publications that do not yet have annotation and overview;
+- generation is based **strictly on normalized publication Markdown**;
+- the source of the publication does not influence the result;
+- for one publication, **both** artifacts are always generated: overview first, then annotation within the same LLM dialogue;
+- the result is canonical and immutable in the MVP;
+- regeneration for already processed publications is prohibited;
+- on failure, the command logs the error, moves the publication to an error state, and prevents it from entering the user feed;
+- publications without successful annotation and overview are not ready and do not participate in runtime;
+- the command does not start embeddings, runtime, or other later stages;
+- the command is non-interactive and accepts no input parameters.
 
-Ограничения:
+### `runtime:web`
 
-- команда обрабатывает только публикации, у которых уже существуют **оба** md-артефакта: обзор и аннотация;
-- рассчитываются ровно два эмбеддинга: для md-обзора и для md-аннотации;
-- источник текста для расчёта — исключительно md-обзор и md-аннотация, сохранённые в БД;
-- команда строго идемпотентна: если эмбеддинги уже существуют — не пересчитывает их;
-- результат расчёта считается каноническим и неизменяемым в рамках MVP;
-- повторный расчёт эмбеддингов для уже обработанных публикаций запрещён;
-- при ошибке расчёта команда:
-  - фиксирует ошибку в логах,
-  - переводит публикацию в ошибочное состояние,
-  - блокирует публикацию для runtime-контура;
-- публикации без успешно рассчитанных **обоих** эмбеддингов не считаются готовыми и не участвуют в runtime-контуре;
-- команда не инициирует runtime или иные последующие этапы обработки;
-- команда не является интерактивной и не принимает входных параметров.
+Contour: runtime.
 
-### process:generate:summaries
+Purpose: start the backend application in web-server runtime mode.
 
-Контур: processing (engineering).
+Parameters: none.
 
-Назначение: каноническая генерация смысловых представлений публикаций — обзора и аннотации — для всех публикаций, для которых эти представления ещё не сформированы.
+Constraints:
 
-Параметры:
+- is not a result-bearing operation;
+- does not imply normal completion;
+- is not used in the maintenance contour.
 
-- отсутствуют.
+## General CLI Command Invariants
 
-Ограничения:
+For all application CLI commands:
 
-- команда обрабатывает **только** публикации, для которых отсутствуют аннотация и обзор;
-- генерация выполняется **строго на основе нормализованного md-текста публикации**;
-- источник публикации не учитывается и не влияет на результат;
-- в рамках одной публикации всегда формируются **оба** артефакта: сначала обзор, затем аннотация в том же диалоге с LLM;
-- результат генерации считается **каноническим и неизменяемым** в рамках MVP;
-- повторная генерация для уже обработанных публикаций запрещена;
-- при ошибке генерации команда:
-  - фиксирует ошибку в логах,
-  - переводит публикацию в ошибочное состояние,
-  - не выпускает публикацию в пользовательскую ленту;
-- публикации без успешно сформированных аннотации и обзора **не считаются готовыми** и не участвуют в runtime-контуре;
-- команда не инициирует embedding, runtime или иные последующие этапы обработки;
-- команда не является интерактивной и не принимает входных параметров.
+- commands are strictly non-interactive;
+- commands are deterministic under fixed environment and data;
+- commands run in a trusted contour;
+- commands do not terminate the process directly.
 
-### runtime:web
+## Document Boundary
 
-Контур: runtime.
-
-Назначение: запуск backend-приложения в runtime-режиме веб-сервера.
-
-Параметры:
-
-- отсутствуют.
-
-Ограничения:
-
-- не является операцией с результатом;
-- не предполагает нормального завершения;
-- не используется в maintenance-контуре.
-
----
-
-## Общие инварианты CLI-команд
-
-Для всех CLI-команд приложения зафиксированы следующие инварианты:
-
-- команды строго неинтерактивны;
-- команды детерминированы при фиксированном окружении и данных;
-- команды работают в доверенном контуре;
-- команды не управляют завершением процесса напрямую.
-
----
-
-## Границы документа
-
-Документ не описывает бизнес-логику команд, алгоритмы выполнения, побочные эффекты, реализацию в коде, порядок вызова внутренних сервисов или формат пользовательского вывода. Любые изменения пространства CLI-команд требуют явного изменения данного документа.
+This document does not describe command business logic, execution algorithms, side effects, code implementation, internal service-call order, or output format. Any change to CLI command space requires explicit change to this document.

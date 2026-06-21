@@ -4,23 +4,23 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует нормативный реестр статусов публикаций в MVP Mindstream, их принадлежность к контурам и допустимые переходы между статусами.
+This document defines the normative registry of publication statuses in the Mindstream MVP, their contour ownership, and the permitted transitions between them.
 
-## Реестр статусов
+## Status Registry
 
-- `extract_pending` — ingestion, публикация зарегистрирована и ожидает извлечения md-текста.
-- `extracted` — ingestion, md-текст публикации извлечён и сохранён.
-- `extract_failed` — ingestion, временная ошибка извлечения md-текста.
-- `extract_broken` — ingestion, извлечение md-текста признано невозможным.
-- `summary_ready` — processing, md-аннотация и md-обзор сформированы.
-- `summary_failed` — processing, генерация md-аннотации и md-обзора завершилась ошибкой.
-- `embedding_pending` — processing, публикация ожидает расчёта эмбеддингов.
-- `embedding_done` — processing, эмбеддинги аннотации и обзора сохранены.
-- `embedding_failed` — processing, расчёт эмбеддингов завершился ошибкой.
+- `extract_pending` — ingestion; the publication is registered and waiting for Markdown-text extraction.
+- `extracted` — ingestion; the publication Markdown text has been extracted and saved.
+- `extract_failed` — ingestion; temporary failure during Markdown-text extraction.
+- `extract_broken` — ingestion; Markdown-text extraction is considered impossible.
+- `summary_ready` — processing; the Markdown annotation and Markdown overview have been produced.
+- `summary_failed` — processing; generation of the Markdown annotation and overview failed.
+- `embedding_pending` — processing; the publication is waiting for embedding calculation.
+- `embedding_done` — processing; the annotation and overview embeddings have been saved.
+- `embedding_failed` — processing; embedding calculation failed.
 
-## Допустимые переходы
+## Allowed Transitions
 
 - `extract_pending` -> `extracted`.
 - `extract_pending` -> `extract_failed`.
@@ -32,9 +32,9 @@
 - `embedding_pending` -> `embedding_done`.
 - `embedding_pending` -> `embedding_failed`.
 
-## Инварианты переходов
+## Transition Invariants
 
-- `extract_broken` является терминальным состоянием ingestion-контура.
-- `summary_failed` является терминальным состоянием processing-контура для генерации смысловых представлений.
-- `embedding_failed` является терминальным состоянием processing-контура для расчёта эмбеддингов.
-- Переходы, отсутствующие в реестре, считаются недопустимыми.
+- `extract_broken` is a terminal state of the ingestion contour.
+- `summary_failed` is a terminal state of the processing contour for semantic-representation generation.
+- `embedding_failed` is a terminal state of the processing contour for embedding calculation.
+- Any transition absent from this registry is invalid.

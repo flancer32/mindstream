@@ -2,167 +2,137 @@
 
 - Path: `ctx/docs/code/logging.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **нормативные принципы логирования кодового слоя MVP Mindstream**.
+This document defines the normative logging principles of the Mindstream MVP code layer.
 
-Логирование рассматривается как **обязательный наблюдательный слой системы** (observability minimum), обеспечивающий воспроизводимую наблюдаемость исполнения кода без влияния на продуктовые данные, архитектурные потоки и поведение системы.
+Logging is treated as a mandatory observability layer that provides reproducible visibility into code execution without affecting product data, architectural flows, or system behavior.
 
-Документ относится исключительно к слою `code/` и не вводит архитектурных, продуктовых, композиционных или эксплуатационных решений.
+This document belongs only to the `code/` layer and does not introduce architectural, product, composition, or operational decisions.
 
----
+## Logging Status In The MVP
 
-## Статус логирования в MVP
+Within the Mindstream MVP:
 
-В рамках MVP Mindstream считается истинным, что:
+- logging is mandatory;
+- absence of logging around meaningful actions or errors is an engineering defect;
+- logging is not optional diagnostics and cannot be excluded under the excuse of MVP scope.
 
-- логирование является **обязательным**;
-- отсутствие логирования в местах значимых действий или ошибок считается **инженерным дефектом**;
-- логирование не является опциональной диагностикой и не может быть исключено под предлогом MVP.
+Logging provides observability of execution but does not participate in system control.
 
-Логирование обеспечивает наблюдаемость исполнения, но не участвует в управлении системой.
+## Status Of Logs As Data
 
----
+Logs:
 
-## Статус логов как данных
+- are allowed as an external observational trace of execution;
+- are not part of product data;
+- do not belong to the Mindstream architectural data model;
+- are not used by the system as a source of truth, input, or state-recovery mechanism.
 
-Логи:
-
-- допускаются как **внешний наблюдательный след исполнения**;
-- **не являются частью данных продукта**;
-- **не входят** в архитектурную модель данных Mindstream;
-- **не используются системой** как источник истины, вход или механизм восстановления состояния.
-
-Логи не относятся к:
+Logs are not part of:
 
 - `Storage`;
 - attention signals;
-- агрегированной статистике внимания.
+- aggregated attention statistics.
 
-Использование логов как скрытого data-flow, обходного канала передачи данных или источника вычислений запрещено.
+Using logs as a hidden data flow, a side channel for data transfer, or a source of computation is prohibited.
 
-Удаление, недоступность или ротация логов не влияют на корректность работы системы.
+Deletion, unavailability, or rotation of logs does not affect system correctness.
 
----
+## Logging Levels
 
-## Уровни логирования
-
-В MVP используется **строго фиксированный набор уровней логирования**:
+The MVP uses a strictly fixed set of logging levels:
 
 - `debug`
 - `info`
 - `warn`
 - `error`
 
-Данный набор является нормативным.
+This set is normative.
 
-- отсутствие уровня;
-- использование произвольных уровней;
-- подмена семантики уровней
+Absence of a level, arbitrary custom levels, or semantic distortion of levels is a code-layer violation.
 
-считаются нарушением инженерной нормы кодового слоя.
+## The `exception` Method
 
----
-
-## Метод `exception`
-
-Для логирования исключений используется **отдельный метод `exception`**.
+Exceptions are logged through a separate method `exception`.
 
 `exception`:
 
-- не является alias-ом `error`;
-- предназначен исключительно для логирования исключительных ситуаций;
-- принимает **стандартный объект `Error` JavaScript**.
+- is not an alias of `error`;
+- is intended only for exceptional situations;
+- accepts the standard JavaScript `Error` object.
 
-В рамках MVP используется **встроенный контракт `Error`**, без введения пользовательских или расширенных типов исключений.
+The MVP uses the built-in `Error` contract without custom or extended exception types.
 
-При логировании `exception` обязано фиксироваться:
+When logging through `exception`, the following must be recorded:
 
 - `error.message`;
 - `error.stack`;
-- `error.cause` — при наличии.
+- `error.cause`, if present.
 
-Использование метода `error` для логирования объектов `Error` вместо `exception` считается нарушением семантики логирования.
+Using `error` instead of `exception` to log `Error` objects is a semantic violation.
 
----
+## Namespace As Mandatory Context
 
-## Namespace как обязательный контекст
+Every log message must contain a namespace.
 
-Каждое лог-сообщение **обязано** содержать namespace.
+- the namespace is passed on every logging call;
+- missing namespace is an engineering defect;
+- the logger does not store the current namespace internally.
 
-- namespace передаётся **при каждом вызове логирования**;
-- отсутствие namespace считается **инженерным дефектом**;
-- логгер не хранит текущий namespace во внутреннем состоянии.
+The logger is a singleton per execution area:
 
-Логгер является **синглтоном области исполнения**:
+- one instance for the frontend context;
+- one instance for the backend context.
 
-- один экземпляр для frontend-контекста;
-- один экземпляр для backend-контекста.
+## Logging Input And Output Contract
 
----
+### Logging Input
 
-## Контракт входа и выхода логирования
-
-### Вход логирования
-
-Каждый вызов логирования принимает:
+Each logging call accepts:
 
 - `namespace`;
-- `message` (string);
-- произвольные дополнительные аргументы.
+- `message` as a string;
+- arbitrary additional arguments.
 
-### Выход логирования
+### Logging Output
 
-Выход логирования является **минимально структурированным** и включает:
+Logging output is minimally structured and includes:
 
 - timestamp;
 - level;
 - namespace;
 - message;
-- дополнительные аргументы.
+- additional arguments.
 
-Конкретный формат сериализации не фиксируется до байтового уровня, но наличие указанных компонентов является нормативным.
+The exact serialization format is not fixed byte-by-byte, but these components are mandatory.
 
----
+## Platform Neutrality
 
-## Платформенная нейтральность
+`Mindstream_Shared_Logger` belongs to the `Mindstream_Shared_` zone and is treated as platform-agnostic.
 
-`Mindstream_Shared_Logger` относится к зоне `Mindstream_Shared_` и считается **platform-agnostic**.
+- the logger does not use platform APIs directly;
+- output goes through the console mechanism provided by the runtime;
+- the logger does not distinguish frontend from backend by behavior, only by application area.
 
-- логгер не использует platform API напрямую;
-- вывод осуществляется через консольный механизм, предоставляемый средой исполнения;
-- логгер не различает frontend и backend по поведению, только по области применения.
+## Logging And Unit Tests
 
----
+In unit tests:
 
-## Логирование и unit-тесты
+- the logger may be mocked with a no-op stub;
+- the production logger implementation may be absent;
+- the code must still call the logger regardless of whether it is mocked.
 
-В unit-тестах:
+Logging is not part of the tested contract and is not used for assertions.
 
-- допускается мокирование логгера заглушкой, не выполняющей действий;
-- production-реализация логгера может не использоваться;
-- код обязан вызывать логгер независимо от того, замокан он или нет.
+## Document Boundary
 
-Логирование не является частью проверяемого контракта тестов и не используется для assertions.
+This document does not describe logger implementation, log-storage formats, aggregation, rotation, delivery, external observability integration, or operational procedures.
 
----
+These questions are outside the scope of the MVP and this documentation layer.
 
-## Границы документа
+## Summary
 
-Документ не описывает:
-
-- реализацию логгера;
-- форматы хранения логов;
-- агрегацию, ротацию и доставку логов;
-- интеграцию с внешними системами наблюдаемости;
-- эксплуатационные процедуры.
-
-Все перечисленные вопросы находятся вне рамок MVP и данного слоя документации.
-
----
-
-## Итог
-
-Документ фиксирует логирование в MVP Mindstream как обязательный, платформенно-независимый наблюдательный слой кодовой базы с жёстко заданной семантикой уровней, явным использованием стандартного объекта `Error` и строгим требованием к namespace, без превращения логов в данные продукта или архитектурный механизм.
+This document defines logging in the Mindstream MVP as a mandatory, platform-neutral observability layer with fixed level semantics, explicit use of the standard `Error` object, and a strict namespace requirement, without turning logs into product data or an architectural mechanism.

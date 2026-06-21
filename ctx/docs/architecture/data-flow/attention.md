@@ -4,110 +4,110 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **Attention flows** в MVP Mindstream.
+This document defines **Attention flows** in the Mindstream MVP.
 
-Под Attention flows понимаются архитектурно допустимые write-only потоки данных, возникающие в браузерном контексте и, при выполнении условий, передаваемые в серверный контур хранения как статистические факты.
+Attention flows are the architecturally permitted write-only data flows that originate in the browser context and, under the required conditions, are transmitted to the server-side storage contour as statistical facts.
 
-Документ описывает только Attention flows и не затрагивает **Content Collection flows** или локальные вычислительные петли браузерного контура.
-
----
-
-## Архитектурная позиция
-
-Attention flows соединяют браузерный контур фиксации внимания с серверным контуром хранения.
-
-Эти потоки:
-
-- имеют происхождение в браузерном контексте;
-- направлены от браузера к серверной части системы (`Browser → Storage`);
-- носят статистический характер;
-- не участвуют в формировании или изменении Content Collection.
+This document describes only Attention flows and does not cover **Content Collection flows** or local computational loops inside the browser contour.
 
 ---
 
-## Общая модель Attention flows
+## Architectural Position
 
-Сигналы внимания фиксируют факты взаимодействия браузерного контекста с read-представлениями публикаций.
+Attention flows connect the browser contour that captures attention with the server-side storage contour.
 
-Сигналы накапливаются как статистические наблюдения без интерпретации порядка, причинности или намерений; последовательность и композиция форм внимания относятся к прикладному и UI-уровню.
+These flows:
+
+- originate in the browser context;
+- move from the browser to the server side of the system (`Browser → Storage`);
+- are statistical in nature;
+- do not participate in forming or changing the Content Collection.
+
+---
+
+## General Model Of Attention Flows
+
+Attention signals record facts of interaction between the browser context and read representations of publications.
+
+Signals are accumulated as statistical observations without interpretation of order, causality, or intent; sequencing and composition of attention forms belong to the application and UI levels.
 
 ![Attention Signal Data Flows](../../_img/mindstream_arch_data_flow_attention.svg)
 
-Схема: Attention flows.
+Diagram: Attention flows.
 
-Семантическая интерпретация сигналов внимания и их влияние на локальный interest vector зафиксированы в документе `../attention/interest-vector.md`.
+The semantic interpretation of attention signals and their effect on the local interest vector are defined in `../attention/interest-vector.md`.
 
 ---
 
-## Поток передачи сигналов внимания
+## Attention-Signal Transfer Flow
 
 (`Browser → Storage`)
 
-### Назначение
+### Purpose
 
-Передача зафиксированных сигналов внимания из браузерного контура в серверный контур хранения как статистических фактов.
+Transfer recorded attention signals from the browser contour to the server-side storage contour as statistical facts.
 
-### Передаваемые данные
+### Data Transferred
 
-- идентификаторы публикаций;
-- признаки взаимодействия с публикацией;
-- минимальный контекст, необходимый для последующего агрегирования.
+- publication identifiers;
+- indicators of interaction with the publication;
+- the minimum context required for later aggregation.
 
-### Свойства потока
+### Flow Properties
 
-- поток является однонаправленным и write-only;
-- передача сигналов не изменяет Content Collection;
-- сигналы не инициируют пересчёт смысловых представлений или эмбеддингов;
-- отсутствие передачи сигналов не нарушает функционирование системы.
-
----
-
-## Условность передачи сигналов внимания
-
-Передача сигналов внимания является **условной** и зависит от наличия **зарегистрированной anonymous identity** в браузерном контексте.
-
-### Контекст без identity
-
-- anonymous identity отсутствует или не зарегистрирована;
-- сигналы внимания могут фиксироваться и использоваться только локально;
-- передача сигналов в серверный контур хранения отсутствует.
-
-### Контекст с зарегистрированной identity
-
-- anonymous identity присутствует и зарегистрирована;
-- допускается передача сигналов внимания в серверный контур хранения;
-- передаваемые сигналы используются исключительно для агрегирования статистики.
-
-Во всех случаях архитектурная роль сигналов внимания остаётся неизменной.
-
-Модель anonymous identity и её lifecycle зафиксированы в документе `ctx/docs/architecture/anonymous-identity/invariants.md`.
+- the flow is one-way and write-only;
+- transmitting signals does not change the Content Collection;
+- signals do not trigger recalculation of semantic representations or embeddings;
+- absence of transmission does not break system operation.
 
 ---
 
-## Ограничения
+## Conditional Signal Transmission
 
-Глобальные запреты на реактивность, обратные связи и управляющие потоки распространяются на Attention flows и исключают влияние сигналов внимания на Content Collection flows.
+Transmission of attention signals is **conditional** and depends on the presence of a **registered anonymous identity** in the browser context.
+
+### Context Without Identity
+
+- anonymous identity is absent or not registered;
+- attention signals may be recorded and used only locally;
+- no signals are transmitted to the server-side storage contour.
+
+### Context With Registered Identity
+
+- anonymous identity exists and is registered;
+- attention signals may be transmitted to the server-side storage contour;
+- transmitted signals are used only for statistical aggregation.
+
+In all cases, the architectural role of attention signals remains unchanged.
+
+The anonymous-identity model and its lifecycle are defined in `ctx/docs/architecture/anonymous-identity/invariants.md`.
 
 ---
 
-## Границы документа
+## Constraints
 
-Данный документ не описывает:
-
-- пользовательский интерфейс и формы взаимодействия;
-- продуктовые сценарии;
-- интерпретацию сигналов внимания;
-- алгоритмы агрегации и анализа;
-- структуру interest vector;
-- форматы хранения и передачи данных;
-- API-эндпойнты и ingress-реализации.
-
-Эти вопросы относятся к другим слоям документации.
+Global prohibitions on reactivity, feedback loops, and control flows apply to Attention flows and exclude any influence of attention signals on Content Collection flows.
 
 ---
 
-## Итог
+## Document Boundary
 
-Документ фиксирует Attention flows Mindstream как однонаправленные write-only потоки наблюдения, передающие факты внимания из браузерного контекста в серверное хранилище **только при наличии зарегистрированной anonymous identity**, без управляющих эффектов, без реактивности и без влияния на Content Collection в рамках MVP.
+This document does not describe:
+
+- user interface and interaction forms;
+- product scenarios;
+- interpretation of attention signals;
+- aggregation and analysis algorithms;
+- the structure of the interest vector;
+- storage and transport formats;
+- API endpoints and ingress implementations.
+
+These questions belong to other documentation layers.
+
+---
+
+## Summary
+
+This document defines Mindstream Attention flows as one-way write-only observation flows that transmit attention facts from the browser context to server storage **only when a registered anonymous identity exists**, without control effects, without reactivity, and without any influence on the Content Collection within the MVP.

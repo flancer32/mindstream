@@ -4,100 +4,100 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует архитектурные инварианты **Content Collection** в MVP Mindstream.
+This document defines the architectural invariants of the **Content Collection** in the Mindstream MVP.
 
-Content Collection рассматривается как технический набор публикаций и их производных представлений, используемый как материал для feed и внимания.
+The Content Collection is treated as the technical set of publications and derived representations used as material for the feed and for attention-related processing.
 
-Документ определяет, что включено и что исключено из Content Collection, а также её связь с другими архитектурными осями без описания схем хранения или реализации.
-
----
-
-## Определение Content Collection
-
-Content Collection — это:
-
-- канонический набор публикаций и их производных представлений;
-- общий источник данных для read-представлений;
-- результат Content Collection flows серверных контуров.
-
-Content Collection:
-
-- не персонализирована;
-- не зависит от anonymous identity;
-- не зависит от attention-сигналов;
-- не трактуется как модель «реальности».
-
-Публикация является атомарным артефактом Content Collection.
+The document defines what is included in and excluded from the Content Collection and its relation to other architectural axes, without describing storage schemas or implementation.
 
 ---
 
-## Что включено
+## Content Collection Definition
 
-В Content Collection включаются:
+The Content Collection is:
 
-- публикации, принятые серверными потоками ingestion;
-- производные представления публикаций (annotation, overview);
-- embeddings, полученные из производных представлений.
+- the canonical set of publications and their derived representations;
+- the shared data source for read models;
+- the result of server-side Content Collection flows.
 
----
+The Content Collection:
 
-## Что исключено
+- is not personalized;
+- does not depend on anonymous identity;
+- does not depend on attention signals;
+- is not treated as a model of “reality.”
 
-В Content Collection не включаются:
-
-- данные anonymous identity;
-- attention-сигналы и любые производные статистики внимания;
-- персонализированные read-модели;
-- UI-состояния и пользовательские контексты.
+A publication is the atomic artifact of the Content Collection.
 
 ---
 
-## Связь с другими осями
+## What Is Included
+
+The Content Collection includes:
+
+- publications accepted by server-side ingestion flows;
+- derived publication representations such as annotation and overview;
+- embeddings derived from those representations.
+
+---
+
+## What Is Excluded
+
+The Content Collection does not include:
+
+- anonymous-identity data;
+- attention signals and any derived attention statistics;
+- personalized read models;
+- UI states and user contexts.
+
+---
+
+## Relation To Other Axes
 
 ### Anonymous Identity
 
-Content Collection не содержит ссылок на anonymous identity и существует независимо от наличия или отсутствия identity.
+The Content Collection contains no references to anonymous identity and exists independently of whether identity is present.
 
 ### Attention
 
-Attention является внешним наблюдением над Content Collection и не влияет на её состав или структуру.
+Attention is an external observation over the Content Collection and does not affect its composition or structure.
 
-### Ingress и Storage
+### Ingress And Storage
 
-Content Collection формируется только серверными потоками и сохраняется в каноническом storage без реактивных обратных связей.
-
----
-
-## Lifecycle публикаций
-
-### Появление
-
-Публикации появляются в Content Collection через серверные потоки ingestion и content processing.
-
-### Изменение
-
-Content Collection допускает обновление и замену производных представлений публикаций без изменения архитектурного статуса публикации.
-
-### Удаление
-
-Удаление публикации из Content Collection приводит к каскадной очистке связанных attention-данных и не инициирует обратных потоков.
+The Content Collection is formed only by server-side flows and stored in canonical storage without reactive feedback loops.
 
 ---
 
-## Границы и запреты
+## Publication Lifecycle
 
-В рамках MVP запрещено:
+### Creation
 
-- персонализировать Content Collection на основе attention или identity;
-- использовать Content Collection как реакцию на пользовательские сигналы;
-- хранить внутри Content Collection данные, производные от внимания;
-- рассматривать Content Collection как read-модель для identity.
+Publications enter the Content Collection through server-side ingestion and content-processing flows.
+
+### Change
+
+The Content Collection may update or replace derived representations of publications without changing the architectural status of the publication.
+
+### Removal
+
+Removing a publication from the Content Collection causes cascade cleanup of related attention data and does not initiate reverse flows.
 
 ---
 
-## Связанные документы
+## Boundaries And Prohibitions
+
+The following are prohibited in the MVP:
+
+- personalizing the Content Collection based on attention or identity;
+- using the Content Collection as a reaction to user signals;
+- storing attention-derived data inside the Content Collection;
+- treating the Content Collection as a read model for identity.
+
+---
+
+## Related Documents
 
 - `ctx/docs/architecture/data-flow/content-collection.md`
 - `ctx/docs/architecture/data-flow/attention.md`
@@ -105,6 +105,6 @@ Content Collection допускает обновление и замену пр�
 
 ---
 
-## Итог
+## Summary
 
-Content Collection в архитектуре Mindstream является каноническим, неперсонализированным техническим набором публикаций, независимым от attention и anonymous identity и используемым как материал для feed и внимания в рамках MVP.
+In the Mindstream architecture, the Content Collection is the canonical, non-personalized technical set of publications, independent of attention and anonymous identity, and used as material for the feed and attention-related processing in the MVP.

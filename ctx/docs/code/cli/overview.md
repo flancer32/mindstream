@@ -4,127 +4,127 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует рамочную модель CLI в MVP Mindstream.
+This document defines the frame model of the CLI in the Mindstream MVP.
 
-Он задаёт нормативные инварианты слоя CLI, определяющие его статус, границы ответственности и отношение к backend-приложению.
-
----
-
-## Статус CLI
-
-В MVP Mindstream CLI является частью backend-приложения.
-
-CLI:
-
-- не является отдельным приложением;
-- не имеет собственного жизненного цикла вне backend-приложения;
-- не образует самостоятельный архитектурный контур.
-
-CLI используется исключительно как механизм выбора режима выполнения backend-приложения.
+It sets the normative invariants of the CLI layer, including its status, responsibility boundaries, and relation to the backend application.
 
 ---
 
-## Entry point
+## CLI Status
 
-Backend-приложение имеет единственный entrypoint.
+In the Mindstream MVP, the CLI is part of the backend application.
 
-Все запуски backend-кода осуществляются через него и различаются только выбранной CLI-командой.
+The CLI:
 
-Альтернативные entrypoint и параллельные точки входа не допускаются.
+- is not a separate application;
+- has no lifecycle outside the backend application;
+- does not form an independent architectural contour.
 
----
-
-## Режимы выполнения
-
-Через CLI всегда запускается одно и то же backend-приложение.
-
-CLI определяет режим выполнения приложения:
-
-- runtime-режим;
-- инженерный (maintenance) режим.
-
-Различие между режимами является логическим и не связано с разными composition root или разными исполняемыми контурами.
+The CLI is used only as the mechanism for choosing the execution mode of the backend application.
 
 ---
 
-## Классы CLI-команд
+## Entry Point
 
-CLI-команды классифицируются по типу жизненного цикла.
+The backend application has a single entry point.
 
-### Runtime-команды
+All backend code starts through it and differs only by the selected CLI command.
 
-Runtime-команды инициируют runtime-режим выполнения backend-приложения.
-
-Runtime-команда не является операцией с результатом и не предполагает нормального завершения.
+Alternative entry points and parallel entry points are not allowed.
 
 ---
 
-### Инженерные команды
+## Execution Modes
 
-Инженерные команды инициируют одноразовое выполнение backend-приложения.
+The same backend application is always launched through the CLI.
 
-Инженерная команда завершается после выполнения действия и выхода из процесса.
+The CLI determines the application's execution mode:
 
----
+- runtime mode;
+- engineering (maintenance) mode.
 
-## Общая прикладная основа
-
-Независимо от выбранной CLI-команды:
-
-- используется единый кодовый базис backend-приложения;
-- используется единый DI-контейнер;
-- используется единое окружение и доступ к инфраструктуре.
-
-CLI не переключает composition root и не разделяет backend-приложение на разные исполняемые сущности.
+The difference between these modes is logical and is not tied to different composition roots or different executable contours.
 
 ---
 
-## Неинтерактивность
+## Classes Of CLI Commands
 
-CLI в MVP является строго неинтерактивным.
+CLI commands are classified by lifecycle type.
 
-CLI:
+### Runtime Commands
 
-- не использует интерактивный ввод;
-- не запрашивает подтверждений;
-- не предполагает диалогов во время выполнения.
+Runtime commands initiate the runtime execution mode of the backend application.
 
-Все параметры выполнения должны быть известны на старте.
+A runtime command is not a result-bearing operation and does not imply normal completion.
 
 ---
 
-## Общие инварианты CLI (MVP)
+### Engineering Commands
 
-Для слоя CLI в MVP зафиксированы следующие инварианты:
+Engineering commands initiate one-shot execution of the backend application.
 
-- детерминированность выполнения при фиксированном окружении и данных;
-- отсутствие интерактивности;
-- работа в доверенном контуре;
-- централизованная политика завершения процесса.
+An engineering command ends after completing its action and exiting the process.
 
 ---
 
-## Отношение к bootstrap и runtime
+## Shared Application Basis
 
-CLI не является bootstrap-слоем.
+Regardless of the selected CLI command:
 
-Bootstrap передаёт управление backend-приложению, а CLI определяет режим выполнения приложения после передачи управления. После возврата управления bootstrap завершает приложение и освобождает управляемые ресурсы.
+- the same backend codebase is used;
+- the same DI container is used;
+- the same environment and infrastructure access are used.
 
-Runtime-код не зависит от CLI и не содержит логики выбора режима запуска.
+The CLI does not switch composition roots and does not split the backend application into different executable entities.
 
 ---
 
-## Границы документа
+## Non-Interactivity
 
-Документ не описывает:
+The CLI is strictly non-interactive in the MVP.
 
-- структуру дерева CLI;
-- модель диспетчеризации;
-- разбор аргументов;
-- семантику ошибок и exit code;
-- конкретные команды MVP;
-- реализацию CLI в коде.
+The CLI:
 
-Эти аспекты фиксируются в специализированных документах слоя `code/cli`.
+- does not use interactive input;
+- does not request confirmations;
+- does not involve dialogue during execution.
+
+All execution parameters must be known at startup.
+
+---
+
+## General CLI Invariants (MVP)
+
+The following invariants are fixed for the CLI layer in the MVP:
+
+- deterministic execution under fixed environment and data;
+- no interactivity;
+- operation in a trusted contour;
+- centralized process-termination policy.
+
+---
+
+## Relation To Bootstrap And Runtime
+
+The CLI is not the bootstrap layer.
+
+Bootstrap hands control to the backend application, and the CLI determines the execution mode after control is transferred. When control returns, bootstrap shuts down the application and releases managed resources.
+
+Runtime code does not depend on the CLI and contains no startup-mode selection logic.
+
+---
+
+## Document Boundary
+
+This document does not describe:
+
+- the CLI tree structure;
+- the dispatcher model;
+- argument parsing;
+- error semantics and exit codes;
+- concrete MVP commands;
+- CLI implementation in code.
+
+These aspects are defined in specialized `code/cli` documents.

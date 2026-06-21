@@ -4,23 +4,23 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **нормативную структуру конфигурационного объекта backend-приложения Mindstream** на уровне параметров.
+This document defines the **normative parameter-level structure of the Mindstream backend configuration object**.
 
-Документ определяет:
+It specifies:
 
-- какие параметры входят в конфигурацию;
-- как они группируются;
-- какие имена считаются допустимыми.
+- which parameters belong to the configuration;
+- how they are grouped;
+- which names are valid.
 
-Документ **не описывает значения**, источники загрузки, семантику параметров и логику их использования.
+It **does not describe values**, loading sources, parameter semantics, or the logic of their use.
 
 ---
 
-## Общая форма конфигурации
+## General Configuration Form
 
-Конфигурация backend-приложения представляется как один объект со следующими верхнеуровневыми секциями:
+The backend configuration is represented as a single object with these top-level sections:
 
 ```
 configuration:
@@ -29,15 +29,15 @@ configuration:
     llm
 ```
 
-Все параметры конфигурации **обязаны принадлежать одной из этих секций**.
+Every configuration parameter **must belong to one of these sections**.
 
 ---
 
-## Секция `server`
+## `server` Section
 
-Секция `server` содержит параметры runtime-веб-сервера backend-приложения.
+The `server` section contains parameters of the backend runtime web server.
 
-Нормативный набор параметров MVP:
+The normative MVP parameter set is:
 
 ```
 server:
@@ -47,11 +47,11 @@ server:
 
 ---
 
-## Секция `db`
+## `db` Section
 
-Секция `db` содержит параметры подключения и настройки DBAL (knex).
+The `db` section contains DBAL (`knex`) connection and configuration parameters.
 
-Нормативный набор параметров MVP:
+The normative MVP parameter set is:
 
 ```
 db:
@@ -63,15 +63,15 @@ db:
     password
 ```
 
-(Допустима вложенная группировка, если она не меняет состав параметров.)
+Nested grouping is allowed if it does not change the set of parameters.
 
 ---
 
-## Секция `llm`
+## `llm` Section
 
-Секция `llm` содержит параметры подключения к внешнему LLM API.
+The `llm` section contains connection parameters for the external LLM API.
 
-Нормативный набор параметров MVP:
+The normative MVP parameter set is:
 
 ```
 llm:
@@ -83,42 +83,42 @@ llm:
 
 ---
 
-## Инварианты структуры
+## Structure Invariants
 
-В рамках MVP считается истинным, что:
+Within the MVP, the following are true:
 
-- конфигурация содержит **только** параметры, перечисленные в данном документе;
-- добавление нового параметра требует изменения этого документа;
-- имена параметров считаются частью контракта;
-- прикладной код не читает `process.env` напрямую;
-- все параметры доступны через `Mindstream_Back_App_Configuration`.
-
----
-
-## Эволюция структуры
-
-Изменение структуры конфигурации допускается только через:
-
-- добавление параметра в существующую секцию;
-- добавление новой секции.
-
-Любое такое изменение фиксируется **изменением данного документа** и синхронным изменением кода.
+- the configuration contains **only** the parameters listed in this document;
+- adding a new parameter requires updating this document;
+- parameter names are part of the contract;
+- application code does not read `process.env` directly;
+- all parameters are available through `Mindstream_Back_App_Configuration`.
 
 ---
 
-## Границы документа
+## Structure Evolution
 
-Документ не фиксирует:
+Changing the configuration structure is allowed only through:
 
-- имена переменных окружения;
-- значения параметров;
-- значения по умолчанию;
-- обязательность параметров;
-- формат секретов;
-- правила валидации.
+- adding a parameter to an existing section;
+- adding a new section.
+
+Any such change must be recorded by **changing this document** together with a synchronized code change.
 
 ---
 
-## Итог
+## Document Boundary
 
-Документ задаёт **жёсткий параметрный скелет конфигурации backend-приложения Mindstream**, достаточный для генерации, проверки и модификации кода агентами без домысливания и интерпретации.
+This document does not define:
+
+- environment-variable names;
+- parameter values;
+- default values;
+- whether a parameter is required;
+- secret formats;
+- validation rules.
+
+---
+
+## Summary
+
+This document defines the **rigid parameter skeleton of the Mindstream backend configuration**, sufficient for agents to generate, verify, and modify code without guesswork or interpretation.

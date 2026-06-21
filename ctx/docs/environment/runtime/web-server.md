@@ -4,132 +4,132 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение документа
+## Purpose
 
-Документ фиксирует контракт и границы ответственности HTTP-сервера в приложении **Mindstream** на уровне runtime. Документ является нормативным контекстом и используется при разработке и интеграции инфраструктурных компонентов.
+This document defines the contract and responsibility boundaries of the HTTP server in **Mindstream** at the runtime level. It is a normative context document used during development and integration of infrastructure components.
 
-Данный документ не описывает доменную или прикладную логику приложения.
-
----
-
-## Статус HTTP-сервера
-
-HTTP-сервер в Mindstream является **инфраструктурным transport-слоем**.
-
-Для реализации сервера используется пакет `@flancer32/teq-web`, который:
-
-- не является частью доменной модели;
-- не участвует в композиции прикладных подсистем;
-- предоставляет только механизм приёма HTTP-запросов и диспетчеризации обработчиков.
-
-Сервер рассматривается как постоянная инфраструктурная зависимость проекта, при этом архитектурно остаётся заменяемым компонентом.
+This document does not describe the domain or application logic of Mindstream.
 
 ---
 
-## Модель запуска приложения
+## HTTP Server Status
 
-Mindstream является CLI-запускаемым backend-приложением.
+The HTTP server in Mindstream is an **infrastructure transport layer**.
 
-Переход приложения в режим работы веб-сервера осуществляется **явной CLI-командой**:
+The server is implemented using `@flancer32/teq-web`, which:
+
+- is not part of the domain model;
+- does not participate in composition of application subsystems;
+- provides only a mechanism for receiving HTTP requests and dispatching handlers.
+
+The server is treated as a permanent infrastructure dependency of the project, while remaining architecturally replaceable.
+
+---
+
+## Application Startup Model
+
+Mindstream is a CLI-started backend application.
+
+The application enters web-server mode through the explicit CLI command:
 
 ```
 runtime:web
 ```
 
-Только при выполнении этой команды:
+Only when this command is executed:
 
-- инициализируется HTTP-сервер;
-- регистрируются HTTP-обработчики приложения;
-- процесс переходит в long-running режим.
+- the HTTP server is initialized;
+- application HTTP handlers are registered;
+- the process enters long-running mode.
 
-В остальных режимах запуска HTTP-сервер отсутствует.
-
----
-
-## Экземплярность и масштабирование
-
-В рамках одного процесса приложения:
-
-- существует **ровно один HTTP-сервер**;
-- повторная инициализация сервера недопустима.
-
-Горизонтальное масштабирование осуществляется **внешними средствами** (PM2) путём запуска нескольких процессов. Каждый процесс содержит собственный экземпляр HTTP-сервера.
+In all other startup modes, the HTTP server is absent.
 
 ---
 
-## Lifecycle сервера
+## Instance Model And Scaling
 
-HTTP-сервер:
+Within one application process:
 
-- запускается при выполнении команды `runtime:web`;
-- живёт на протяжении всего жизненного цикла процесса;
-- не управляет завершением процесса самостоятельно.
+- there is **exactly one HTTP server**;
+- repeated server initialization is not allowed.
 
-Приложение может:
-
-- подписываться на сигналы завершения процесса;
-- вызывать методы сервера или HTTP-обработчиков для корректного освобождения ресурсов.
-
-Требования к graceful shutdown определяются на уровне приложения и обработчиков, а не на уровне сервера как инфраструктурного компонента.
+Horizontal scaling is done **externally** through PM2 by running multiple processes. Each process contains its own HTTP-server instance.
 
 ---
 
-## Конфигурация
+## Server Lifecycle
 
-Конфигурация HTTP-сервера является частью **общего конфигурационного объекта приложения**.
+The HTTP server:
 
-Сервер получает параметры (порт, режим работы и прочие runtime-настройки) исключительно через этот объект. Отдельной конфигурации сервера не существует.
+- starts when `runtime:web` is executed;
+- lives for the lifetime of the process;
+- does not terminate the process on its own.
 
----
+The application may:
 
-## TLS и сетевое окружение
+- subscribe to process termination signals;
+- call methods on the server or HTTP handlers to release resources cleanly.
 
-TLS-терминация осуществляется **внешним reverse-proxy (apache)**.
-
-HTTP-сервер Mindstream:
-
-- работает за reverse-proxy;
-- не обслуживает TLS напрямую;
-- предполагает наличие TLS во всех окружениях, включая dev.
+Graceful-shutdown requirements are defined at the application and handler level, not at the server layer as an infrastructure component.
 
 ---
 
-## Тип обслуживаемого API
+## Configuration
 
-HTTP-сервер обслуживает исключительно **backend JSON API**.
+HTTP-server configuration is part of the **shared application configuration object**.
 
-- Модель взаимодействия: REST-подобные HTTP-запросы (GET / POST).
-- Формат ответов: JSON.
-- Обслуживание HTML, SPA или статических файлов сервером Mindstream **запрещено**.
+The server receives parameters such as port, mode, and other runtime settings only through this object. There is no separate server configuration.
 
 ---
 
-## Статус HTTP-обработчиков
+## TLS And Network Environment
 
-HTTP-обработчики:
+TLS termination is handled by an **external reverse proxy (Apache)**.
 
-- принадлежат приложению Mindstream;
-- регистрируются в сервере через инфраструктурный механизм `@flancer32/teq-web`;
-- являются адаптерами между HTTP-запросами и внутренними операциями приложения.
+The Mindstream HTTP server:
 
-HTTP-обработчики могут:
-
-- вызывать прикладные и доменные операции;
-- сериализовать результаты выполнения;
-- участвовать в управлении завершением приложения.
-
-Контракт и правила реализации HTTP-обработчиков фиксируются в документах уровня composition.
+- runs behind a reverse proxy;
+- does not serve TLS directly;
+- assumes TLS exists in all environments, including `dev`.
 
 ---
 
-## Границы ответственности документа
+## Type Of API Served
 
-Данный документ **не описывает**:
+The HTTP server serves only a **backend JSON API**.
 
-- доменные операции;
-- структуру API-эндпоинтов;
-- бизнес-логику приложения;
-- формат DTO;
-- поведение конкретных HTTP-обработчиков.
+- Interaction model: REST-like HTTP requests (`GET` / `POST`).
+- Response format: JSON.
+- Serving HTML, an SPA, or static files from the Mindstream server is **prohibited**.
 
-Все перечисленные аспекты фиксируются в документах более высокого уровня абстракции.
+---
+
+## Status Of HTTP Handlers
+
+HTTP handlers:
+
+- belong to the Mindstream application;
+- are registered in the server through the `@flancer32/teq-web` infrastructure mechanism;
+- act as adapters between HTTP requests and internal application operations.
+
+HTTP handlers may:
+
+- call application and domain operations;
+- serialize execution results;
+- participate in shutdown handling for the application.
+
+The contract and implementation rules for HTTP handlers are defined in composition-level documents.
+
+---
+
+## Document Boundary
+
+This document **does not describe**:
+
+- domain operations;
+- API endpoint structure;
+- business logic;
+- DTO formats;
+- behavior of specific HTTP handlers.
+
+All of these aspects are defined in documents at higher abstraction levels.

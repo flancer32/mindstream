@@ -4,110 +4,110 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **нормативную модель конфигурации backend-приложения Mindstream** на уровне кодового слоя.
+This document defines the **normative configuration model of the Mindstream backend application** at the code layer.
 
-Он определяет:
+It specifies:
 
-- как в проекте устроена работа с конфигурацией;
-- какие инварианты считаются обязательными;
-- какие источники значений допустимы.
+- how configuration is handled in the project;
+- which invariants are mandatory;
+- which value sources are allowed.
 
-Документ относится исключительно к слою `code/` и не вводит архитектурных, продуктовых или эксплуатационных решений.
-
----
-
-## Статус конфигурации
-
-Конфигурация backend-приложения Mindstream оформляется как **внутренний объект прикладного приложения**.
-
-Объект конфигурации:
-
-- не является частью runtime-контракта;
-- не участвует в архитектурной модели запуска;
-- не передаётся из bootstrap-кода как готовая структура;
-- создаётся и используется исключительно внутри приложения.
-
-Архитектурный и environment-слои **не оперируют** сущностью конфигурации как объектом.
+This document belongs only to the `code/` layer and does not introduce architectural, product, or operational decisions.
 
 ---
 
-## Единый объект конфигурации
+## Status Of Configuration
 
-В backend-приложении существует **ровно один** объект конфигурации: `Mindstream_Back_App_Configuration`.
+The Mindstream backend configuration is represented as an **internal application object**.
 
-- объект создаётся единственной точкой сборки в прикладном коде;
-- объект присутствует в памяти процесса на протяжении всего времени работы приложения;
-- объект используется как **read-only** структура и не изменяется после инициализации;
-- доступ к объекту осуществляется через стандартные механизмы связывания кода (import или DI), без использования глобального состояния.
+The configuration object:
 
-Создание дополнительных объектов конфигурации, конфигурационных дублей или альтернативных конфигурационных сервисов считается нарушением нормы.
+- is not part of the runtime contract;
+- does not participate in the architectural startup model;
+- is not passed from bootstrap code as a ready-made structure;
+- is created and used only inside the application.
 
----
-
-## Источники значений
-
-**Каноническим источником значений конфигурации является `process.env`.**
-
-Другие источники значений в модели конфигурации отсутствуют.
-
-Использование `.env` файла допускается **исключительно как механизм подготовки `process.env`** и не рассматривается как альтернативный источник конфигурации.
+The architecture and environment layers **do not operate** on configuration as an object.
 
 ---
 
-## Загрузка `.env` файла
+## Single Configuration Object
 
-Допускается загрузка файла `.env`, расположенного в корне проекта.
+There is **exactly one** configuration object in the backend application: `Mindstream_Back_App_Configuration`.
 
-Инварианты загрузки `.env`:
+- the object is created by a single assembly point in application code;
+- it remains in process memory for the lifetime of the application;
+- it is used as a **read-only** structure and is not changed after initialization;
+- it is accessed through standard code-binding mechanisms such as import or DI, without global state.
 
-- загрузка инициируется прикладным кодом при инициализации конфигурации;
-- путь к корню проекта передаётся в приложение извне (через bootstrap);
-- файл `.env`, если он существует, разбирается и его значения записываются в `process.env`;
-- отсутствие файла `.env` не считается ошибкой;
-- значения, уже присутствующие в `process.env`, не переопределяются.
-
-Загрузка `.env` рассматривается как **подготовка среды выполнения**, а не как часть модели конфигурации.
+Creating additional configuration objects, configuration duplicates, or alternative configuration services is a violation.
 
 ---
 
-## Доступ к параметрам окружения
+## Value Sources
 
-Чтение `process.env` допускается **только** в точке инициализации `Mindstream_Back_App_Configuration`.
+**The canonical source of configuration values is `process.env`.**
 
-Прямой доступ к `process.env` в прикладных модулях, сервисах, адаптерах или инфраструктурных компонентах запрещён и считается нарушением инженерной нормы.
+There are no other value sources in the configuration model.
 
----
-
-## Нормализация
-
-Все значения из `process.env` приводятся к требуемым типам и форме **в момент инициализации объекта конфигурации**.
-
-Объект конфигурации содержит **только нормализованные значения**, пригодные для прямого использования. Передача "сырых" строк окружения в прикладной код запрещена.
+Use of a `.env` file is allowed **only as a mechanism for preparing `process.env`** and is not treated as an alternative configuration source.
 
 ---
 
-## Связь со структурой конфигурации
+## Loading The `.env` File
 
-Структура конфигурационного объекта считается нормативно зафиксированной в документе:
+Loading a `.env` file located at the project root is allowed.
+
+`.env` loading invariants:
+
+- loading is initiated by application code during configuration initialization;
+- the project root path is passed into the application from outside, through bootstrap;
+- if the `.env` file exists, it is parsed and its values are written into `process.env`;
+- absence of the `.env` file is not an error;
+- values already present in `process.env` are not overwritten.
+
+Loading `.env` is treated as **runtime-environment preparation**, not as part of the configuration model.
+
+---
+
+## Access To Environment Parameters
+
+Reading `process.env` is allowed **only** at the initialization point of `Mindstream_Back_App_Configuration`.
+
+Direct access to `process.env` from application modules, services, adapters, or infrastructure components is prohibited and treated as an engineering violation.
+
+---
+
+## Normalization
+
+All values from `process.env` are converted to the required types and shape **at the moment the configuration object is initialized**.
+
+The configuration object contains **only normalized values** ready for direct use. Passing raw environment strings into application code is prohibited.
+
+---
+
+## Relation To Configuration Structure
+
+The structure of the configuration object is normatively fixed in:
 
 ```
 ctx/docs/code/configuration/structure.md
 ```
 
-Использование параметров, отсутствующих в нормативной структуре, считается дефектом кодовой базы.
+Using parameters absent from the normative structure is treated as a codebase defect.
 
 ---
 
-## Границы документа
+## Document Boundary
 
-Документ не описывает:
+This document does not describe:
 
-- конкретные имена переменных окружения;
-- значения параметров и значения по умолчанию;
-- формат хранения секретов;
-- процедуры деплоя и настройки окружения;
-- архитектурную модель запуска приложения.
+- concrete environment-variable names;
+- parameter values and defaults;
+- secret-storage format;
+- deployment and environment-setup procedures;
+- the architectural application-startup model.
 
-Эти аспекты относятся к другим уровням контекста и не фиксируются на уровне `code/`.
+These aspects belong to other context levels and are not fixed at the `code/` level.

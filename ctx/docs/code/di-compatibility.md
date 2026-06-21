@@ -1,215 +1,188 @@
-# DI Compatibility — @teqfw/di
+# DI Compatibility — `@teqfw/di`
 
 - Path: `ctx/docs/code/di-compatibility.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **жёсткие инженерные инварианты организации кода**, необходимые для признания кодовой базы **совместимой с DI-моделью `@teqfw/di`** в рамках проекта Mindstream.
+This document defines the **rigid engineering invariants of code organization** required for the codebase to be considered **compatible with the `@teqfw/di` DI model** within the Mindstream project.
 
-Документ носит **нормативный характер**. Любое отклонение от зафиксированных положений считается **архитектурным дефектом**.
+This document is normative. Any deviation is an architectural defect.
 
-Документ не является руководством по использованию `@teqfw/di` и не дублирует README библиотеки.
+It is not a usage guide for `@teqfw/di` and does not duplicate the library README.
 
----
+## Role Of DI In The Project
 
-## Роль DI в проекте
+In Mindstream:
 
-В проекте Mindstream:
+- `@teqfw/di` is the **only allowed mechanism for binding project code**;
+- DI is the **primary form of composition**, not a helper tool;
+- all dependencies between modules are expressed **only declaratively** through Dependency IDs.
 
-- `@teqfw/di` является **единственным допустимым механизмом связывания project-кода**;
-- DI используется как **основная форма композиции**, а не как вспомогательный инструмент;
-- все зависимости между модулями выражаются **исключительно декларативно**, через Dependency IDs.
+Code that bypasses the DI model is not part of the correct project codebase.
 
-Код, обходящий DI-модель, **не считается частью корректной кодовой базы проекта**.
+## Namespaces And Code Zones
 
----
-
-## Пространства имён и зоны кода
-
-В проекте зафиксирован **строго ограниченный набор корневых namespace**:
+The project fixes a **strictly limited set of root namespaces**:
 
 - `Mindstream_Back_`
 - `Mindstream_Shared_`
 - `Mindstream_Web_`
 
-Использование иных корневых namespace в MVP **запрещено**.
+Use of any other root namespace in the MVP is prohibited.
 
-### Семантика зон
+### Zone Semantics
 
-- `Back` — серверная логика и backend-службы.
-- `Web` — клиентская логика и фронтенд-исполнение.
-- `Shared` — platform-agnostic код.
+- `Back` means server logic and backend services.
+- `Web` means client logic and frontend execution.
+- `Shared` means platform-agnostic code.
 
 `Mindstream_Shared_`:
 
-- не имеет доступа к platform API;
-- не использует `node:*`, DOM, `fetch`, `process` и аналогичные зависимости;
-- содержит DTO, утилиты и чистую бизнес-логику.
+- has no access to platform APIs;
+- does not use `node:*`, DOM, `fetch`, `process`, or similar dependencies;
+- contains DTOs, utilities, and pure business logic.
 
----
+## Code Import And Binding
 
-## Импорт и связывание кода
+### Prohibited
 
-### Запрещено
+In any business module, the following are prohibited:
 
-В любом business-модуле **запрещено**:
+- static import of project code;
+- relative imports such as `../X.mjs`;
+- direct import of platform APIs;
+- direct import of dependencies from `node_modules`.
 
-- статически импортировать project-код;
-- использовать относительные импорты вида `../X.mjs`;
-- напрямую импортировать platform API;
-- напрямую импортировать зависимости из `node_modules`.
+### Allowed
 
-### Допустимо
+- All dependencies are declared **only through DI**.
+- Access to platform APIs and `node_modules` is allowed **only through Dependency IDs**.
 
-- Все зависимости объявляются **исключительно через DI**;
-- доступ к platform API и `node_modules` осуществляется **только через Dependency IDs**.
+Violation of any of these rules is an architectural defect.
 
-Нарушение любого из правил считается архитектурным дефектом.
+## Dependencies From `node_modules`
 
----
+All dependencies supplied through `node_modules` in Mindstream:
 
-## Зависимости из node_modules
+- are **used as ES6 modules**;
+- are **registered in the DI container with the `node:` prefix**;
+- are **injected into constructors or factories as ready-made modules**, without wrappers or proxying.
 
-Все зависимости, поставляемые через `node_modules`, в проекте Mindstream:
-
-- **оформляются как ES6-модули**;
-- **регистрируются в DI-контейнере с префиксом `node:`**;
-- **внедряются в конструкторы или фабрики как готовые модули**, без обёрток и проксирования.
-
-Нормативная форма dependency ID:
+Normative Dependency ID form:
 
 - `"node:<package-name>"`
 
-Нормативная форма внедрения:
+Normative injection form:
 
-- зависимость передаётся в конструктор или фабрику как ES6-модуль
-  (например: `"node:knex" → knex`).
+- the dependency is passed into a constructor or factory as an ES6 module, for example `"node:knex" -> knex`.
 
-Использование зависимостей из `node_modules`:
+The following uses of `node_modules` dependencies are prohibited and are architectural defects:
 
-- без префикса `node:`;
-- через статический `import` в business-коде;
-- через динамический `require`;
-- через контейнер как service locator;
-
-**запрещено и считается архитектурным дефектом**.
-
----
+- without the `node:` prefix;
+- through static `import` in business code;
+- through dynamic `require`;
+- through the container as a service locator.
 
 ## Composition Root
 
-### Количество и роль
+### Count And Role
 
-В проекте зафиксированы следующие production composition root:
+The project fixes the following production composition roots:
 
-- один для `Back`;
-- один для `Web`;
-- один для Service Worker.
+- one for `Back`;
+- one for `Web`;
+- one for Service Worker.
 
-Тесты используют **отдельный composition root**, создаваемый для набора тестов или для каждого unit-теста.
+Tests use a **separate composition root**, created either per test suite or per unit test.
 
-### Полномочия composition root
+### Composition-Root Authority
 
-Только composition root имеет право:
+Only the composition root may:
 
-- использовать статические импорты project-кода;
-- использовать статические импорты зависимостей из `node_modules`;
-- регистрировать зависимости с префиксом `node:`;
-- конфигурировать namespace resolver;
-- определять соответствие namespace ↔ filesystem;
-- выполнять разрешение Dependency IDs в реальные объекты.
+- use static imports of project code;
+- use static imports of dependencies from `node_modules`;
+- register dependencies with the `node:` prefix;
+- configure the namespace resolver;
+- define namespace-to-filesystem correspondence;
+- resolve Dependency IDs into real objects.
 
-Любая конфигурация DI вне composition root **запрещена**.
+Any DI configuration outside a composition root is prohibited.
 
----
+## Service Locator Prohibition
 
-## Запрет service locator
+The DI container `Container` is an **infrastructure object** and is **not part of the application domain model**.
 
-DI-контейнер (`Container`) является **инфраструктурным объектом** и **не относится к предметной модели** приложения.
+The following are prohibited in Mindstream:
 
-В проекте Mindstream **запрещено**:
+- passing the DI container through function, constructor, or method parameters;
+- storing the container or its wrappers in object properties;
+- using the container for dynamic dependency retrieval through `container.get(...)` outside composition root and test mode;
+- building business logic that depends on the container as a service.
 
-- передавать контейнер DI через параметры функций, конструкторов или методов;
-- хранить контейнер (или его обёртки) в свойствах объектов;
-- использовать контейнер для динамического извлечения зависимостей (`container.get(...)`) вне composition root и test mode;
-- строить бизнес-логику, зависящую от наличия контейнера как сервиса.
+Any signature that accepts `Container` or a compatible object is an architectural defect without exception.
 
-**Любая сигнатура, принимающая `Container` или совместимый объект, считается архитектурным дефектом без обсуждений.**
+## Normative Dependency Model
 
----
+In a correct Mindstream DI model:
 
-## Нормативная модель зависимости
+- an object **does not know** where its dependencies come from;
+- an object **does not manage** their creation or lifecycle;
+- all dependencies of an object are:
+- expressed **explicitly**;
+- declared **declaratively** through Dependency IDs;
+- resolved **before business logic begins**.
 
-В корректной DI-модели проекта Mindstream:
+If an object needs direct access to the DI container, that is an architectural defect.
 
-- объект **не знает**, откуда берутся его зависимости;
-- объект **не управляет** их созданием и жизненным циклом;
-- все зависимости объекта:
-  - выражены **явно**;
-  - заданы **декларативно** через Dependency IDs;
-  - разрешаются **до начала исполнения бизнес-логики**.
+## Factory Objects
 
-Если объекту требуется доступ к DI-контейнеру, это трактуется как дефект архитектуры.
+Factory objects are allowed as composition elements, but they:
 
----
+- accept **only concrete dependencies**, not the container;
+- do not resolve dependencies dynamically;
+- do not act as proxy access to the container.
 
-## Factory-объекты
+A factory object creates objects, but does **not participate in dependency-graph resolution**.
 
-Factory-объекты допускаются как элемент композиции, но:
-
-- принимают **только конкретные зависимости**, а не контейнер;
-- не разрешают зависимости динамически;
-- не выступают прокси-доступом к контейнеру.
-
-Factory-объект создаёт объекты, но **не участвует в разрешении графа зависимостей**.
-
-Нарушение любого пункта считается архитектурным дефектом.
-
----
+Violation of any of these points is an architectural defect.
 
 ## Dependency ID Model
 
-### Суффиксы
+### Suffixes
 
-Использование суффиксов `$` / `$$` является **обязательным**:
+Use of suffixes `$` and `$$` is mandatory:
 
-- `$` — singleton из default export;
-- `$$` — новый экземпляр из default export;
-- отсутствие суффикса — raw module / export без инстанцирования.
+- `$` means singleton from default export;
+- `$$` means new instance from default export;
+- absence of suffix means raw module or export without instantiation.
 
-### Экспорты
+### Exports
 
-- Нормативная форма — `default export`.
-- `.export` допустим, но не является базовым путём.
-- `(factory)` и `(proxy)` не входят в базовый MVP-набор.
-
----
+- The normative form is `default export`.
+- `.export` is allowed but is not the base path.
+- `(factory)` and `(proxy)` are not part of the base MVP set.
 
 ## Platform Dependencies
 
-- Dependency IDs с префиксом `node:` допустимы **только в `Mindstream_Back_`**.
-- `Web` и `Shared` не используют platform-specific dependency IDs.
-- Любой доступ к платформе осуществляется только через DI.
-
----
+- Dependency IDs with the `node:` prefix are allowed **only in `Mindstream_Back_`**.
+- `Web` and `Shared` do not use platform-specific Dependency IDs.
+- Any access to the platform happens only through DI.
 
 ## Test Mode
 
-`enableTestMode()` определяет разрешённость вмешательства в DI-граф.
+`enableTestMode()` defines whether intervention in the DI graph is allowed.
 
-В test mode допускается:
+In test mode, the following are allowed:
 
-- регистрация и переопределение любых зависимостей;
-- мокирование `node:*` зависимостей.
+- registration and override of any dependencies;
+- mocking of `node:*` dependencies.
 
-Вне test mode любые такие действия запрещены.
+Outside test mode, such actions are prohibited.
 
----
+## Compatibility Criterion
 
-## Критерий совместимости
+Code is considered **compatible with `@teqfw/di` in the Mindstream project** only when **all provisions of this document are satisfied simultaneously**.
 
-Код считается **совместимым с `@teqfw/di` в рамках проекта Mindstream** только при **одновременном соблюдении всех положений** данного документа.
-
-Любое нарушение фиксируется как **архитектурный дефект** и не подлежит интерпретации.
+Any violation is recorded as an **architectural defect** and is not open to reinterpretation.

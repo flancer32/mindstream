@@ -2,101 +2,101 @@
 
 Path: `./src/AGENTS.md`
 
-## Назначение
+## Purpose
 
-Документ определяет **процедурные требования к работе агента с production-кодом backend-части проекта Mindstream**, размещённым в каталоге `src/`.
+This document defines the **procedural requirements for an agent working with the production backend code of the Mindstream project** located in the `src/` directory.
 
-Документ применяется ко всем подкаталогам `src/` и дополняет правила, зафиксированные в корневом `AGENTS.md` и в документации когнитивного контекста проекта (`ctx/`).
+This document applies to all subdirectories under `src/` and complements the rules defined in the root `AGENTS.md` and in the project's cognitive context documentation (`ctx/`).
 
-Документ **не фиксирует инженерные инварианты кода** и **не дублирует нормативные требования**, описанные в `ctx/docs/code/`.  
-Его задача — определить, **какие действия обязан выполнить агент и какой нормативный контекст он обязан загрузить** перед работой с backend-кодом.
-
----
-
-## Карта уровня
-
-- `src/` — исходный production-код **backend-части** проекта Mindstream.
-- `AGENTS.md` — текущий документ; процедурные требования к действиям агента при изменении backend-кода данного уровня.
-
-Код shared-слоёв **не относится** к данному уровню и расположен в `web/app/Shared`.
+This document **does not define engineering code invariants** and **does not duplicate the normative requirements** described in `ctx/docs/code/`.
+Its role is to define **which actions the agent must perform and which normative context the agent must load** before working with backend code.
 
 ---
 
-## Границы ответственности агента
+## Level Map
 
-В каталоге `src/` агент:
+- `src/` — the production source code of the **backend part** of the Mindstream project.
+- `AGENTS.md` — this document; procedural requirements for agent actions when changing backend code at this level.
 
-- изменяет **только backend-код** проекта Mindstream;
-- действует исключительно в рамках зафиксированной DI-модели проекта;
-- не расширяет scope продукта без явного указания человека;
-- не вводит инженерные допущения, отсутствующие в документации контекста.
-
-Перед внесением любых изменений агент **обязан загрузить в рабочий контекст нормативные документы кодового слоя**, применимые к backend-коду, включая как минимум:
-
-- `ctx/docs/code/conventions.md` — базовые инженерные конвенции кода;
-- `ctx/docs/code/di-compatibility.md` — жёсткие инварианты DI-модели `@teqfw/di`;
-- `ctx/docs/code/es6-modules.md` — нормативная форма ES6-модулей проекта;
-- `ctx/docs/code/logging.md` — нормативные принципы логирования кодового слоя и требования observability.
-- `ctx/docs/code/testing.md` — инварианты тестирования кодового слоя.
-
-Несоблюдение любого из указанных нормативов трактуется как дефект кодовой базы, а не как стилевое отклонение.
+The shared-layer code **does not belong** to this level and is located in `web/app/Shared`.
 
 ---
 
-## Требование к декларациям типов
+## Agent Responsibility Boundaries
 
-При добавлении новых классов в backend-код каталога `src/` агент обязан:
+Within the `src/` directory, the agent:
 
-- добавить декларацию соответствующего класса в файл `types.d.ts`;
-- указать корректный файл-источник класса;
-- обеспечить согласованность имени класса и namespace с DI-моделью проекта.
+- modifies **backend code only** for the Mindstream project;
+- operates strictly within the project's established DI model;
+- does not expand product scope without explicit human direction;
+- does not introduce engineering assumptions that are absent from the context documentation.
 
-Изменения кода, при которых новый класс отсутствует в `types.d.ts`, считаются незавершёнными и некорректными.
+Before making any changes, the agent **must load into the working context the normative documents of the code layer** that apply to backend code, including at minimum:
 
----
+- `ctx/docs/code/conventions.md` — baseline engineering code conventions;
+- `ctx/docs/code/di-compatibility.md` — hard invariants of the `@teqfw/di` DI model;
+- `ctx/docs/code/es6-modules.md` — the normative ES6 module shape used in the project;
+- `ctx/docs/code/logging.md` — normative principles of code-layer logging and observability requirements;
+- `ctx/docs/code/testing.md` — testing invariants for the code layer.
 
-## Требование выполнения тестов
-
-Любое изменение production-кода в каталоге `src/` требует обязательной проверки unit-тестами.
-
-Агент обязан:
-
-- при добавлении новых модулей в `src/` создавать unit-тесты для каждого нового модуля, если только модуль не является entrypoint или явно зафиксированным стабильным интерфейсом;
-- после внесения изменений выполнить команду `npm run test:unit`;
-- убедиться, что тесты завершились без ошибок;
-- зафиксировать факт выполнения тестов и их результат в отчёте итерации.
+Failure to comply with any of these norms must be treated as a codebase defect, not as a stylistic deviation.
 
 ---
 
-## Поведение при сбое тестов
+## Type Declaration Requirement
 
-Если выполнение `npm run test:unit` завершается с ошибками, агент обязан:
+When adding new classes to backend code under `src/`, the agent must:
 
-- не считать задачу завершённой;
-- либо исправить код и повторно запустить тесты;
-- либо явно зафиксировать причину сбоя в отчёте итерации и передать решение человеку.
+- add a declaration for the corresponding class to `types.d.ts`;
+- specify the correct source file for the class;
+- ensure consistency of the class name and namespace with the project's DI model.
 
-Внесение изменений в backend-код без успешного выполнения тестов считается некорректным.
-
----
-
-## Запрещённые действия
-
-В каталоге `src/` агенту запрещено:
-
-- вносить изменения в backend-код без загрузки нормативного контекста кодового слоя;
-- вносить изменения без последующего запуска unit-тестов;
-- заявлять о завершении задачи при наличии падающих тестов;
-- обходить или игнорировать тестовую инфраструктуру проекта;
-- подменять соблюдение нормативных требований субъективной оценкой корректности кода.
+Code changes in which a new class is missing from `types.d.ts` are considered incomplete and invalid.
 
 ---
 
-## Итоговое требование
+## Test Execution Requirement
 
-Изменения backend-кода в `src/` **не считаются валидными**, если:
+Any change to production code in the `src/` directory requires mandatory verification with unit tests.
 
-- агент не загрузил обязательные нормативные документы кодового слоя;
-- изменения не соответствуют зафиксированным инженерным инвариантам;
-- изменения не подтверждены успешным выполнением `npm run test:unit`;
-- результаты тестов не отражены в отчёте итерации.
+The agent must:
+
+- create unit tests for each new module added under `src/`, unless the module is an entry point or an explicitly fixed stable interface;
+- run `npm run test:unit` after making changes;
+- verify that the tests complete without errors;
+- record the fact that tests were executed and their result in the iteration report.
+
+---
+
+## Behavior When Tests Fail
+
+If `npm run test:unit` finishes with errors, the agent must:
+
+- not consider the task complete;
+- either fix the code and rerun the tests;
+- or explicitly record the reason for the failure in the iteration report and hand the decision over to the human.
+
+Making backend code changes without successful test execution is considered invalid.
+
+---
+
+## Prohibited Actions
+
+Within the `src/` directory, the agent must not:
+
+- modify backend code without loading the normative context of the code layer;
+- make changes without subsequently running unit tests;
+- claim the task is complete while tests are failing;
+- bypass or ignore the project's test infrastructure;
+- substitute compliance with normative requirements by a subjective judgment of code correctness.
+
+---
+
+## Final Requirement
+
+Backend code changes in `src/` **must not be considered valid** if:
+
+- the agent did not load the required normative documents of the code layer;
+- the changes do not comply with the established engineering invariants;
+- the changes are not confirmed by successful execution of `npm run test:unit`;
+- the test results are not recorded in the iteration report.

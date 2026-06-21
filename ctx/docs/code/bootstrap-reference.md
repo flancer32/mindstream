@@ -4,11 +4,11 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует референсную кодовую форму bootstrap-запуска backend-приложения Mindstream для Node.js (ESM) и служит иллюстрацией нормативной архитектурной и environment-модели запуска, зафиксированной в документах `ctx/docs/architecture/` и `ctx/docs/environment/`.
+This document defines the reference bootstrap form for starting the Mindstream backend application on Node.js (ESM) and serves as an illustration of the normative architecture and runtime-start model defined in `ctx/docs/architecture/` and `ctx/docs/environment/`.
 
-## Референсная реализация
+## Reference Implementation
 
 ```js
 #!/usr/bin/env node
@@ -32,6 +32,6 @@ const app = await container.get("Mindstream_Back_App$");
 await app.run({ projectRoot });
 ```
 
-## Статус
+## Status
 
-Документ является кодовой справкой и не определяет архитектурных инвариантов запуска. Источники инвариантов находятся в документах уровней `architecture/` и `environment/`.
+This document is a code reference and does not define architectural startup invariants. The authoritative invariants are defined in the `architecture/` and `environment/` documents.

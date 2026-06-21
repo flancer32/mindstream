@@ -4,94 +4,94 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Данный документ фиксирует архитектурную модель **anonymous identity** — анонимного идентификатора, используемого в Mindstream как якорь для сбора и агрегации статистики внимания. Документ определяет инварианты регистрации identity, допустимые операции с ней и границы её жизненного цикла в рамках MVP.
+This document defines the architectural model of **anonymous identity**: an anonymous identifier used in Mindstream as the anchor for collecting and aggregating attention statistics. It defines identity-registration invariants, allowed operations, and lifecycle boundaries within the MVP.
 
-Anonymous identity не является пользователем, субъектом, профилем или участником взаимодействия с системой. Она существует исключительно как технический идентификатор источника статистических сигналов.
+Anonymous identity is not a user, subject, profile, or participant in system interaction. It exists only as a technical identifier for the source of statistical signals.
 
-## Понятие Anonymous Identity
+## Anonymous Identity Concept
 
-Anonymous identity — это:
+Anonymous identity is:
 
-- пассивный идентификатор;
-- представленный UUID стандартного формата;
-- генерируемый исключительно на стороне фронта;
-- связанный с одним профилем браузера.
+- a passive identifier;
+- represented as a standard UUID;
+- generated only on the frontend;
+- bound to one browser profile.
 
 Anonymous identity:
 
-- не имеет аутентификации;
-- не имеет прав доступа;
-- не имеет пользовательского состояния;
-- не используется для персонализации ответов системы.
+- has no authentication;
+- has no access rights;
+- has no user state;
+- is not used to personalize system responses.
 
-Использование термина «user» к данной сущности не допускается.
+Using the term `user` for this entity is not allowed.
 
-## Регистрация Identity
+## Identity Registration
 
-Регистрация anonymous identity является **явным архитектурным событием**.
+Registration of an anonymous identity is an **explicit architectural event**.
 
-Инварианты регистрации:
+Registration invariants:
 
-- UUID должен быть зарегистрирован на сервере до приёма любых событий внимания.
-- События, поступившие без зарегистрированной identity, считаются недопустимыми и не принимаются.
-- Имплицитная регистрация identity через первое событие запрещена.
-- Повторная регистрация существующего UUID считается идемпотентной и не изменяет состояние системы.
+- The UUID must be registered on the server before any attention events are accepted.
+- Events received without a registered identity are invalid and must not be accepted.
+- Implicit identity registration through the first event is prohibited.
+- Re-registering an existing UUID is idempotent and does not change system state.
 
-Регистрация identity фиксирует только факт существования UUID и не влечёт создания дополнительных данных.
+Identity registration records only the existence of the UUID and does not create additional data.
 
-## Использование Identity в write-path
+## Identity Usage In The Write Path
 
-Anonymous identity используется исключительно в write-path для:
+Anonymous identity is used only in the write path for:
 
-- связывания событий внимания;
-- дедупликации событий;
-- последующей серверной агрегации.
+- linking attention events;
+- deduplicating events;
+- later server-side aggregation.
 
-Все события внимания обязаны:
+All attention events must:
 
-- содержать UUID зарегистрированной identity;
-- ссылаться на конкретную публикацию;
-- иметь фиксированный тип события;
-- содержать timestamp в UTC.
+- include the UUID of a registered identity;
+- reference a concrete publication;
+- have a fixed event type;
+- include a UTC timestamp.
 
-Read-доступ к данным, связанным с identity, в рамках MVP отсутствует.
+There is no read access to identity-related data in the MVP.
 
-## Дедупликация и целостность
+## Deduplication And Integrity
 
-Для одной anonymous identity допускается не более одного события одного типа для одной публикации.
+For one anonymous identity, no more than one event of the same type is allowed for the same publication.
 
-Повторная отправка идентичных событий допустима, но не должна приводить к изменению агрегированного состояния. Обеспечение идемпотентности является инвариантом хранения данных.
+Resending identical events is allowed, but must not change aggregated state. Idempotency is a storage invariant.
 
-## Lifecycle Identity
+## Identity Lifecycle
 
-Lifecycle anonymous identity включает следующие состояния:
+The anonymous identity lifecycle includes these states:
 
-1. Отсутствие identity — UUID не сгенерирован или удалён на фронте.
-2. Зарегистрированная identity без событий.
-3. Зарегистрированная identity с событиями внимания.
+1. No identity: the UUID has not been generated or has been removed on the frontend.
+2. Registered identity without events.
+3. Registered identity with attention events.
 
-Anonymous identity без связанных событий подлежит удалению по TTL. Удаление identity приводит к утрате доступа к ранее накопленным данным и не предусматривает восстановления.
+An anonymous identity without related events may be removed by TTL. Removing an identity causes loss of access to previously accumulated data and does not allow recovery.
 
-## Ограничения и запреты
+## Constraints And Prohibitions
 
-В рамках MVP запрещено:
+The following are prohibited in the MVP:
 
-- использовать anonymous identity для персонализации;
-- связывать identity с IP-адресами или user-agent;
-- вводить read-API для identity;
-- трактовать identity как пользователя;
-- хранить любые персональные данные.
+- using anonymous identity for personalization;
+- linking identity to IP addresses or user-agent strings;
+- introducing a read API for identity;
+- treating identity as a user;
+- storing any personal data.
 
-Любое расширение роли anonymous identity за пределы описанных инвариантов считается выходом за рамки MVP и требует пересмотра архитектуры.
+Any expansion of the role of anonymous identity beyond these invariants is outside MVP scope and requires architectural revision.
 
-## Связанные документы
+## Related Documents
 
 - `ctx/docs/architecture/data-flow/attention.md` — Attention flows.
 - `ctx/docs/architecture/ingress/http-ingress.md` — HTTP ingress.
-- `ctx/docs/architecture/ingress/attention-write-ingress.md` — write-ingress сигналов внимания.
+- `ctx/docs/architecture/ingress/attention-write-ingress.md` — write ingress for attention signals.
 
-## Итог
+## Summary
 
-Документ фиксирует anonymous identity как техническую сущность write-path, не являющуюся пользователем и не вводящую персонализации, а также задаёт инварианты её регистрации и использования в MVP Mindstream.
+This document defines anonymous identity as a technical write-path entity that is not a user and does not introduce personalization, and it establishes the invariants of its registration and use in the Mindstream MVP.

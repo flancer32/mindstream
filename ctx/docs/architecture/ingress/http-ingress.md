@@ -2,88 +2,74 @@
 
 - Path: `ctx/docs/architecture/ingress/http-ingress.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-**HTTP Ingress** — инфраструктурная архитектурная граница Mindstream, через которую система принимает все внешние HTTP-запросы из веб-контекста и иных HTTP-клиентов.
+**HTTP Ingress** is the infrastructure-level architectural boundary of Mindstream through which the system accepts all external HTTP requests from the web context and other HTTP clients.
 
-HTTP Ingress принимает только read/write запросы и передаёт их во внутреннее backend-приложение без принятия доменных решений, генерации идентификаторов или управления состоянием.
+HTTP Ingress accepts only read/write requests and passes them into the internal backend application without making domain decisions, generating identifiers, or managing state.
 
----
+## Responsibility Boundary
 
-## Границы ответственности
+HTTP Ingress is responsible for:
 
-HTTP Ingress отвечает за:
+- receiving external HTTP requests;
+- transferring control into the internal backend application;
+- providing a single controlled HTTP boundary for the system.
 
-- приём внешних HTTP-запросов;
-- передачу управления во внутреннее backend-приложение;
-- обеспечение единой и контролируемой HTTP-границы системы.
+HTTP Ingress is **not responsible** for:
 
-HTTP Ingress **не отвечает** за:
+- domain data-processing logic;
+- lifecycle management of entities;
+- storage or interpretation of data;
+- UUID generation;
+- authentication, authorization, or role handling.
 
-- доменную логику обработки данных;
-- управление жизненным циклом сущностей;
-- хранение и интерпретацию данных;
-- генерацию UUID;
-- аутентификацию, авторизацию и роли.
+## Architectural Invariants
 
----
+The following inbound invariants are fixed for the MVP:
 
-## Архитектурные инварианты (MVP)
+1. **Apache is a mandatory component of the runtime contour.** All external HTTP requests reach the system through Apache.
+2. **Direct external access to the Node application is not allowed.** The Node application is not exposed directly to the external network. Direct access is allowed only in dev or test contours.
+3. **HTTP Ingress is canonically implemented through `@flancer32/teq-web`.** The `@flancer32/teq-web` dispatcher model (`pre / process / post`) is part of the architectural invariant of the MVP. Alternative HTTP entry mechanisms or libraries are not provided.
 
-В рамках MVP зафиксированы следующие inbound-инварианты:
-
-1. **Apache является обязательным компонентом runtime-контура.** Все внешние HTTP-запросы к системе проходят через Apache.
-2. **Прямой внешний доступ к Node-приложению недопустим.** Node-приложение не экспонируется напрямую во внешнюю сеть. Прямой доступ допустим только в dev- или тестовых контурах.
-3. **HTTP Ingress канонически реализован через `@flancer32/teq-web`.** Dispatcher-модель `@flancer32/teq-web` (pre / process / post) является частью архитектурного инварианта MVP. Альтернативные HTTP-входы или библиотеки не предусматриваются.
-
----
-
-## Read/Write границы
+## Read/Write Boundary
 
 HTTP Ingress:
 
-- принимает только read/write запросы;
-- не является каналом batch- или операционных команд;
-- не расширяет архитектурные контуры за пределы ingress.
+- accepts only read/write requests;
+- is not a channel for batch or operational commands;
+- does not expand architectural contours beyond ingress.
 
----
+## Anonymous Identity And HTTP Ingress
 
-## Anonymous Identity и HTTP Ingress
-
-В рамках MVP HTTP Ingress работает только с **anonymous identity** как техническим идентификатором источника write-сигналов.
+In the MVP, HTTP Ingress works only with **anonymous identity** as the technical identifier of the source of write signals.
 
 HTTP Ingress:
 
-- **не генерирует UUID**;
-- **не управляет lifecycle identity**;
-- **не интерпретирует identity как субъекта**;
-- **не реализует аутентификацию или авторизацию**.
+- **does not generate UUIDs**;
+- **does not manage identity lifecycle**;
+- **does not interpret identity as a subject**;
+- **does not implement authentication or authorization**.
 
-Write-операции, требующие идентификации источника, допускаются **только при наличии зарегистрированной anonymous identity**. Запросы без зарегистрированной identity считаются архитектурно недопустимыми для соответствующих write-путей.
+Write operations that require source identification are allowed **only when a registered anonymous identity exists**. Requests without registered identity are architecturally invalid for the corresponding write paths.
 
----
+## Usage Context
 
-## Контекст использования
+HTTP Ingress exists for:
 
-HTTP Ingress предназначен для:
+- delivering read models into the browser context;
+- accepting statistical write events when architectural conditions are satisfied.
 
-- доставки read-моделей в браузерный контекст;
-- приёма write-событий статистического характера при выполнении архитектурных условий.
+API formats, serialization approaches, and endpoint-handler implementation are not fixed at the architectural level.
 
-Форматы API, способы сериализации данных и реализация endpoint-обработчиков не фиксируются на архитектурном уровне.
+## Related Architectural Documents
 
----
+- `ctx/docs/architecture/anonymous-identity/invariants.md`
+- `ctx/docs/architecture/ingress/attention-write-ingress.md`
+- `ctx/docs/architecture/data-flow/attention.md`
 
-## Связанные архитектурные документы
+## Summary
 
-- `ctx/docs/architecture/anonymous-identity/invariants.md` — модель anonymous identity.
-- `ctx/docs/architecture/ingress/attention-write-ingress.md` — write-ingress сигналов внимания.
-- `ctx/docs/architecture/data-flow/attention.md` — Attention flows.
-
----
-
-## Итог
-
-HTTP Ingress фиксирует инфраструктурную HTTP-границу системы в MVP Mindstream, принимающую read/write запросы и сохраняющую изоляцию доменной логики, identity и хранения от внешнего доступа.
+HTTP Ingress defines the infrastructure HTTP boundary of the Mindstream MVP, accepting read/write requests while preserving isolation of domain logic, identity, and storage from direct external access.

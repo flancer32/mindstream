@@ -4,26 +4,26 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ задаёт рамку композиционного слоя как описания прикладной формы MVP Mindstream и определяет три его проекции: представление, состояние опыта и действие.
+This document defines the composition layer as the description of the applied form of the Mindstream MVP and identifies its three projections: presentation, experience state, and action.
 
-## Прикладная форма
+## Applied Form
 
-В рамках композиционного слоя Mindstream рассматривается как целостный опыт:
+Within the composition layer, Mindstream is treated as a cohesive experience of:
 
-- чтение смысловых представлений публикаций;
-- локальная персональная проекция доступного корпуса в форме ленты;
-- фиксация положительных сигналов внимания в допустимых границах режима доступа.
+- reading semantic representations of publications;
+- a local personal projection of the available corpus in feed form;
+- recording positive attention signals within the permitted access-mode boundaries.
 
-Композиция описывает этот опыт как форму, не раскрывая механику формирования данных и поведения системы.
+Composition describes this experience as form without exposing the mechanics of data formation or system behavior.
 
-## Проекции слоя
+## Layer Projections
 
-- `interaction.md` фиксирует допустимые действия пользователя как факты активности, без последовательностей и UI-механик.
-- `state.md` фиксирует допустимые формы пользовательского опыта, включая валидные пустоты.
-- `ui.md` фиксирует прикладные формы представления (что существует для чтения и ориентации).
+- `interaction.md` defines permitted user actions as activity facts, without sequences or UI mechanics.
+- `state.md` defines permitted forms of user experience, including valid emptiness states.
+- `ui.md` defines applied presentation forms: what exists for reading and orientation.
 
-## Итог
+## Summary
 
-Композиционный слой описывает MVP Mindstream как прикладную форму пользовательского опыта через три проекции, не выходя в архитектуру, алгоритмы, технологии и UX-сценарии.
+The composition layer describes the Mindstream MVP as an applied user-experience form through three projections, without moving into architecture, algorithms, technologies, or UX scenarios.

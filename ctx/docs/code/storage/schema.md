@@ -2,184 +2,162 @@
 
 - Path: `ctx/docs/code/storage/schema.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **нормативную форму декларативного описания схемы данных** для DB-слоя MVP Mindstream.
+This document defines the **normative form of declarative schema description** for the DB layer of the Mindstream MVP.
 
-Схема данных рассматривается как **канонический источник истины** о структуре реляционной базы данных и используется агентами и кодом DB-слоя для воспроизводимого создания, пересоздания и эволюции структуры хранения.
+The data schema is treated as the **canonical source of truth** for relational database structure and is used by both agents and the DB layer for reproducible creation, recreation, and evolution of storage structure.
 
-Документ описывает **мета-уровень схемы**: допустимую форму декларации, обязательные элементы, инварианты и границы ответственности. Конкретные сущности и таблицы в документе не вводятся.
+This document describes the **schema meta-level**: allowed declaration form, required elements, invariants, and responsibility boundaries. It does not introduce concrete entities or tables.
 
----
+## Schema As The Source Of Truth
 
-## Статус схемы как источника истины
+The declarative schema is the **only source of truth** for database structure.
 
-Декларативная схема является **единственным источником истины** о структуре базы данных.
+The declaration must explicitly describe:
 
-В декларации **обязаны** быть явно описаны:
+- tables;
+- columns and their types;
+- primary keys;
+- foreign keys;
+- unique constraints;
+- `NOT NULL` and `CHECK` constraints;
+- indexes.
 
-- таблицы;
-- колонки и их типы;
-- первичные ключи;
-- внешние ключи;
-- уникальные ограничения;
-- NOT NULL и CHECK constraints;
-- индексы.
+Any structure present in the database but absent from the declaration is a defect.
 
-Любая структура, существующая в БД и отсутствующая в декларации, считается **дефектом**.
+Manual modification of the schema without reflecting it in the declarative form is prohibited, including dev experiments.
 
-Ручное изменение схемы базы данных без отражения в декларативной схеме **запрещено**, включая dev-эксперименты.
+## Format Of Declarative Description
 
----
+The schema is described as a **pure declarative JSON structure** without executable code.
 
-## Формат декларативного описания
+Requirements:
 
-Схема данных описывается в виде **чистой декларативной JSON-структуры**, без выполнения кода.
+- the declaration contains no executable logic;
+- conditions, loops, and computations are not allowed;
+- the declaration is data, not code;
+- schema application such as DDL is performed by the DB layer, not by the declaration itself.
 
-Требования к формату:
+## Schema Composition
 
-- декларация не содержит исполняемой логики;
-- не допускаются условия (`if`), циклы, вычисления;
-- декларация представляет собой данные, а не код;
-- применение схемы (DDL) осуществляется DB-слоем, а не декларацией.
+The schema is formed as **one logical structure** assembled from separate declarative fragments.
 
----
+The following are allowed:
 
-## Композиция схемы
+- splitting the schema across multiple files;
+- grouping declarations by functional or domain criterion;
+- assembling the final schema by composing fragments.
 
-Схема формируется как **единая логическая структура**, собираемая из отдельных декларативных фрагментов.
+The resulting schema must be reproducible as one unambiguous declarative object.
 
-Допускается:
+## Schema Granularity
 
-- разбиение схемы на несколько файлов;
-- группировка деклараций по функциональному или предметному признаку;
-- сборка итоговой схемы через композицию фрагментов.
+The atomic unit of schema declaration is the **table**.
 
-Итоговая схема должна быть однозначно восстанавливаема как единый декларативный объект.
+Each table declaration describes:
 
----
+- table name;
+- set of columns;
+- primary key;
+- foreign keys;
+- constraints;
+- indexes.
 
-## Гранулярность схемы
+Domain entities do **not have to** correspond directly to tables.
 
-Атомом декларации схемы является **таблица**.
+The following are allowed:
 
-Каждая декларация таблицы описывает:
+- auxiliary tables;
+- technical tables;
+- aggregate tables;
+- service tables, including schema-version tables.
 
-- имя таблицы;
-- набор колонок;
-- первичный ключ;
-- внешние ключи;
-- ограничения;
-- индексы.
+## Identifiers And Keys
 
-Domain-сущности **не обязаны** иметь прямое соответствие таблицам.
+Identifier strategy is defined **per concrete table**, not globally for the entire schema.
 
-Допускаются:
+The following are allowed:
 
-- вспомогательные таблицы;
-- технические таблицы;
-- таблицы агрегатов;
-- служебные таблицы (включая таблицы версии схемы).
+- internal numeric identifiers such as `bigint` or `serial`;
+- external stable identifiers such as `uuid`;
+- identifier generation:
+- on the application side;
+- on the database side;
+- or in mixed mode.
 
----
+The schema must explicitly state:
 
-## Идентификаторы и ключи
+- which columns are identifiers;
+- which are used as primary keys;
+- which are intended for external use.
 
-Стратегия идентификаторов определяется **на уровне конкретных таблиц**, а не нормативно для всей схемы.
+## Relations And Constraints
 
-Допускается использование:
+Use of **foreign keys** is mandatory.
 
-- внутреннего числового идентификатора (`bigint / serial`);
-- внешнего стабильного идентификатора (`uuid`);
-- генерации идентификаторов:
-  - на стороне приложения,
-  - на стороне БД,
-  - либо в смешанном режиме.
+Requirements:
 
-Схема обязана явно указывать:
+- all logical relations between tables must be expressed through foreign keys;
+- foreign keys are used as fully as possible for related entities;
+- integrity constraints are not replaced by application logic.
 
-- какие колонки являются идентификаторами;
-- какие из них используются как первичные ключи;
-- какие предназначены для внешнего использования.
+All constraints must be declared declaratively, including:
 
----
+- `UNIQUE`;
+- `NOT NULL`;
+- `CHECK` constraints;
+- referential-integrity rules.
 
-## Связи и ограничения
+## Indexes
 
-Использование **внешних ключей (foreign keys)** является обязательным.
+Indexes are a **mandatory part** of the declarative schema.
 
-Требования:
+Requirements:
 
-- все логические связи между таблицами должны быть выражены через FK;
-- внешние ключи используются максимально полно для связанных сущностей;
-- ограничения целостности не заменяются логикой приложения.
+- all indexes must be explicitly described;
+- indexes that belong to a table are described in that table declaration;
+- absence of an index in the declaration means absence of that index in a valid schema.
 
-Все ограничения должны быть описаны декларативно, включая:
+## Schema Versioning
 
-- UNIQUE;
-- NOT NULL;
-- CHECK constraints;
-- правила ссылочной целостности.
+The data schema in the MVP has an **explicit version**.
 
----
+Requirements:
 
-## Индексы
+- the schema version is fixed declaratively;
+- the version is also stored in the database in a separate service table;
+- the DB layer uses the schema version to control database state.
 
-Индексы являются **обязательной частью декларативной схемы**.
+The storage form of the version is defined by the schema declaration.
 
-Требования:
+## Recreate And Preserve Semantics
 
-- все индексы должны быть описаны явно;
-- индексы, относящиеся к таблице, описываются в декларации этой таблицы;
-- отсутствие индекса в декларации означает его отсутствие в допустимой схеме.
+The DB layer must support schema recreation with data preservation.
 
----
+Normative rules:
 
-## Версионирование схемы
+- data absent from the new schema version is **dropped** during restoration;
+- data restoration is limited to structures present in the declaration;
+- the order of recreate-with-preserve operations is not described in the declaration and belongs to the DB layer.
 
-Схема данных в MVP имеет **явную версию**.
+## DBMS Independence
 
-Требования:
+The declarative schema must use **only portable constructs** supported by `knex`.
 
-- версия схемы фиксируется декларативно;
-- версия схемы также хранится в базе данных в отдельной служебной таблице;
-- DB-слой использует версию схемы для контроля состояния базы данных.
+The following are prohibited:
 
-Форма хранения версии определяется декларацией схемы.
+- DBMS-specific extensions;
+- conditional branches for concrete DBMSs;
+- declarations that depend on runtime environment.
 
----
+The schema must be applicable to any DBMS supported by `knex`.
 
-## Recreate / preserve semantics
+## Minimal Declaration Example
 
-DB-слой обязан поддерживать пересоздание схемы с сохранением данных.
-
-Нормативные положения:
-
-- данные, отсутствующие в новой версии схемы, при восстановлении **отбрасываются**;
-- восстановление данных ограничено структурами, присутствующими в декларации;
-- порядок операций recreate-with-preserve не описывается в декларации схемы и относится к ответственности DB-слоя.
-
----
-
-## СУБД-независимость
-
-Декларативная схема обязана использовать **только portable-конструкции**, поддерживаемые `knex`.
-
-Запрещено:
-
-- использование СУБД-специфичных расширений;
-- условные ветки под конкретные СУБД;
-- декларации, зависящие от runtime-окружения.
-
-Схема должна быть применима к любой СУБД, поддерживаемой `knex`.
-
----
-
-## Минимальный пример формы декларации
-
-Пример иллюстрирует **форму**, а не нормативную структуру конкретной таблицы.
+The example below illustrates **form**, not the normative structure of a real table.
 
 ```json
 {
@@ -198,23 +176,19 @@ DB-слой обязан поддерживать пересоздание сх�
 }
 ```
 
----
+## Document Boundary
 
-## Границы документа
+This document does not describe:
 
-Документ не описывает:
+- concrete Mindstream tables;
+- names of real entities;
+- SQL implementation;
+- DB-layer APIs;
+- schema-application order;
+- CLI commands.
 
-- конкретные таблицы Mindstream;
-- имена реальных сущностей;
-- SQL-реализацию;
-- API DB-слоя;
-- порядок применения схемы;
-- CLI-команды.
+These questions are described in later `code/storage/` documents.
 
-Эти вопросы описываются в последующих документах уровня `code/storage/`.
+## Summary
 
----
-
-## Итог
-
-`schema.md` фиксирует декларативную, воспроизводимую и СУБД-независимую форму описания схемы данных DB-слоя MVP Mindstream, обеспечивая агентам и коду единую нормативную основу для управления структурой хранения.
+`schema.md` defines a declarative, reproducible, and DBMS-independent form of schema description for the Mindstream MVP DB layer, giving both agents and code a shared normative basis for managing storage structure.

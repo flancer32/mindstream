@@ -1,138 +1,122 @@
-# Цветовая интерпретация индикатора интереса
+# Interest Indicator Coloring
 
 - Path: `ctx/docs/composition/attention/interest-indicator-coloring.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует прикладное браузерное правило цветовой интерпретации индикатора интереса в ленте публикаций.
+This document defines the applied UI rule for color interpretation of the interest indicator in the Mindstream MVP.
 
-Документ определяет:
+The rule highlights publications that belong to the upper local interest range within the currently loaded set of feed items.
 
-- какое множество значений используется как локальная шкала интереса;
-- как из этой шкалы выделяется верхний интервал повышенного интереса;
-- как UI использует этот интервал для визуального ориентирования пользователя.
+## General Principle
 
-Документ не определяет алгоритм расчёта самих interest scores и не вводит серверную ответственность.
+The coloring rule is relative, not absolute.
 
-## Область действия
+It is computed only from:
 
-Правило применяется только в рамках текущей пользовательской ленты, загруженной в браузере для одного пользовательского контекста.
+- interest-indicator values already shown for the currently loaded set of publications;
+- the current page-local score range.
 
-Шкала цветовой интерпретации:
+The rule does not require backend participation and does not depend on global statistics.
 
-- строится заново для каждого актуального набора загруженных с бэкенда публикаций;
-- зависит от текущих локально доступных значений индикатора интереса среди всех загруженных публикаций;
-- не переносится между пользователями, страницами и состояниями ленты.
+## Local Value Space
 
-Под загруженным набором публикаций понимается весь набор публикаций, полученный с бэкенда за время текущей сессии работы с лентой.
+The algorithm uses the minimum and maximum visible indicator values within the currently loaded publication set.
 
-## Локальное пространство значений
+Example:
 
-UI определяет для всего загруженного набора:
+- minimum value: `69%`;
+- maximum value: `82%`;
+- local value space: from `69%` to `82%`.
 
-- минимальное значение индикатора интереса среди всех публикаций текущего загруженного набора;
-- максимальное значение индикатора интереса среди всех публикаций текущего загруженного набора.
+If `min == max`, the local value space is degenerate and all publications in the set are treated as belonging to the upper interest interval.
 
-Интервал между этими двумя значениями считается полным локальным пространством интереса для:
+## Excluding The Top 10%
 
-- данного пользователя;
-- данного состояния interest vector;
-- данного загруженного набора публикаций.
+From the full local value space, the upper segment of `10%` of the interval width is excluded.
 
-Пример:
-
-- минимальное значение: `69%`;
-- максимальное значение: `82%`;
-- локальное пространство значений: от `69%` до `82%`.
-
-Если в текущем загруженном наборе `min == max`, локальное пространство значений считается вырожденным, а все публикации этого набора трактуются как попадающие в верхний интервал интереса.
-
-## Исключение верхних 10%
-
-Из полного локального пространства выделяется верхний сегмент размером `10%` от всей ширины интервала.
-
-Порог отсечения вычисляется по формуле:
+The cutoff is computed as:
 
 `cutoff = min + (max - min) * 0.9`
 
-Все публикации со значением индикатора `>= cutoff` исключаются из расчёта порога маркировки. Это защищает шкалу от единичных выбросов интереса, когда после клика пользователя одна публикация получает резко завышенную оценку.
+All publications with value `>= cutoff` are excluded from calculation of the marking threshold. This protects the scale from single outliers when one publication receives a sharply increased score after a click.
 
-Если после исключения верхних 10% не остаётся данных (все публикации попали в топ-10%), используется вырожденный режим: порог маркировки приравнивается к `min`, и все публикации маркируются.
+If exclusion leaves no remaining data, degenerate mode is used: the marking threshold becomes `min`, and all publications are marked.
 
-## Порог маркировки
+## Marking Threshold
 
-На оставшихся (после исключения верхних 10%) публикациях вычисляется новый минимум `min'` и новый максимум `max'`.
+On the remaining publications, a new minimum `min'` and maximum `max'` are computed.
 
-Из этого суженного пространства выделяется верхний сегмент размером `20%` от его ширины.
+From this reduced space, the upper segment of `20%` of the interval width is selected.
 
-Порог маркировки вычисляется по формуле:
+The marking threshold is:
 
 `markThreshold = min' + (max' - min') * 0.8`
 
-Публикация попадает в верхний интервал интереса (маркируется), если её значение индикатора `>= markThreshold`.
+A publication belongs to the upper interest interval, and is highlighted, if its indicator value is `>= markThreshold`.
 
-Правило применяется ко **всем** публикациям загруженного набора, включая исключённые на шаге отсечения верхних 10%. Благодаря этому публикации с экстремально высокими оценками не искажают порог, но всё равно получают маркировку.
+This rule is applied to **all** publications in the loaded set, including those excluded during the top-10% step. This means extreme high-score publications still receive highlighting without distorting the threshold.
 
-В вырожденном случае `min' == max'` (после исключения верхних 10% осталось одно уникальное значение) порог маркировки равен этому значению, и все публикации с оценкой `>= markThreshold` маркируются.
+In the degenerate case where `min' == max'`, the marking threshold is equal to that value, and all publications with `>= markThreshold` are highlighted.
 
-## Полный алгоритм
+## Full Algorithm
 
-1. Найти `min` и `max` среди всех загруженных публикаций.
-2. Вычислить `cutoff = min + (max - min) * 0.9`.
-3. Исключить из расчёта порога все публикации со значением `>= cutoff`.
-4. На оставшихся публикациях найти `min'` и `max'`.
-5. Если оставшихся публикаций нет — `markThreshold = min`.
-6. Иначе вычислить `markThreshold = min' + (max' - min') * 0.8`.
-7. Маркировать все публикации со значением `>= markThreshold`.
+1. Find `min` and `max` across all loaded publications.
+2. Compute `cutoff = min + (max - min) * 0.9`.
+3. Exclude all publications with value `>= cutoff` from threshold calculation.
+4. Find `min'` and `max'` among the remaining publications.
+5. If no publications remain, set `markThreshold = min`.
+6. Otherwise compute `markThreshold = min' + (max' - min') * 0.8`.
+7. Highlight all publications with value `>= markThreshold`.
 
-## Пример
+## Example
 
-Исходные значения: `[10%, 20%, 30%, 95%]` (одна публикация получила высокий интерес после клика).
+Input values: `[10%, 20%, 30%, 95%]`.
 
-Шаг 1: `min = 10%`, `max = 95%`.
-Шаг 2: `cutoff = 10 + (95 - 10) * 0.9 = 86.5%`.
-Шаг 3: исключается `95%` (все остальные ` < 86.5%`).
-Шаг 4: `min' = 10%`, `max' = 30%`.
-Шаг 6: `markThreshold = 10 + (30 - 10) * 0.8 = 26%`.
-Шаг 7: маркируются `30%` и `95%`.
+1. `min = 10%`, `max = 95%`.
+2. `cutoff = 10 + (95 - 10) * 0.9 = 86.5%`.
+3. `95%` is excluded.
+4. `min' = 10%`, `max' = 30%`.
+5. `markThreshold = 10 + (30 - 10) * 0.8 = 26%`.
+6. `30%` and `95%` are highlighted.
 
-Без исключения верхних 10% порог был бы `10 + (95 - 10) * 0.8 = 78%`, и маркировалась бы только `95%`.
+Without top-10% exclusion, the threshold would be `78%`, so only `95%` would be highlighted.
 
-## Визуальное правило
+## Visual Rule
 
-Индикатор интереса окрашивается в яркий цвет для всех публикаций, попадающих в верхний интервал интереса.
+The interest indicator uses a bright color for all publications that fall into the upper interest interval.
 
-Остальные публикации:
+All other publications:
 
-- не считаются наиболее интересными в рамках загруженного набора;
-- не получают яркую маркировку только на основании значения индикатора.
+- are not treated as the most interesting within the loaded set;
+- do not receive bright highlighting based only on the indicator value.
 
-Яркий цвет в данном правиле означает не абсолютный глобальный уровень интереса, а относительное попадание в верхний локальный диапазон загруженного набора.
+In this rule, bright color means not an absolute global level of interest but relative inclusion in the upper local range of the loaded set.
 
-## Смысл для пользователя
+## Meaning For The User
 
-Цветовая интерпретация служит визуальным ориентиром и помогает быстро выделить публикации, которые в текущем наборе выглядят наиболее соответствующими интересам пользователя.
+The color interpretation is a visual cue that helps the user quickly identify publications that currently look most aligned with their interests.
 
-Правило:
+The rule:
 
-- не объясняет причины конкретной оценки;
-- не заменяет процентное значение индикатора;
-- не обещает объективную важность публикации вне текущего локального набора.
+- does not explain the reason for a specific score;
+- does not replace the percentage value of the indicator;
+- does not promise objective importance outside the current local set.
 
-## Ручное переопределение
+## Manual Override
 
-Пользователь может задать ручной порог маркировки через ползунок в панели настроек. В этом случае описанный выше автоматический алгоритм не применяется.
+The user may set a manual highlighting threshold with the settings slider. In that case, the automatic algorithm described here is not used.
 
-Ручной режим использует прямой числовой порог того же индикатора интереса: число в настройке сравнивается с числом, показанным на карточке публикации.
+Manual mode compares a direct numeric threshold against the numeric indicator shown on the publication card.
 
-Правило ручного порога описано отдельно в `ctx/docs/composition/attention/threshold-control.md`.
+The manual-threshold rule is defined separately in `ctx/docs/composition/attention/threshold-control.md`.
 
-## Границы документа
+## Document Boundary
 
-Документ:
+This document:
 
-- относится только к браузерной композиции UI;
-- не требует участия бэкенда;
-- не фиксирует CSS, DOM-структуру, имена компонентов или технологию реализации.
+- applies only to browser-side UI composition;
+- does not require backend participation;
+- does not define CSS, DOM structure, component names, or implementation technology.

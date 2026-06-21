@@ -4,102 +4,102 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует допустимые состояния пользовательского опыта в MVP Mindstream как устойчивые формы чтения и внимания, а не как состояния системы, этапы выполнения или переходы.
+This document defines the permitted user-experience states in the Mindstream MVP as stable forms of reading and attention, not as system states, execution stages, or transitions.
 
-## Принцип описания
+## Description Principle
 
-Состояние в данном документе — это нормальная форма опыта пользователя в рамках продуктовых и ограничительных инвариантов MVP.
+In this document, a state is a normal form of user experience within the product and constraint invariants of the MVP.
 
-Причины состояний, события, переходы и триггеры не описываются.
+Causes, events, transitions, and triggers are not described here.
 
-## Базовые состояния опыта
+## Basic Experience States
 
-### Чтение в демо-режиме
+### Reading In Demo Mode
 
-Пользователь читает публикации из демонстрационного корпуса.
+The user reads publications from the demo corpus.
 
-Характеристики состояния:
+State characteristics:
 
-- профиль пользователя не инициализирован (отсутствует UUID);
-- персональная лента формируется локально;
-- сигналы внимания фиксируются и используются локально;
-- участие в серверной статистике отсутствует.
+- the user profile is not initialized and no UUID exists;
+- the personal feed is formed locally;
+- attention signals are recorded and used locally;
+- there is no participation in server-side statistics.
 
-Состояние является валидным и самодостаточным.
+This state is valid and self-sufficient.
 
-### Чтение в режиме полного доступа
+### Reading In Full-Access Mode
 
-Пользователь читает публикации из полного корпуса данных.
+The user reads publications from the full data corpus.
 
-Характеристики состояния:
+State characteristics:
 
-- профиль пользователя инициализирован (присутствует UUID);
-- персональная лента формируется локально с использованием доступных серверных данных;
-- сигналы внимания участвуют в агрегированной статистике;
-- режим доступа визуально обозначен.
+- the user profile is initialized and a UUID exists;
+- the personal feed is formed locally using available server data;
+- attention signals participate in aggregated statistics;
+- the access mode is visually indicated.
 
-Состояние является валидным и не требует дополнительных форм подтверждения.
+This state is valid and requires no additional confirmation.
 
-## Состояния ленты
+## Feed States
 
-### Пустая лента
+### Empty Feed
 
-Отсутствие публикаций в ленте считается нормальной формой пользовательского опыта.
+The absence of publications in the feed is a normal user-experience form.
 
-Пустота не трактуется как ошибка, сбой или временное состояние.
+Emptiness is not treated as an error, failure, or temporary state.
 
-### Малая лента
+### Small Feed
 
-Лента с крайне ограниченным количеством публикаций считается допустимой формой опыта.
+A feed with a very limited number of publications is an allowed experience form.
 
-Малый объём ленты не требует пояснений и не считается деградацией интерфейса.
+A small feed does not require explanation and is not considered interface degradation.
 
-## Состояния публикации
+## Publication States
 
-Для каждой публикации в рамках MVP существуют следующие формы состояния пользовательского опыта, отражающие последовательное углубление внимания:
+For each publication, the following user-experience state forms exist in the MVP and reflect sequential deepening of attention:
 
-- публикация представлена в ленте (название и мета-информация);
-- аннотация прочитана;
-- обзор прочитан;
-- выполнен переход к оригинальной публикации.
+- the publication is present in the feed with title and meta information;
+- the annotation has been read;
+- the overview has been read;
+- the original publication has been opened.
 
-Данные состояния образуют упорядоченную последовательность возрастания внимания.
+These states form an ordered sequence of increasing attention.
 
-Последовательность относится к прикладному пользовательскому опыту и не описывает архитектурную модель обработки сигналов внимания.
+This sequence belongs to the applied user experience and does not describe the architectural attention-signal model.
 
-Каждое последующее состояние возможно только при достижении предыдущего, при этом фиксация внимания на более глубоком уровне не отменяет и не замещает предыдущие формы внимания.
+Each later state is possible only after the previous one is reached, and deeper attention does not cancel or replace earlier forms of attention.
 
-## Состояния внимания пользователя
+## User Attention States
 
-В рамках MVP допустимы только положительные формы внимания пользователя:
+Only positive forms of user attention are allowed in the MVP:
 
-- внимание зафиксировано на уровне аннотации;
-- внимание зафиксировано на уровне обзора;
-- внимание зафиксировано через переход к оригиналу;
-- внимание зафиксировано положительной отметкой публикации.
+- attention recorded at the annotation level;
+- attention recorded at the overview level;
+- attention recorded through opening the original;
+- attention recorded through a positive publication mark.
 
-Положительная отметка является самостоятельной формой внимания и может сопутствовать любой форме доступа.
+A positive mark is an independent form of attention and may accompany any form of access.
 
-Отсутствие внимания к публикации считается нормальным состоянием.
+Absence of attention to a publication is a normal state.
 
-Отрицательные формы внимания и оценки отсутствуют.
+Negative forms of attention and rating are absent.
 
-## Запрещённые и отсутствующие состояния
+## Prohibited And Absent States
 
-Отсутствуют состояния, запрещённые в `constraints/mvp-scope.md`, включая:
+States prohibited in `constraints/mvp-scope.md` are absent, including:
 
-- состояние повторяющейся публикации в ленте;
-- состояние ошибки как отдельная форма пользовательского опыта;
-- состояние управления алгоритмами или параметрами персонализации;
-- состояние объяснения причин формирования ленты;
-- состояние социального взаимодействия.
+- repeated publication state in the feed;
+- error state as a separate user-experience form;
+- state of controlling algorithms or personalization parameters;
+- state of explaining why the feed was formed;
+- state of social interaction.
 
-## Границы документа
+## Document Boundary
 
-Документ не описывает переходы между состояниями, причины возникновения состояний, события, сигналы и триггеры, архитектурные и вычислительные состояния, визуальные механизмы реализации состояний.
+This document does not describe transitions between states, causes of states, events, signals and triggers, architectural or computational states, or the visual mechanisms that implement these states.
 
-## Итог
+## Summary
 
-`composition/state.md` фиксирует допустимые состояния пользовательского опыта MVP Mindstream как устойчивые формы чтения, внимания и присутствия пользователя в продукте, включая валидные пустоты и ограничения, без перехода к механике, архитектуре и реализации.
+`composition/state.md` defines the permitted user-experience states of the Mindstream MVP as stable forms of reading, attention, and presence inside the product, including valid emptiness states and constraints, without moving into mechanics, architecture, or implementation.

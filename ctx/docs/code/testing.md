@@ -2,90 +2,68 @@
 
 - Path: `ctx/docs/code/testing.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует жёсткие инженерные инварианты тестирования кодового слоя проекта Mindstream.
+This document defines the rigid engineering invariants for testing the Mindstream code layer.
 
-Тесты рассматриваются как равноправная часть кодовой базы, а не как вспомогательные или обслуживающие артефакты. Нарушение положений данного документа считается дефектом.
+Tests are treated as a first-class part of the codebase, not as auxiliary artifacts. Violating this document is a defect.
 
-Документ не является руководством по написанию тестов и не описывает конкретные тестовые сценарии.
+This document is not a guide to writing tests and does not define concrete test scenarios.
 
----
+## Status Of Tests In The Project
 
-## Статус тестов в проекте
+Tests belong to the same code layer as production code. For all backend and frontend `.mjs` modules, unit tests are the default norm. Absence of tests is allowed only for entry points and explicitly fixed stable interfaces.
 
-Тесты являются частью кодового слоя одного уровня с production-кодом. Для всех `.mjs`-модулей backend и frontend наличие unit-тестов считается нормой по умолчанию. Отсутствие тестов допускается только для точек входа (entrypoints) и явно зафиксированных стабильных интерфейсов.
+## Namespaces And Test Zones
 
----
+Tests use the same namespaces as production code: `Mindstream_Back_`, `Mindstream_Web_`, and `Mindstream_Shared_`.
 
-## Namespace и зоны тестирования
+Test-only namespaces such as `Mindstream_Test_*` are not allowed. Tests verify code within the same namespace boundaries in which it is used in production.
 
-Тесты используют те же пространства имён, что и production-код: `Mindstream_Back_`, `Mindstream_Web_`, `Mindstream_Shared_`.
+## DI And Composition Root In Tests
 
-Введение test-only namespace (например, `Mindstream_Test_*`) не допускается. Тесты проверяют код в тех же namespace-границах, в которых он используется в production.
-
----
-
-## DI и Composition Root в тестах
-
-Каждый unit-тест создаёт собственный DI-контейнер. DI-контейнер не переиспользуется между тестами. Все тесты выполняются в test mode (`enableTestMode()`).
+Each unit test creates its own DI container. The DI container is not reused across tests. All tests run in test mode through `enableTestMode()`.
 
 ### Test Composition Root
 
-Для тестов используется отдельный composition root, независимый от production. Конфигурация resolver’а может быть минимальной, достаточной для целей конкретного теста. Helper-модули должны быть чистыми фабриками контейнеров, не вносить неиспользуемые зависимости и не скрывать конфигурацию DI.
+Tests use a dedicated composition root independent from production. Resolver configuration may be minimal and sufficient for the concrete test. Helper modules must be pure container factories, must not inject unused dependencies, and must not hide DI configuration.
 
----
+## Imports And Access To Production Code
 
-## Импорт и доступ к коду в тестах
+Tests must not statically import production code from `src/` or `web/app/`, must not directly import production modules even for form validation, and must not bypass the DI container by any means.
 
-В тестах запрещено статически импортировать production-код из `src/` и `web/app/`, напрямую импортировать production-модули даже для проверки формы, а также обходить DI-контейнер любыми способами.
+Static import is allowed only for test helpers, fixtures, snapshot data, and standard Node.js modules from `node:*`. Access to production code is performed only through the DI container via `container.get(...)`.
 
-Статический импорт допускается только для тестовых helper’ов, фикстур, snapshot-данных и стандартных Node.js-модулей (`node:*`). Доступ к production-коду осуществляется исключительно через DI-контейнер (`container.get(...)`).
+A test that bypasses the DI container is not a valid project test.
 
-Тест, обходящий DI-контейнер, не считается валидным тестом проекта.
+## Platform API And Side Effects
 
----
+Real side effects are prohibited in tests, including filesystem access, network access, sockets, timers, and background processes. Any access to platform APIs must happen only through DI. Mocking platform dependencies is fully allowed.
 
-## Platform API и side effects
+## Test Types
 
-Реальные side effects в тестах запрещены, включая файловую систему, сеть, сокеты, таймеры и фоновые процессы. Любой доступ к platform API осуществляется только через DI. Мокирование platform-зависимостей допускается свободно.
+Only unit tests are allowed in the MVP. Integration, e2e, snapshot, property-based, and fuzz tests are not used.
 
----
+## Testing Tools
 
-## Типы тестов
+The normative testing stack is `node:test` and `node:assert/strict`.
 
-В рамках MVP допускаются только unit-тесты. Интеграционные, e2e, snapshot-, property-based и fuzz-тесты не используются.
+Using third-party libraries is allowed only with explicit human approval. Preference is given to standard Node.js tools.
 
----
+## Logging In Tests
 
-## Инструменты тестирования
+Using the production logger in unit tests is not mandatory. `console.log` may be used for diagnostics. Test logs are not part of the checked contract, are not used for assertions, and are treated only as debug output.
 
-Нормативный стек тестирования: `node:test`, `node:assert/strict`.
+## Idempotency And Isolation
 
-Использование сторонних библиотек допускается только по явному согласованию с человеком. Предпочтение отдаётся стандартным средствам Node.js.
+Each test must be idempotent and must not leave traces of execution behind. If a test changes global state such as `process`, `window`, or `document`, it must restore that state in `finally`. Shared state inside a single test file is allowed only if the tests remain logically isolated.
 
----
+## Web Tests
 
-## Логирование в тестах
+Frontend code is tested in Node.js. Real browsers and e2e tests are absent in the MVP. Browser API emulation is performed only through manual mock objects injected through DI. Libraries such as `jsdom` and `happy-dom` are not allowed.
 
-Использование production-логгера в unit-тестах не является обязательным. Допускается использование `console.log` для диагностических целей. Логи тестов не являются частью проверяемого контракта, не используются для assertions и рассматриваются исключительно как отладочный вывод.
+## Document Status
 
----
-
-## Идемпотентность и изоляция
-
-Каждый тест обязан быть идемпотентным и не оставлять следов своего выполнения. Если тест изменяет глобальное состояние (`process`, `window`, `document`), он обязан восстановить его в `finally`. Использование shared state внутри одного test-файла допускается при условии логической изоляции тестов.
-
----
-
-## Web-тесты
-
-Тестирование frontend-кода выполняется в Node.js. Реальный браузер и e2e-тесты в MVP отсутствуют. Эмуляция browser API выполняется исключительно через ручные mock-объекты, внедряемые через DI. Использование `jsdom`, `happy-dom` и аналогичных библиотек не допускается.
-
----
-
-## Статус документа
-
-Положения данного документа являются жёсткими инженерными инвариантами. Нарушение любого из требований считается дефектом кодовой базы и не трактуется как рекомендация, стиль или технический долг.
+The rules in this document are rigid engineering invariants. Violating any of them is a codebase defect and is not treated as a recommendation, style preference, or technical debt.

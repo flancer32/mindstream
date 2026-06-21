@@ -2,195 +2,159 @@
 
 - Path: `ctx/docs/code/cli/dispatcher.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует нормативную модель диспетчеризации CLI в MVP Mindstream.
+This document defines the normative CLI dispatch model in the Mindstream MVP.
 
-Он определяет:
+It specifies:
 
-- модель дерева CLI;
-- правила определения роли CLI-модуля;
-- границы ответственности диспетчеров;
-- модель выполнения команд;
-- семантику ошибок;
-- правила завершения процесса и освобождения ресурсов.
+- the CLI tree model;
+- how the role of a CLI module is determined;
+- dispatcher responsibility boundaries;
+- the command-execution model;
+- error semantics;
+- process-termination and resource-release rules.
 
-Документ специализированный и опирается на рамочную модель, заданную в `code/cli/overview.md`. Любое отклонение от зафиксированной модели считается дефектом реализации.
+This document builds on `code/cli/overview.md`. Any deviation is an implementation defect.
 
----
+## CLI Model
 
-## Модель CLI
+The Mindstream CLI is implemented as a tree of CLI modules.
 
-CLI в Mindstream реализован как дерево CLI-модулей.
+- the tree root is the root application dispatcher;
+- internal nodes are dispatchers;
+- leaf nodes are executable commands.
 
-- корень дерева — корневой диспетчер приложения;
-- внутренние узлы дерева выполняют роль диспетчеров;
-- листья дерева являются исполняемыми командами.
+Flat command registries and centralized routing tables are not used.
 
-Плоский реестр команд и централизованная таблица маршрутизации не используются.
+## Root Dispatcher
 
----
-
-## Корневой диспетчер
-
-Корневым диспетчером CLI является:
+The root CLI dispatcher is:
 
 `Mindstream_Back_App_Cli_Dispatcher`
 
-Корневой диспетчер:
+It:
 
-- является частью backend-приложения;
-- инициирует CLI-диспетчеризацию;
-- не содержит прикладной логики команд;
-- работает исключительно через DI-контур;
-- является единственной точкой интерпретации результата выполнения CLI-команды.
+- belongs to the backend application;
+- initiates CLI dispatch;
+- contains no command application logic;
+- works only through the DI contour;
+- is the only point that interprets command-execution results.
 
----
+## Role Of A CLI Module
 
-## Роль CLI-модуля
+A CLI module may have one of two roles:
 
-CLI-модуль может выполнять одну из ролей:
+- dispatcher;
+- command.
 
-- диспетчер;
-- команда.
+The role is determined only by its position in the CLI tree and by directory structure.
 
-Роль CLI-модуля определяется исключительно его положением в дереве CLI и структурой каталогов.
+Class naming, inheritance, suffixes, and code markers are not used to determine role.
 
-Именование классов, наследование, суффиксы и маркеры в коде для определения роли не используются.
+## Role-Determination Rule
 
----
+For a directory `src/Cli/<Path>/`:
 
-## Правило определения роли
+1. If the directory contains subdirectories, the module `<Path>.mjs` is a dispatcher and must delegate execution into one of the subdirectories.
+2. If the directory contains no subdirectories, all modules in that directory are commands and are treated as CLI tree leaves.
 
-Для каталога `src/Cli/<Path>/` применяются следующие правила:
+## Dispatcher Responsibility
 
-1. Если каталог содержит подкаталоги, модуль `<Path>.mjs` является диспетчером и обязан делегировать выполнение в один из подкаталогов.
-2. Если каталог не содержит подкаталогов, все модули в данном каталоге являются командами и считаются листьями дерева CLI.
+A dispatcher:
 
----
+- selects the next CLI tree node;
+- delegates execution;
+- catches and normalizes errors.
 
-## Ответственность диспетчера
+A dispatcher does not:
 
-Диспетчер:
+- parse arguments;
+- validate parameters;
+- run application logic;
+- manage infrastructure;
+- manage resource lifecycle;
+- terminate the process.
 
-- выбирает следующий узел дерева CLI;
-- делегирует выполнение;
-- перехватывает и нормализует ошибки.
+## DI And The CLI Space
 
-Диспетчер не:
+All CLI modules:
 
-- разбирает аргументы;
-- валидирует параметры;
-- выполняет прикладную логику;
-- управляет инфраструктурой;
-- управляет жизненным циклом ресурсов;
-- управляет завершением процесса.
+- are provided through the DI container;
+- are not created manually;
+- are not registered dynamically.
 
----
+The space of available CLI commands is determined by the combination of `src/Cli` directory structure and the set of objects available through DI.
 
-## DI и пространство CLI
+## Executable Commands
 
-Все CLI-модули:
+A command is a leaf module of the CLI tree.
 
-- предоставляются через DI-контейнер;
-- не создаются вручную;
-- не регистрируются динамически.
+A command:
 
-Пространство доступных CLI-команд определяется совокупностью структуры каталогов `src/Cli` и состава объектов, доступных через DI.
+- receives dependencies through DI;
+- parses CLI arguments on its own;
+- implements a single execution method `execute`;
+- does not manage application lifecycle;
+- does not terminate the process directly.
 
----
+A command is treated as a pure operation with side effects and without formalized internal state.
 
-## Исполняемые команды
+## Errors And Termination
 
-Команда является листовым модулем дерева CLI.
+### Error Signaling
 
-Команда:
+A command signals failure by throwing an exception.
 
-- получает зависимости через DI;
-- самостоятельно разбирает аргументы CLI;
-- реализует один метод выполнения `execute`;
-- не управляет жизненным циклом приложения;
-- не управляет завершением процесса напрямую.
+Dispatchers catch errors and pass them upward through the tree to the root dispatcher.
 
-Команда рассматривается как pure-операция с побочными эффектами без формализованного внутреннего состояния.
+### Exit Semantics
 
----
+Exit semantics are centralized and interpreted **only by the root dispatcher and the application bootstrap layer**.
 
-## Ошибки и завершение
+- `0` means successful completion of an engineering CLI command;
+- a non-zero value means command-execution failure.
 
-### Сигнализация ошибок
+An exit code describes the **result of command execution**, not the lifecycle of resources.
 
-Команда сигнализирует об ошибке через исключение.
+### Runtime Commands
 
-Диспетчеры перехватывают ошибки и передают их вверх по дереву до корневого диспетчера.
+Runtime commands are leaf nodes that start application runtime mode and do not imply normal completion. Returning control from a runtime command is abnormal.
 
----
+### Application Shutdown And Resource Release
 
-### Exit semantics
+Releasing backend-application resources is the responsibility of the bootstrap layer, not CLI commands or dispatchers.
 
-Exit semantics централизованы и интерпретируются **исключительно корневым диспетчером и bootstrap-слоем приложения**.
+Normative rules:
 
-- `0` — успешное завершение инженерной CLI-команды;
-- ненулевое значение — ошибка выполнения команды.
+- CLI commands and dispatchers do not release resources directly.
+- Completion of a CLI command returns control to bootstrap.
+- After control returns, bootstrap stops the application through `app.stop()` or an equivalent, releases all managed resources, and only then terminates the process.
 
-Exit code является характеристикой **результата выполнения команды**, но не механизмом управления жизненным циклом ресурсов.
+For runtime commands, normal return does not exist, so `app.stop()` is called only on abnormal return or external process termination such as `SIGINT` or `SIGTERM`.
 
----
+Any attempt to manage process termination or resources from a CLI command is an architectural defect.
 
-### Runtime-команды
+## Logging
 
-Runtime-команды являются leaf-узлами дерева CLI, инициируют runtime-режим приложения и не предполагают нормального завершения. Возврат управления из runtime-команды считается нештатной ситуацией.
+- a command may log its own errors;
+- intermediate dispatchers may catch errors and pass them upward;
+- the root dispatcher must log every error not handled below.
 
----
+Absence of logs on abnormal CLI termination is a defect.
 
-### Завершение приложения и освобождение ресурсов
+## CLI Invariants In The MVP
 
-Освобождение ресурсов backend-приложения является обязанностью bootstrap-слоя, а не CLI-команд или диспетчеров.
+All CLI commands have these fixed properties:
 
-Нормативно зафиксировано:
+- determinism;
+- non-idempotency by default;
+- strict non-interactivity;
+- execution in a trusted contour;
+- no application-lifecycle management at command level.
 
-- CLI-команды и диспетчеры не освобождают ресурсы напрямую.
-- Завершение работы CLI-команды возвращает управление в bootstrap-слой.
-- Bootstrap-слой после возврата управления вызывает остановку приложения (`app.stop()` или эквивалент), обеспечивает корректное освобождение всех управляемых ресурсов и затем завершает процесс.
+## Document Boundary
 
-Для runtime-команд возврат управления не является штатным, поэтому вызов `app.stop()` происходит только при нештатном возврате управления или при внешнем завершении процесса (SIGINT, SIGTERM и т.п.).
-
-Любая попытка управлять завершением процесса или ресурсами из CLI-команды считается архитектурным дефектом.
-
----
-
-## Логирование
-
-- команда может логировать ошибки самостоятельно;
-- промежуточные диспетчеры могут перехватывать и передавать ошибки выше;
-- корневой диспетчер обязан логировать все ошибки, не обработанные на нижележащих уровнях.
-
-Отсутствие логов при аварийном завершении CLI считается дефектом.
-
----
-
-## Инварианты CLI (MVP)
-
-Для всех CLI-команд в MVP зафиксированы следующие свойства:
-
-- детерминированность;
-- неидемпотентность по умолчанию;
-- строгая неинтерактивность;
-- работа в доверенном контуре;
-- отсутствие управления жизненным циклом приложения на уровне команд.
-
----
-
-## Границы документа
-
-Документ не описывает:
-
-- синтаксис CLI;
-- формат аргументов;
-- help и usage;
-- автогенерацию CLI;
-- список команд MVP;
-- реализацию в коде;
-- обработку сигналов ОС.
+This document does not describe CLI syntax, argument format, help and usage, CLI generation, the list of MVP commands, code implementation, or OS signal handling.

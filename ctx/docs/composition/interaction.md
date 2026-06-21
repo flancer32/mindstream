@@ -4,78 +4,78 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует допустимые действия пользователя в MVP Mindstream как прикладные факты активности и описывает их декларативно без сценариев, последовательностей и UX-механик.
+This document defines the permitted user actions in the Mindstream MVP as applied facts of activity and describes them declaratively without scenarios, sequences, or UX mechanics.
 
-## Принцип описания
+## Description Principle
 
-Действие в данном документе — это факт пользовательской активности, имеющий прикладной смысл в рамках продукта.
+In this document, an action is a fact of user activity with product-level meaning.
 
-Документ фиксирует какие действия существуют, не описывая как, когда и при каких условиях они выполняются.
+The document defines which actions exist without describing how, when, or under what conditions they happen.
 
-## Базовые действия пользователя
+## Basic User Actions
 
-В рамках MVP Mindstream существуют следующие действия пользователя.
+The following user actions exist in the Mindstream MVP.
 
-### Ориентация в ленте
+### Feed Orientation
 
-Пользователь просматривает ленту публикаций как персональную проекцию доступного корпуса данных.
+The user scans the publication feed as a personal projection of the available corpus.
 
-Действие фиксирует факт первичного контакта пользователя с публикациями и не считается формой углублённого внимания.
+This action records initial contact with publications and is not treated as deep attention.
 
-### Чтение аннотации
+### Reading The Annotation
 
-Пользователь читает аннотацию публикации.
+The user reads the publication annotation.
 
-Действие является первой формой смыслового углубления и фиксирует переход от ориентации к вниманию.
+This is the first form of semantic deepening and marks the shift from orientation to attention.
 
-### Чтение обзора
+### Reading The Overview
 
-Пользователь читает обзор публикации.
+The user reads the publication overview.
 
-Действие отражает более высокий уровень смыслового внимания и фиксирует углубление чтения после аннотации.
+This action reflects a higher level of semantic attention and a deeper stage of reading after the annotation.
 
-### Переход к оригинальной публикации
+### Opening The Original Publication
 
-Пользователь переходит к оригинальной внешней публикации.
+The user opens the original external publication.
 
-Действие является формой выраженного внимания и отражает переход к первоисточнику.
+This action is a form of explicit attention and reflects movement toward the source material.
 
-### Положительная отметка публикации
+### Positive Mark On A Publication
 
-Пользователь явно фиксирует положительное отношение к публикации как форму внимания.
+The user explicitly records a positive attitude toward a publication as a form of attention.
 
-Действие является самостоятельной положительной отметкой и не подменяет последовательность форм доступа к публикации.
+This action is an independent positive mark and does not replace the access sequence of other publication interactions.
 
-## Иерархия действий внимания
+## Hierarchy Of Attention Actions
 
-Действия, отражающие формы доступа и углубления внимания, образуют упорядоченную иерархию возрастания внимания:
+The actions that reflect access and attention deepening form an ordered hierarchy of increasing attention:
 
-1. ориентация в ленте;
-2. чтение аннотации;
-3. чтение обзора;
-4. переход к оригинальной публикации.
+1. feed orientation;
+2. reading the annotation;
+3. reading the overview;
+4. opening the original publication.
 
-Иерархия отражает последовательность пользовательского доступа к публикации и относится к прикладному уровню, а не к архитектурной обработке сигналов внимания.
+This hierarchy reflects the sequence of user access to a publication and belongs to the applied level, not the architectural processing of attention signals.
 
-Положительная отметка публикации является отдельным действием внимания и может сопутствовать любой форме доступа.
+A positive mark is a separate attention action and may accompany any form of access.
 
-## Отсутствующие действия
+## Missing Actions
 
-Отсутствуют действия, запрещённые в `constraints/mvp-scope.md`, включая:
+Actions prohibited by `constraints/mvp-scope.md` are absent, including:
 
-- отрицательную оценку публикаций;
-- управление алгоритмами или параметрами персонализации;
-- ручную фильтрацию и сортировку ленты;
-- объяснение причин формирования ленты;
-- социальное взаимодействие;
-- создание или редактирование контента.
+- negative publication ratings;
+- controlling algorithms or personalization parameters;
+- manual filtering and sorting of the feed;
+- explanations of why the feed was formed;
+- social interaction;
+- content creation or editing.
 
-## Границы документа
+## Document Boundary
 
-Документ не описывает UX-последовательности и пользовательские сценарии, визуальные механики и элементы управления, события, триггеры и реакции системы, фиксацию, хранение и обработку данных, архитектурные и вычислительные процессы.
+This document does not describe UX sequences or user scenarios, visual mechanics or controls, events, triggers, or system reactions, data recording, storage or processing, or architectural and computational processes.
 
-## Итог
+## Summary
 
-`composition/interaction.md` фиксирует допустимые действия пользователя MVP Mindstream как ограниченный набор прикладных фактов активности, образующих иерархию форм доступа к вниманию, без перехода к механике, реализации и архитектуре.
+`composition/interaction.md` defines the permitted user actions of the Mindstream MVP as a bounded set of applied activity facts that form a hierarchy of access-to-attention forms, without moving into mechanics, implementation, or architecture.

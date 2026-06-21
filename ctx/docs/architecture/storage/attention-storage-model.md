@@ -2,170 +2,151 @@
 
 - Path: `ctx/docs/architecture/storage/attention-storage-model.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **структурную модель данных** для хранения статистики внимания в MVP Mindstream.
+This document defines the **structural data model** for storing attention statistics in the Mindstream MVP.
 
-Модель предназначена для:
+The model is intended for:
 
-- формулировки задач агентам на создание схемы БД;
-- обеспечения enforce инвариантов, зафиксированных в архитектурных документах;
-- однозначного отображения логических сущностей storage в реляционную схему.
+- formulating tasks for agents that generate the database schema;
+- enforcing invariants already fixed in architectural documents;
+- providing an unambiguous mapping of logical storage entities to a relational schema.
 
-Документ не описывает SQL, миграции, ORM, индексы производительности и способы доступа к данным.
+This document does not describe SQL, migrations, ORM, performance indexes, or data-access methods.
 
----
+## Target Storage Model
 
-## Целевая модель хранения
+- Storage type: **relational**
+- Target DBMS: **PostgreSQL** using a compatible schema
 
-- Тип хранилища: **реляционное**
-- Целевая СУБД: **PostgreSQL (совместимая схема)**
-
----
-
-## Логические сущности и атрибуты
+## Logical Entities And Attributes
 
 ### 1. Anonymous Identity
 
-Anonymous identity представляет зарегистрированный анонимный идентификатор браузерного контекста.
+Anonymous Identity represents a registered anonymous identifier of a browser context.
 
-**Атрибуты:**
+**Attributes:**
 
 - `identity_id`
-  - тип: UUID
-  - обязательный
-  - первичный ключ
+- type: UUID
+- required
+- primary key
 - `registered_at`
-  - тип: timestamp (UTC)
-  - обязательный
-  - фиксирует момент регистрации identity
+- type: timestamp (UTC)
+- required
+- records the identity-registration moment
 
-**Инварианты:**
+**Invariants:**
 
-- identity может существовать без событий внимания;
-- identity без событий может быть удалена по TTL;
-- identity удаляется полностью и необратимо;
-- storage не генерирует identity.
-
----
+- an identity may exist without attention events;
+- an identity without events may be removed by TTL;
+- identity removal is full and irreversible;
+- storage does not generate identity.
 
 ### 2. Publication Reference
 
-Publication Reference представляет ссылку на публикацию, существующую в Content Collection.
+Publication Reference represents a reference to a publication that exists in the Content Collection.
 
-**Атрибуты:**
+**Attributes:**
 
 - `publication_id`
-  - тип: определяется Content Collection
-  - обязательный
-  - первичный ключ
-  - внешний ключ на таблицу публикаций
+- type: defined by the Content Collection
+- required
+- primary key
+- foreign key to the publications table
 
-**Инварианты:**
+**Invariants:**
 
-- attention-событие может ссылаться только на существующую публикацию;
-- попытка записи события для несуществующей публикации является ошибкой;
-- удаление публикации приводит к каскадному удалению связанных attention-данных.
-
----
+- an attention event may reference only an existing publication;
+- attempting to write an event for a non-existent publication is an error;
+- removing a publication causes cascade deletion of related attention data.
 
 ### 3. Attention Event (State)
 
-Attention Event представляет **логическое состояние внимания**, а не историческое событие.
+Attention Event represents a **logical attention state**, not a historical event.
 
-Состояние фиксирует факт того, что attention данного типа считается проявленным для пары `(identity, publication)`.
+The state records the fact that attention of a given type is considered expressed for the pair `(identity, publication)`.
 
-**Атрибуты:**
+**Attributes:**
 
 - `identity_id`
-  - тип: UUID
-  - обязательный
-  - внешний ключ → Anonymous Identity
+- type: UUID
+- required
+- foreign key to Anonymous Identity
 - `publication_id`
-  - тип: соответствует Publication Reference
-  - обязательный
-  - внешний ключ → Publication Reference
+- type: matches Publication Reference
+- required
+- foreign key to Publication Reference
 - `attention_type`
-  - тип: enum (см. ниже)
-  - обязательный
+- type: enum
+- required
 - `created_at`
-  - тип: timestamp (UTC)
-  - обязательный
-  - фиксирует момент первичной фиксации состояния
+- type: timestamp (UTC)
+- required
+- records the moment of first state registration
 
-**Ключи и ограничения:**
+**Keys and constraints:**
 
-- составной уникальный ключ:
+- composite unique key:
 
-```
+```text
 (identity_id, publication_id, attention_type)
 ```
 
-**Инварианты:**
+**Invariants:**
 
-- для одной тройки `(identity, publication, attention_type)` допускается не более одного состояния;
-- повторная запись такого же события полностью игнорируется;
-- `created_at` не обновляется при повторной отправке;
-- история повторов не хранится.
-
----
+- for one triple `(identity, publication, attention_type)`, at most one state is allowed;
+- rewriting the same event is fully ignored;
+- `created_at` is not updated on repeated submission;
+- repetition history is not stored.
 
 ## Attention Type Enum
 
-Перечень допустимых типов сигналов внимания **закрыт** в рамках MVP.
+The set of allowed attention-signal types is **closed** in the MVP.
 
-Допустимые значения:
+Allowed values:
 
-- `overview_view`  
-  Факт открытия обзора публикации.
-- `link_click`  
-  Факт перехода по ссылке на источник публикации.
-- `link_click_after_overview`  
-  Факт перехода по ссылке после предварительного просмотра обзора.
+- `overview_view`
+  records the fact of opening a publication overview.
+- `link_click`
+  records the fact of opening the publication source link.
+- `link_click_after_overview`
+  records the fact of opening the link after previewing the overview.
 
-Расширение перечня attention-type требует пересмотра архитектурного набора документации.
+Expanding the `attention_type` set requires revision of the architectural documentation set.
 
----
+## Constraint Invariants
 
-## Constraint Invariants (summary)
-
-Storage обязан enforce следующие ограничения:
+Storage must enforce:
 
 1. **Existence**
-
-- attention-событие невозможно без существующей identity;
-- attention-событие невозможно без существующей публикации.
+- an attention event cannot exist without an existing identity;
+- an attention event cannot exist without an existing publication.
 
 2. **Uniqueness**
-
-- уникальность `(identity_id, publication_id, attention_type)`.
+- uniqueness of `(identity_id, publication_id, attention_type)`.
 
 3. **Referential integrity**
-
-- каскадное удаление attention-событий при удалении публикации;
-- каскадное удаление attention-событий при удалении identity.
+- cascade deletion of attention events when a publication is removed;
+- cascade deletion of attention events when an identity is removed.
 
 4. **Immutability**
+- an attention state does not change after first registration.
 
-- attention-состояние не изменяется после первичной фиксации.
+## Retention And Cleanup
 
----
+At the storage level, the schema must allow:
 
-## Retention and cleanup (storage-level expectations)
+- deletion of identities without events;
+- deletion of attention events older than a configured threshold;
+- manual cleanup execution;
+- preservation of aggregated statistics outside primary tables during attention-event cleanup.
 
-- схема должна позволять:
-- удаление identity без событий;
-- удаление attention-событий старше заданного срока;
-- очистка может выполняться вручную;
-- при очистке attention-событий допускается сохранение агрегированной статистики вне первичных таблиц.
+## Conceptual Write-Event Example
 
----
-
-## Примеры write-событий (conceptual)
-
-Пример входных данных для write-ingress (формат не нормативный, приведён для контекста):
+The following example is non-normative and included only for context:
 
 ```json
 {
@@ -176,31 +157,25 @@ Storage обязан enforce следующие ограничения:
 }
 ```
 
----
+## Document Boundary
 
-## Границы документа
+This document:
 
-Документ:
+- does not define SQL DDL;
+- does not describe optimization indexes;
+- does not introduce aggregate tables;
+- does not describe ORM models;
+- does not define API contracts.
 
-- не определяет SQL DDL;
-- не описывает индексы оптимизации;
-- не вводит агрегатные таблицы;
-- не описывает ORM-модели;
-- не задаёт API-контракты.
+All of these belong to the implementation level and are formulated through agent tasks.
 
-Все перечисленные вопросы относятся к уровню реализации и формулируются в задачах агентам.
-
----
-
-## Связанные документы
+## Related Documents
 
 - `ctx/docs/architecture/anonymous-identity/invariants.md`
 - `ctx/docs/architecture/ingress/attention-write-ingress.md`
 - `ctx/docs/architecture/data-flow/attention.md`
 - `ctx/docs/architecture/attention/storage-invariants.md`
 
----
+## Summary
 
-## Итог
-
-Данный документ задаёт **полную и однозначную структурную модель данных** для хранения статистики внимания в MVP Mindstream и предназначен для прямого использования при постановке задачи codex-агенту на генерацию схемы БД.
+This document defines the **complete and unambiguous structural data model** for storing attention statistics in the Mindstream MVP and is intended for direct use when assigning a Codex agent to generate the database schema.

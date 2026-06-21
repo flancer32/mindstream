@@ -4,130 +4,122 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **нормативную форму развёртывания MVP Mindstream** как часть продукта.  
-Он описывает инвариантную модель деплоя, роли компонентов и границы их ответственности без перехода к инструкциям, конфигурациям и операционным процедурам.
+This document defines the **normative deployment form of the Mindstream MVP** as part of the product. It describes the invariant deployment model, component roles, and responsibility boundaries without moving into instructions, configurations, or operational procedures.
 
-Форма деплоя считается частью продукта MVP и подлежит воспроизведению во всех средах исполнения.
+The deployment form is considered part of the MVP product and must be reproduced across all execution environments.
 
-## Статус деплоя в MVP
+## Deployment Status In The MVP
 
-В рамках MVP считается истинным, что:
+Within the MVP, the following is true:
 
-- модель деплоя Mindstream **жёстко зафиксирована**;
-- деплой является **частью продукта**, а не эксплуатационным выбором;
-- среды `dev` и `prod` различаются параметрами и способом запуска, но **не формой развёртывания**;
-- архитектурная форма системы не зависит от среды исполнения.
+- the Mindstream deployment model is **rigidly fixed**;
+- deployment is **part of the product**, not an operational choice;
+- `dev` and `prod` differ by parameters and startup mode, but **not by deployment form**;
+- the architectural form of the system does not depend on the execution environment.
 
-## Общая форма развёртывания
+## General Deployment Form
 
-MVP Mindstream развёртывается в форме:
+The Mindstream MVP is deployed in the form:
 
 **Apache → Node.js application → PostgreSQL**
 
-где Apache является единственной внешней точкой входа, а Node.js-приложение функционирует исключительно за прокси-сервером.
+where Apache is the only external entry point and the Node.js application operates exclusively behind the proxy server.
 
-## HTTPS и требования PWA
+## HTTPS And PWA Requirements
 
-Клиентская часть Mindstream реализуется в форме **Progressive Web App (PWA)**.
+The Mindstream client is implemented as a **Progressive Web App (PWA)**.
 
-В рамках MVP считается истинным, что:
+Within the MVP, the following is true:
 
-- HTTPS является **обязательным условием** эксплуатации продукта;
-- доступ к продукту по HTTP без TLS не допускается;
-- обеспечение TLS относится к ответственности веб-сервера.
+- HTTPS is a **mandatory condition** for product operation;
+- access over plain HTTP without TLS is not allowed;
+- TLS is the responsibility of the web server.
 
-## Роль Apache
+## Role Of Apache
 
-Apache является **обязательным компонентом MVP** и является единственной внешней HTTPS-точкой входа системы.
+Apache is a **mandatory MVP component** and the only external HTTPS entry point of the system.
 
-В рамках MVP Apache:
+In the MVP, Apache:
 
-- обслуживает клиентскую статику напрямую;
-- проксирует API-запросы в серверное приложение;
-- реализует любые политики доступа к backend, включая фильтрацию, ограничение и модификацию запросов;
-- завершает TLS-соединения.
+- serves client-side static assets directly;
+- proxies API requests to the server application;
+- enforces backend access policies, including filtering, limiting, and request modification;
+- terminates TLS connections.
 
-Apache рассматривается как полноценный reverse proxy, обладающий полной свободой в обработке входящих HTTP-запросов.
+Apache is treated as a full reverse proxy with complete control over incoming HTTP request handling.
 
-## Статика и клиентская часть
+## Static Assets And Client Side
 
-Клиентская часть Mindstream:
+The Mindstream client side:
 
-- представляет собой **чистую статическую PWA** (HTML / JavaScript / CSS);
-- не использует server-side rendering;
-- не использует build-этап;
-- обслуживается Apache напрямую без участия Node.js.
+- is a **pure static PWA** using HTML, JavaScript, and CSS;
+- does not use server-side rendering;
+- does not use a build step;
+- is served directly by Apache without Node.js involvement.
 
-Статические ресурсы имеют **версию**, рассматриваемую как часть продукта и используемую в контексте PWA.
+Static assets have a **version**, treated as part of the product and used in the PWA context.
 
-Передача статических ресурсов через Node.js в рамках MVP не допускается.
+Serving static assets through Node.js is not allowed in the MVP.
 
-## API и маршрутизация
+## API And Routing
 
-В рамках MVP существует **ровно один API namespace**:
+There is **exactly one API namespace** in the MVP:
 
 - `/api/*`
 
-Иные namespaces, версии API, служебные или диагностические пути отсутствуют.
+No other namespaces, API versions, service paths, or diagnostic paths exist.
 
-Apache вправе произвольно модифицировать API-запросы, включая заголовки и маршруты, при условии сохранения единого публичного namespace `/api/*`.
+Apache may arbitrarily modify API requests, including headers and routes, as long as the single public namespace `/api/*` is preserved.
 
-## Node.js приложение
+## Node.js Application
 
-Серверная часть Mindstream реализуется в виде Node.js-приложения.
+The server side of Mindstream is implemented as a Node.js application.
 
-В рамках MVP считается истинным, что:
+Within the MVP, the following is true:
 
-- Node.js-приложение обслуживает **исключительно API-контур**;
-- приложение не раздаёт статические ресурсы;
-- приложение не доступно напрямую из внешней сети;
-- приложение слушает только внутренний интерфейс, предназначенный для взаимодействия с Apache.
+- the Node.js application serves **only the API contour**;
+- the application does not serve static assets;
+- the application is not directly reachable from the external network;
+- the application listens only on an internal interface intended for Apache.
 
-### Режимы запуска
+### Startup Modes
 
-- В среде `prod` Node.js-приложение запускается в **кластерном режиме под управлением PM2**.
-- В среде `dev` допускается запуск без PM2 в однопроцессном режиме.
+- In `prod`, the Node.js application runs in **cluster mode under PM2**.
+- In `dev`, single-process execution without PM2 is allowed.
 
-Выбор PM2 зафиксирован для MVP как нормативный для production-среды.
+The choice of PM2 is fixed for the MVP as normative for production.
 
-## Консольный доступ и задачи
+## Console Access And Tasks
 
-Кодовая база Mindstream предусматривает возможность:
+The Mindstream codebase supports:
 
-- запуска серверного приложения из командной строки;
-- выполнения вспомогательных и сервисных задач вне HTTP-контекста.
+- starting the server application from the command line;
+- running support and service tasks outside the HTTP context.
 
-Наличие CLI-доступа не изменяет сетевые и архитектурные границы деплоя и не предполагает внешнего HTTP-доступа к Node.js.
+CLI access does not change the network or architectural deployment boundaries and does not imply external HTTP access to Node.js.
 
-## Границы ответственности компонентов
+## Component Responsibility Boundaries
 
-В рамках MVP считается истинным, что:
+Within the MVP, the following is true:
 
-- Apache отвечает за:
-  - TLS;
-  - приём внешних HTTP(S)-запросов;
-  - раздачу статики;
-  - проксирование и контроль доступа к API;
-- Node.js-приложение отвечает за:
-  - обработку API-запросов;
-  - реализацию серверной логики;
-  - доступ к серверному хранилищу данных;
-- прямое пересечение ролей компонентов отсутствует.
+- Apache is responsible for TLS, receiving external HTTP(S) requests, serving static assets, and proxying and controlling access to the API.
+- The Node.js application is responsible for API handling, server logic, and access to server-side data storage.
+- The roles of these components do not directly overlap.
 
-## Границы документа
+## Document Boundary
 
-Документ:
+This document:
 
-- не содержит инструкций по настройке;
-- не содержит команд, конфигурационных файлов и путей;
-- не фиксирует операционные процедуры;
-- не описывает альтернативные модели деплоя;
-- не вводит требований к облачной или сетевой инфраструктуре.
+- contains no setup instructions;
+- contains no commands, config files, or paths;
+- does not define operational procedures;
+- does not describe alternative deployment models;
+- does not introduce cloud or network infrastructure requirements.
 
-Документ фиксирует **форму**, а не процесс её реализации.
+It defines **form**, not the implementation process.
 
-## Итог
+## Summary
 
-`deployment.md` закрепляет модель развёртывания MVP Mindstream как жёстко зафиксированную часть продукта, в которой Apache выступает единственной внешней точкой входа и прокси-уровнем, Node.js реализует API-контур за внутренним интерфейсом, клиентская часть функционирует как PWA по HTTPS, а различия сред исполнения не затрагивают архитектурную форму системы.
+`deployment.md` fixes the Mindstream MVP deployment model as a rigid part of the product, where Apache is the only external entry point and proxy layer, Node.js implements the API contour behind an internal interface, the client runs as an HTTPS PWA, and environment differences do not affect the architectural form of the system.

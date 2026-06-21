@@ -2,154 +2,136 @@
 
 - Path: `ctx/docs/architecture/attention/storage-invariants.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **инварианты хранилища** для подсистемы сигналов внимания в MVP Mindstream.
+This document defines the **storage invariants** for the attention-signal subsystem in the Mindstream MVP.
 
-Инварианты определяют, какие состояния **обязаны быть истинны в storage** независимо от конкретной СУБД, схемы таблиц, SQL, индексов и реализации сервисов.
+These invariants define which states **must hold true in storage** regardless of the concrete DBMS, table schema, SQL, indexes, or service implementation.
 
-Документ относится только к storage-контуру сигналов внимания и не описывает ingress, API, UI, алгоритмы агрегации и любые вычислительные процессы.
+This document applies only to the storage contour for attention signals and does not describe ingress, API, UI, aggregation algorithms, or any computational processes.
 
----
+## Role Of Storage In Architecture
 
-## Роль storage в архитектуре (MVP)
+Storage in the attention-signal contour is an **enforcement layer** and:
 
-Storage в контуре сигналов внимания является **enforcement layer** и:
+- records accepted statistical data in durable form;
+- ensures integrity and deduplication at the data level;
+- contains no domain logic beyond enforcement of invariants;
+- does not initiate reactive processes;
+- does not form read models for anonymous identity.
 
-- фиксирует принятые статистические данные в устойчивом виде;
-- обеспечивает целостность и дедупликацию на уровне данных;
-- не содержит доменной логики, кроме enforce инвариантов;
-- не инициирует реактивных процессов;
-- не формирует read-модели для anonymous identity.
+## Logical Storage Entities
 
----
-
-## Логические сущности storage (MVP)
-
-В рамках MVP в storage контура сигналов внимания допускаются только следующие логические сущности:
+Only the following logical entities are allowed in this storage contour in the MVP:
 
 1. **Anonymous Identity**
 2. **Publication Reference**
 3. **Attention Event (State)**
 
-Иные сущности, включая вспомогательные (profiles, sessions, counters, aggregates), в MVP для данного контура не вводятся.
-
----
+Other entities, including auxiliary ones such as profiles, sessions, counters, and aggregates, are not introduced in this contour.
 
 ## Invariants: Anonymous Identity
 
-### Источник identity
+### Identity Source
 
-- Anonymous identity представлена UUID стандартного формата.
-- UUID генерируется исключительно на фронте и регистрируется на сервере явным образом.
-- Storage не является источником identity и не генерирует UUID.
+- Anonymous identity is represented by a standard UUID.
+- The UUID is generated only on the frontend and registered explicitly on the server.
+- Storage is not the source of identity and does not generate UUIDs.
 
-### Наличие и регистрация
+### Existence And Registration
 
-- Любое событие внимания допускается к фиксации только при наличии зарегистрированной identity.
-- Identity может существовать в storage независимо от наличия событий внимания.
+- Any attention event may be recorded only if a registered identity exists.
+- An identity may exist in storage even without attention events.
 
-### Метаданные identity
+### Identity Metadata
 
-- Storage обязан фиксировать **время регистрации identity** (UTC).
+- Storage must record the **identity registration time** in UTC.
 
-### Удаление identity
+### Identity Removal
 
-- Identity без событий внимания подлежит удалению по TTL.
-- Удаление identity является полным и необратимым.
-- Tombstone-механизм или сохранение следов удаления identity в MVP не используется.
-
----
+- An identity without attention events may be removed by TTL.
+- Identity removal is full and irreversible.
+- No tombstone mechanism or trace preservation is used in the MVP.
 
 ## Invariants: Publication Reference
 
-### Обязательность существования публикации
+### Publication Existence Requirement
 
-- Attention Event может ссылаться только на публикацию, которая существует в Content Collection storage.
-- Попытка зафиксировать событие внимания для несуществующей публикации является ошибкой.
+- An attention event may reference only a publication that exists in Content Collection storage.
+- Attempting to record an attention event for a non-existent publication is an error.
 
-### Удаление публикации
+### Publication Removal
 
-- Если публикация удаляется из Content Collection, связанные с ней данные attention должны быть удалены каскадно.
-- После каскадного удаления публикации не остаётся attention-состояний, ссылающихся на неё.
-
----
+- If a publication is removed from the Content Collection, related attention data must be deleted cascade-style.
+- After cascade cleanup, no attention state may remain that references the removed publication.
 
 ## Invariants: Attention Event (State)
 
-### Онтология события
+### Event Ontology
 
-Attention Event в MVP является не историческим событием, а **логическим состоянием внимания**:
+In the MVP, an Attention Event is not a historical event but a **logical attention state**:
 
-- состояние фиксирует, что для пары (identity, publication) внимание данного типа считается проявленным;
-- storage не хранит историю повторов одного и того же события внимания.
+- it records that attention of a given type is considered expressed for a pair `(identity, publication)`;
+- storage does not keep the repetition history of the same attention event.
 
-### Уникальность состояния
+### State Uniqueness
 
-- Для каждой тройки `(anonymous_identity, publication_id, attention_type)` допускается не более одного внимания-состояния.
-- В storage не допускается наличие дублей, нарушающих уникальность состояния.
+- For each triple `(anonymous_identity, publication_id, attention_type)`, at most one attention state is allowed.
+- Storage must not contain duplicates that violate state uniqueness.
 
-### Повторная отправка (dedup semantics)
+### Repeated Submission
 
-- Повторная отправка одинакового события внимания должна быть **полностью игнорируема** на уровне устойчивого состояния.
-- Повторная отправка не должна:
-  - создавать новые записи;
-  - обновлять timestamp;
-  - изменять любое производное состояние.
+- Repeated submission of the same attention event must be **fully ignorable** at the durable-state level.
+- A repeated submission must not:
+- create new rows;
+- update the timestamp;
+- change any derived state.
 
 ### Timestamp
 
-- Timestamp, связанный с attention-состоянием, трактуется как **момент первичной фиксации** этого состояния (UTC).
-- Timestamp не обновляется при повторных отправках.
+- The timestamp associated with an attention state is the **moment of its first recording** in UTC.
+- The timestamp is not updated by repeated submissions.
 
----
+## Deduplication Invariants
 
-## Deduplication invariants
+- Deduplication is a storage invariant, not an ingress-logic invariant.
+- Storage must ensure that duplicate attention states cannot exist.
+- Storage does not have to prevent duplicate submissions from reaching the backend, but it must ensure that duplicates do not change durable state.
 
-- Дедупликация является инвариантом хранения, а не ingress-логики.
-- Storage обязан обеспечивать невозможность существования дубликатов attention-состояний.
-- Storage не обязан предотвращать поступление дублей на вход backend, но обязан обеспечивать, что дубли не приводят к изменению устойчивого состояния.
+## Retention And Cleanup
 
----
+### Cleanup Of Identities Without Events
 
-## Retention and cleanup
+- TTL cleanup of identities without events is allowed.
+- Cleanup may run manually and is not a required runtime-contour process.
 
-### Очистка identity без событий
+### Cleanup Of Expired Attention Data
 
-- TTL-очистка identities без событий допускается.
-- Механизм очистки может выполняться вручную и не является обязательным процессом runtime-контура.
+- Removing attention data older than a configured period, for example one year, is allowed.
+- Cleanup may be implemented as a separate manual run and is not a required runtime-contour process.
 
-### Очистка устаревших attention-данных
+### Preserving Aggregated Statistics During Cleanup
 
-- Удаление attention-данных старше заданного срока (например, 1 год) допускается.
-- Очистка может быть реализована как отдельный запуск вручную и не является обязательным процессом runtime-контура.
+- Preserving aggregated statistics while cleaning up primary attention states is allowed.
+- Aggregates are not a required part of storage in the MVP, but they may appear as long as they do not violate the invariants in this document.
 
-### Сохранение агрегированной статистики при очистке
+## Derived Data Boundary
 
-- При очистке первичных attention-состояний допускается сохранение агрегированной статистики.
-- В MVP агрегаты не являются обязательной частью storage, но их появление допускается при условии, что они не нарушают остальные инварианты данного документа.
+In the future, the following may be added:
 
----
-
-## Derived data (future-compatible boundary)
-
-В будущем допускается появление:
-
-- server-side агрегатов;
+- server-side aggregates;
 - derived tables;
 - materialized views;
 
-если выполняются условия:
+if all of the following hold:
 
-- они не меняют онтологию первичных attention-состояний;
-- они не вводят read-модели для identity в рамках write-ingress контура;
-- они не нарушают enforce инварианты uniqueness, existence и cascade cleanup.
+- they do not change the ontology of primary attention states;
+- they do not introduce read models for identity within the write-ingress contour;
+- they do not violate enforcement invariants for uniqueness, existence, or cascade cleanup.
 
----
-
-## Связанные документы
+## Related Documents
 
 - `ctx/docs/architecture/anonymous-identity/invariants.md`
 - `ctx/docs/architecture/ingress/http-ingress.md`
@@ -157,14 +139,12 @@ Attention Event в MVP является не историческим событ
 - `ctx/docs/architecture/data-flow/attention.md`
 - `ctx/docs/architecture/attention/interest-vector.md`
 
----
+## Summary
 
-## Итог
+The attention-signal storage contour in the MVP stores:
 
-Storage-конур сигналов внимания в MVP хранит:
+- registered anonymous identities with registration time;
+- references to publications that exist in the Content Collection as an external dependency;
+- attention states, not history, unique by `(identity, publication, attention_type)`, fully idempotent under repeated submission, and removed cascade-style when a publication is removed.
 
-- зарегистрированные anonymous identities (с временем регистрации);
-- ссылки на публикации, существующие в Content Collection (как внешнюю зависимость);
-- attention-состояния (не историю), уникальные по `(identity, publication, attention_type)`, полностью идемпотентные к повторной отправке и удаляемые каскадно при удалении публикации.
-
-Очистка данных допускается и может выполняться вручную. Derived data допускаются в будущем при соблюдении инвариантов данного документа.
+Data cleanup is allowed and may be run manually. Derived data may be added later if the invariants of this document are preserved.

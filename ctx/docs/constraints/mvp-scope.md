@@ -4,98 +4,98 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует жёсткие и обязательные ограничения MVP Mindstream и определяет допустимые и недопустимые свойства продукта без интерпретаций и расширений.
+This document defines the hard and mandatory constraints of the Mindstream MVP and identifies the allowed and disallowed product properties without interpretation or extension.
 
-Любые решения, выходящие за пределы данного документа, считаются выходом за рамки MVP.
+Any decision that goes beyond this document is considered out of MVP scope.
 
-## Базовая рамка MVP
+## Base MVP Frame
 
-MVP Mindstream предназначен для проверки идеи персональной проекции корпуса публикаций и модели участия пользователя в коллективном статистическом контуре, а не для оптимизации персонализации, масштабирования или развития социальной функциональности.
+The Mindstream MVP exists to validate the idea of a personal projection of a publication corpus and a user's participation in a shared statistical contour, not to optimize personalization, scaling, or social features.
 
-MVP реализует строго ограниченный набор продуктовых сущностей и режимов доступа, достаточный для демонстрации базовой ценности продукта.
+The MVP implements a strictly limited set of product entities and access modes sufficient to demonstrate the core value of the product.
 
-## Режимы доступа
+## Access Modes
 
-В MVP допускаются ровно два режима доступа к данным продукта: демо-режим и режим полного доступа.
+The MVP allows exactly two access modes to product data: demo mode and full-access mode.
 
-Иные режимы доступа, промежуточные состояния или автоматические переходы между режимами в рамках MVP отсутствуют.
+There are no other access modes, intermediate states, or automatic transitions between modes in the MVP.
 
-## Демо-режим
+## Demo Mode
 
-В демо-режиме пользователь использует Mindstream без инициализации профиля и без UUID.
+In demo mode, the user uses Mindstream without profile initialization and without a UUID.
 
-В демо-режиме пользователю предоставляется доступ только к демонстрационному корпусу данных, объём и состав которого ограничены и не отражают полный корпус публикаций.
+In demo mode, the user has access only to the demo corpus, whose size and composition are limited and do not represent the full publication corpus.
 
-В демо-режиме формирование персональной ленты на основе полного корпуса данных запрещено.
+In demo mode, generating a personal feed from the full corpus is prohibited.
 
-В демо-режиме сигналы внимания могут фиксироваться локально, но не передаются на сервер и не участвуют в агрегированной статистике внимания.
+In demo mode, attention signals may be recorded locally but are not sent to the server and do not participate in aggregated attention statistics.
 
-## Полный доступ
+## Full Access
 
-Полный доступ к данным Mindstream предоставляется только пользователю с инициализированным профилем, идентифицируемым UUID.
+Full access to Mindstream data is granted only to a user with an initialized profile identified by a UUID.
 
-Инициализация профиля является условием доступа к полному корпусу данных и участия в коллективном статистическом контуре продукта.
+Profile initialization is a condition for access to the full corpus and participation in the product's shared statistical contour.
 
-UUID не является регистрацией, аккаунтом, механизмом аутентификации или подтверждения личности и не связан с персональными данными пользователя.
+The UUID is not a registration, account, authentication mechanism, or proof of identity and is not tied to personal user data.
 
-## Пользовательский контекст и профиль
+## User Context And Profile
 
-В рамках MVP считается, что один пользовательский контекст соответствует одному профилю браузера.
+Within the MVP, one user context corresponds to one browser profile.
 
-Каждому пользовательскому контексту соответствует не более одного профиля пользователя, идентифицируемого UUID.
+Each user context has at most one user profile identified by a UUID.
 
-Перенос профиля между браузерами, устройствами или пользовательскими контекстами в рамках MVP запрещён.
+Moving a profile across browsers, devices, or user contexts is prohibited in the MVP.
 
-## Корпус данных
+## Data Corpus
 
-В рамках MVP различаются демонстрационный корпус данных и полный корпус данных.
+The MVP distinguishes between the demo corpus and the full corpus.
 
-Демонстрационный корпус используется исключительно в демо-режиме и не требует участия пользователя в сборе статистики внимания.
+The demo corpus is used only in demo mode and does not require user participation in attention-statistics collection.
 
-Полный корпус данных используется только в режиме полного доступа и может применяться при формировании персональной ленты с учётом агрегированной статистики внимания.
+The full corpus is used only in full-access mode and may be used for personal-feed formation with aggregated attention statistics taken into account.
 
-## Смысловые представления и эмбеддинги
+## Semantic Representations And Embeddings
 
-В MVP для публикаций формируются только два смысловых представления: аннотация и обзор.
+In the MVP, only two semantic representations are produced for publications: annotation and overview.
 
-Формирование иных смысловых проекций, дополнительных уровней свёртки или чанкинга публикаций запрещено.
+Generating other semantic projections, additional condensation layers, or publication chunking is prohibited.
 
-Эмбеддинги формируются исключительно для аннотаций и обзоров.
+Embeddings are generated only for annotations and overviews.
 
-Формирование эмбеддингов полного текста публикаций в рамках MVP запрещено.
+Generating embeddings for full publication text is prohibited in the MVP.
 
-## Сигналы внимания
+## Attention Signals
 
-В MVP фиксируются только положительные сигналы внимания, включая чтение аннотации, чтение обзора, переход к оригинальной публикации и положительную отметку публикации.
+The MVP records only positive attention signals, including reading an annotation, reading an overview, opening the original publication, and explicitly marking a publication positively.
 
-Отрицательные сигналы внимания, дизлайки и негативные оценки в рамках MVP запрещены.
+Negative attention signals, dislikes, and negative ratings are prohibited in the MVP.
 
-Передача сигналов внимания на сервер и их участие в агрегированной статистике возможны только при наличии UUID профиля.
+Sending attention signals to the server and using them in aggregated attention statistics is possible only when a profile UUID exists.
 
-## Персональная лента
+## Personal Feed
 
-Лента пользователя в MVP является результатом локальной персональной проекции доступного корпуса данных через призму профиля интересов пользователя.
+The user feed in the MVP is the result of a local personal projection of the available corpus through the lens of the user's interest profile.
 
-Лента не является глобальной сущностью, не хранится как объект и не имеет канонического представления.
+The feed is not a global entity, is not stored as an object, and has no canonical representation.
 
-Формирование персональной ленты на основе полного корпуса данных без UUID профиля запрещено.
+Generating a personal feed from the full corpus without a profile UUID is prohibited.
 
-## Персонализация и обратные связи
+## Personalization And Feedback
 
-В MVP допускается локальная персонализация в браузере пользователя без глобального пересчёта данных.
+The MVP allows local personalization inside the user's browser without global data recalculation.
 
-Глобальные обратные связи, реактивное обучение системы, пересчёт корпуса данных, аннотаций, обзоров, эмбеддингов или агрегированной статистики внимания в реальном времени запрещены.
+Global feedback loops, reactive system learning, and real-time recalculation of the corpus, annotations, overviews, embeddings, or aggregated attention statistics are prohibited.
 
-## Интерфейс
+## Interface
 
-Пользовательский интерфейс MVP предназначен исключительно для чтения публикаций, фиксации сигналов внимания и визуализации персональной ленты.
+The MVP user interface exists only for reading publications, recording attention signals, and visualizing the personal feed.
 
-Интерфейс не предоставляет средств управления алгоритмами, настройки параметров персонализации или объяснения причин формирования ленты.
+The interface does not provide controls for algorithms, personalization settings, or explanations of why the feed was formed the way it was.
 
-## Вне рамок MVP
+## Outside MVP Scope
 
-Вне рамок MVP находятся регистрация аккаунтов, социальные функции, взаимодействие между пользователями, пользовательский контент, отрицательные оценки, перенос профилей между устройствами, объяснимость рекомендаций, платёжные механизмы и любые формы глобального обучения системы.
+Out of scope for the MVP are account registration, social features, user-to-user interaction, user-generated content, negative ratings, profile transfer across devices, recommendation explainability, payment mechanisms, and any form of global system learning.
 
-Любые изменения, выходящие за перечисленные ограничения, требуют пересмотра данного документа.
+Any change beyond these constraints requires this document to be revised.

@@ -4,134 +4,132 @@
 - Template Version: `20260619`
 - Changed: `20260619`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **среду исполнения MVP Mindstream**.
+This document defines the **runtime environment of the Mindstream MVP**.
 
-Он определяет допустимые платформы, рантаймы и внешние зависимости, в рамках которых возможна реализация и запуск системы.
+It specifies the permitted platforms, runtimes, and external dependencies within which the system may be implemented and run.
 
-Документ является **обзорным runtime-контекстом** и не описывает:
+This document is an **overview runtime context** and does not describe:
 
-- архитектуру приложения;
-- композицию подсистем;
-- прикладную или доменную логику;
-- конкретные инфраструктурные контракты.
+- application architecture;
+- subsystem composition;
+- application or domain logic;
+- concrete infrastructure contracts.
 
-Специализированные аспекты runtime выносятся в поддокументы.
-
----
-
-## Область применения
-
-Runtime-контекст описывает:
-
-- где и в каком окружении исполняется приложение;
-- какие минимальные требования предъявляются к среде;
-- какие инфраструктурные предположения считаются истинными для MVP.
+Specialized runtime aspects are moved into subordinate documents.
 
 ---
 
-## Среда исполнения
+## Scope
 
-- Серверная часть исполняется на **VPS**.
-- Клиентская часть исполняется в **браузере пользователя**.
-- Допускается наличие нескольких сред исполнения (например, dev / prod),
-  отличающихся параметрами доступа и окружения.
-- Ограничений по региону, провайдеру и операционной системе нет.
+The runtime context describes:
 
----
-
-## Платформа выполнения
-
-- Серверная платформа: **Node.js**.
-- Клиентская платформа: **browser runtime**.
-- Serverless-подходы не используются.
-- Минимальная среда исполнения зафиксирована:
-  - **Node.js LTS (целевой — 20.x)**;
-  - **современные evergreen-браузеры**;
-  - **PostgreSQL 16+**.
+- where and in what environment the application runs;
+- the minimum environment requirements;
+- which infrastructure assumptions are considered true for the MVP.
 
 ---
 
-## Клиентская среда
+## Execution Environment
 
-- Клиент ориентирован на **PWA**, подход **mobile first**.
-- Поддерживаются только **современные evergreen-браузеры**.
-- Legacy-браузеры исключены.
-- Offline-режим в MVP **исключён**.
-
----
-
-## Хранение данных
-
-- Серверное хранилище: **PostgreSQL**.
-- Клиентское локальное хранилище: **IndexedDB**.
-- Используется одно серверное хранилище для всех пользователей
-  и одно локальное хранилище на пользователя.
-- Данные разделяются по физическому размещению:
-  - локальные — в IndexedDB;
-  - удалённые — в PostgreSQL.
-
-### PostgreSQL и расширения
-
-В рамках MVP считается истинным, что серверное хранилище данных (PostgreSQL) поддерживает расширение **pgvector**.
-
-Использование pgvector является **обязательным требованием среды исполнения**, так как эмбеддинги публикаций хранятся в виде векторных данных и используются для операций смысловой близости.
-
-Среды исполнения PostgreSQL, не поддерживающие pgvector, считаются некорректными для запуска MVP Mindstream.
+- The server side runs on a **VPS**.
+- The client side runs in the **user's browser**.
+- Multiple execution environments are allowed, for example `dev` and `prod`, with different access parameters and environment settings.
+- There are no constraints by region, provider, or operating system.
 
 ---
 
-## Интеграции и внешние зависимости
+## Execution Platform
 
-- Внешние API допускаются **только для LLM**.
-- SaaS-инфраструктура (auth, analytics, queues и т.п.) не используется.
-- Количество зависимостей минимизируется.
-- Все базовые (не транзитивные) зависимости подлежат согласованию с человеком.
-
----
-
-## LLM и embeddings
-
-- LLM используются **через API**.
-- Используется библиотека **openai**.
-- Провайдер LLM может быть любым, совместимым с API.
-- Эмбеддинги хранятся:
-  - на сервере — в PostgreSQL;
-  - на клиенте — в IndexedDB.
+- Server platform: **Node.js**.
+- Client platform: **browser runtime**.
+- Serverless approaches are not used.
+- The minimum runtime is fixed as:
+- **Node.js LTS** with target version `20.x`;
+- **modern evergreen browsers**;
+- **PostgreSQL 16+**.
 
 ---
 
-## Масштаб и режим использования
+## Client Environment
 
-- MVP рассчитан на **десятки и сотни пользователей**.
-- Один браузер соответствует одному пользователю.
-- Многопользовательский режим в одном браузере не предполагается.
-- Жёсткие ограничения по памяти, CPU и latency не задаются.
-
----
-
-## Безопасность и изоляция
-
-- Пользовательские данные изолированы за счёт изолированности клиентских сред исполнения.
-- Хранение чувствительных персональных данных не допускается.
-- Compliance-ограничения отсутствуют.
-- Собирается только анонимная статистика.
+- The client is designed as a **PWA** with a **mobile-first** approach.
+- Only **modern evergreen browsers** are supported.
+- Legacy browsers are excluded.
+- Offline mode is **out of scope** for the MVP.
 
 ---
 
-## Специализированные runtime-контексты
+## Data Storage
 
-Следующие аспекты runtime вынесены в отдельные нормативные документы:
+- Server storage: **PostgreSQL**.
+- Client local storage: **IndexedDB**.
+- The system uses one shared server-side store for all users and one local store per user.
+- Data is separated by physical location:
+- local data in IndexedDB;
+- remote data in PostgreSQL.
 
-- **HTTP-сервер и web-режим исполнения**  
-  См. `ctx/docs/environment/runtime/web-server.md`.
+### PostgreSQL And Extensions
 
-Данные документы являются продолжением runtime-контекста и используются совместно с данным обзором.
+Within the MVP it is assumed that the server-side data store, PostgreSQL, supports the **pgvector** extension.
+
+Using pgvector is a **mandatory runtime requirement**, because publication embeddings are stored as vector data and used for semantic similarity operations.
+
+PostgreSQL environments without pgvector support are considered invalid for running the Mindstream MVP.
 
 ---
 
-## Запрещённое
+## Integrations And External Dependencies
 
-- **TypeScript** запрещён.
-- Любые **реактивные фреймворки** запрещены, включая временное использование.
+- External APIs are allowed **only for LLM usage**.
+- SaaS infrastructure such as auth, analytics, and queues is not used.
+- The number of dependencies is minimized.
+- All direct dependencies must be approved by a human.
+
+---
+
+## LLM And Embeddings
+
+- LLMs are used **through an API**.
+- The **openai** library is used.
+- The LLM provider may be any provider compatible with the API.
+- Embeddings are stored:
+- on the server in PostgreSQL;
+- on the client in IndexedDB.
+
+---
+
+## Scale And Usage Model
+
+- The MVP is intended for **tens to hundreds of users**.
+- One browser corresponds to one user.
+- Multiple users inside the same browser are not assumed.
+- No hard limits are set for memory, CPU, or latency.
+
+---
+
+## Security And Isolation
+
+- User data is isolated through isolation of client execution environments.
+- Storage of sensitive personal data is not allowed.
+- There are no compliance-driven constraints.
+- Only anonymous statistics are collected.
+
+---
+
+## Specialized Runtime Contexts
+
+The following runtime aspects are defined in separate normative documents:
+
+- **HTTP server and web runtime mode**  
+  See `ctx/docs/environment/runtime/web-server.md`.
+
+These documents extend the runtime context and are meant to be used together with this overview.
+
+---
+
+## Prohibited
+
+- **TypeScript** is prohibited.
+- Any **reactive frameworks** are prohibited, including temporary use.

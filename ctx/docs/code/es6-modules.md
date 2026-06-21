@@ -1,37 +1,32 @@
-# ES6 Module Form — @teqfw/di
+# ES6 Module Form — `@teqfw/di`
 
 - Path: `ctx/docs/code/es6-modules.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260620`
 
-## Назначение
+## Purpose
 
-Документ фиксирует **нормативную форму ES6-модулей проекта Mindstream**, используемых совместно с DI-контейнером `@teqfw/di`.
+This document defines the **normative ES6 module form** for the Mindstream project when used with the `@teqfw/di` container.
 
-Документ определяет обязательную форму модуля, структуру конструктора, модель инкапсуляции и правила формирования публичного API экземпляра.
+It specifies the mandatory module form, constructor structure, encapsulation model, and rules for building the public API of an instance.
 
-Документ относится к **кодовому слою** (`code/`) и описывает инженерную форму реализации.  
-Он не описывает архитектуру, продуктовые смыслы, правила связывания зависимостей или конфигурацию DI-графа (см. `di-compatibility.md`).
+This document belongs to the `code/` layer and describes engineering implementation form. It does not describe architecture, product meaning, dependency-binding rules, or DI-graph configuration.
 
----
+## Normative Module Form
 
-## Нормативная форма модуля
+The only allowed ES6 module form in Mindstream is:
 
-Единственной допустимой формой ES6-модуля проекта Mindstream является:
-
-- ES6-модуль;
+- ES6 module;
 - `default export`;
-- экспортируемый объект — **`class`**.
+- exported object is a **`class`**.
 
-Использование factory-функций в качестве default export **запрещено**, даже если они функционально эквивалентны классу.
+Using factory functions as the default export is prohibited, even if functionally equivalent to a class.
 
-Отсутствие `class` в default export трактуется как нарушение нормативной формы кодового слоя.
+Absence of a `class` in the default export is a violation of the normative code-layer form.
 
----
+## Standard Module Template
 
-## Типовой шаблон модуля
-
-Нормативный пример ES6-модуля, совместимого с `@teqfw/di`:
+The following example is normative in form:
 
 ```js
 /**
@@ -53,105 +48,90 @@ export default class Namespace_Area_Module {
 }
 ```
 
-Пример является **нормативным по форме**, а не рекомендацией по реализации логики.
+The example is normative in form, not a recommendation for implementation logic.
 
----
+## Constructor And Dependencies
 
-## Конструктор и зависимости
+- The constructor accepts **exactly one argument**, the dependency object `deps`.
+- Dependencies are declared **only** through constructor parameters.
+- Dependencies are accessed by destructuring the `deps` object.
+- The constructor **must not validate** dependency presence. Checks such as `if (!deps)` are prohibited.
 
-- Конструктор принимает **ровно один аргумент** — объект зависимостей (`deps`).
-- Зависимости объявляются **исключительно** через параметры конструктора.
-- Доступ к зависимостям осуществляется через деструктурирование объекта `deps`.
-- Конструктор **не проверяет** наличие зависимостей (`if (!deps)` и аналогичные проверки запрещены).
+`@teqfw/di` guarantees correctness of the `deps` composition. Any defensive or validation logic in the constructor is a defect.
 
-Контейнер `@teqfw/di` гарантирует корректность состава `deps`.
-Любая проверочная или защитная логика в конструкторе считается дефектом.
+The `deps` object is treated as logically immutable and must not be modified inside the constructor.
 
-Объект `deps` считается **логически неизменяемым** и не должен модифицироваться внутри конструктора.
+## Encapsulation And State
 
----
+The primary mechanism of data and function encapsulation is **constructor closure**.
 
-## Инкапсуляция и состояние
+The following is allowed and encouraged:
 
-Основным механизмом инкапсуляции данных и функций является **замыкание конструктора**.
+- storing internal state in constructor-local variables;
+- binding functions to that state through closure.
 
-Допускается и поощряется:
+The following mechanisms are not required and are not normative project practice:
 
-- хранение внутреннего состояния в локальных переменных конструктора;
-- связывание функций с этим состоянием через замыкание.
+- `#private` fields;
+- `private` modifiers;
+- protected fields or methods;
+- complex OO hierarchies.
 
-Использование следующих механизмов **не требуется и не является нормативной практикой проекта**:
+This position follows from the DI model and widespread use of singleton components.
 
-- `#private`-поля;
-- `private`-модификаторы;
-- защищённые поля и методы;
-- сложные OO-иерархии.
+## Public API Of The Instance
 
-Данная позиция обусловлена моделью DI и широким использованием singleton-компонентов в проекте.
+- All public instance methods are declared **only through `this.` inside the constructor**.
+- Class methods declared outside the constructor are prohibited.
+- A module instance is treated as an **assembled object with an explicit API**, not as a classical object hierarchy.
 
----
+Any behavior not added through `this.` in the constructor is considered unavailable and must not be used as part of the module contract.
 
-## Публичный API экземпляра
+## Classes And Object Model
 
-- Все публичные методы экземпляра **объявляются исключительно через `this.` внутри конструктора**.
-- Методы класса, объявленные вне конструктора, **запрещены**.
-- Экземпляр модуля рассматривается как **собранный объект с явным API**, а не как классическая объектная иерархия.
+Use of `class` is mandatory and formal.
 
-Любое поведение, не добавленное через `this.` в конструкторе, считается недоступным и не должно использоваться как часть контракта модуля.
+The class is used only as:
 
----
+- the module-form container;
+- the carrier of the constructor invoked by the DI container.
 
-## Классы и объектная модель
+The class is **not used** for:
 
-Использование `class` является **обязательным** и носит формальный характер.
+- inheritance;
+- polymorphism;
+- extensible hierarchies;
+- behavior reuse through `extends`.
 
-Класс используется исключительно как:
+Use of `extends`, `super`, and inheritance chains is a violation of normative form.
 
-- контейнер формы модуля;
-- носитель конструктора, вызываемого DI-контейнером.
+## Top-Level Module Logic
 
-Класс **не используется** как средство:
+Top-level code in an ES6 module is allowed only if all of the following are true:
 
-- наследования;
-- полиморфизма;
-- расширяемых иерархий;
-- повторного использования поведения через `extends`.
+- it creates no side effects;
+- it does not access platform APIs;
+- it does not initiate application logic before instance creation through DI.
 
-Использование `extends`, `super` и построение цепочек наследования считается нарушением нормативной формы.
+Any initialization that affects module behavior must occur inside the constructor.
 
----
+## Constraints And Prohibitions
 
-## Top-level логика модуля
+The following are prohibited for ES6 modules in Mindstream:
 
-Наличие top-level кода в ES6-модуле **допускается**, при соблюдении всех условий:
+- using factory functions instead of `class`;
+- declaring public methods outside the constructor;
+- modifying the `deps` object;
+- statically importing project code outside the composition root;
+- using private modifiers as the primary encapsulation mechanism;
+- building OO hierarchies and inheritance.
 
-- код не создаёт side effects;
-- код не обращается к platform API;
-- код не инициирует выполнение прикладной логики до создания экземпляра через DI.
+## Requirement Status
 
-Любая инициализация, влияющая на поведение модуля, должна происходить внутри конструктора.
+The rules in this document are **rigid engineering invariants** of the Mindstream code layer.
 
----
+Code that violates the fixed ES6 module form:
 
-## Ограничения и запреты
-
-В рамках проекта Mindstream для ES6-модулей **запрещено**:
-
-- использование factory-функций вместо class;
-- объявление публичных методов вне конструктора;
-- изменение объекта `deps`;
-- статический импорт project-кода вне composition root;
-- использование private-модификаторов как основного механизма инкапсуляции;
-- построение OO-иерархий и наследования.
-
----
-
-## Статус требований
-
-Положения данного документа являются **жёсткими инженерными инвариантами** кодового слоя проекта Mindstream.
-
-Код, нарушающий зафиксированную форму ES6-модуля:
-
-- считается **несовместимым с кодовым слоем проекта**;
-- трактуется как дефект кодовой базы;
-- не рассматривается как допустимое стилевое отклонение или технический долг.
+- is treated as incompatible with the project code layer;
+- is a codebase defect;
+- is not a permissible style deviation or technical debt.
