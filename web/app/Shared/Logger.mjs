@@ -30,48 +30,52 @@ export default class Mindstream_Shared_Logger {
     /**
      * @param {string} namespace
      * @param {string} message
+     * @param {TeqFw_Log_Data} [data]
      * @returns {void}
      */
-    this.debug = function (namespace, message) {
+    this.debug = function (namespace, message, data) {
       assertNamespace(namespace);
       assertMessage(message);
-      getLogger(namespace).debug(message);
+      getLogger(namespace).debug(message, data);
     };
 
     /**
      * @param {string} namespace
      * @param {string} message
+     * @param {TeqFw_Log_Data} [data]
      * @returns {void}
      */
-    this.info = function (namespace, message) {
+    this.info = function (namespace, message, data) {
       assertNamespace(namespace);
       assertMessage(message);
-      getLogger(namespace).info(message);
+      getLogger(namespace).info(message, data);
     };
 
     /**
      * @param {string} namespace
      * @param {string} message
+     * @param {TeqFw_Log_Data} [data]
      * @returns {void}
      */
-    this.warn = function (namespace, message) {
+    this.warn = function (namespace, message, data) {
       assertNamespace(namespace);
       assertMessage(message);
-      getLogger(namespace).warn(message);
+      getLogger(namespace).warn(message, data);
     };
 
     /**
      * @param {string} namespace
      * @param {string} message
+     * @param {TeqFw_Log_Data} [data]
      * @returns {void}
      */
-    this.error = function (namespace, message) {
+    this.error = function (namespace, message, data) {
       assertNamespace(namespace);
       if (message instanceof Error) {
         throw new TypeError('Use exception() to log Error objects');
       }
       assertMessage(message);
-      getLogger(namespace).error(message);
+      getLogger(namespace).error(message, data);
     };
 
     /**

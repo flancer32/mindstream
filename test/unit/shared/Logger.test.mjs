@@ -19,11 +19,16 @@ test('Mindstream_Shared_Logger delegates structured records to @teqfw/log', asyn
   container.register('TeqFw_Log_Provider$', provider);
   const logger = await container.get('Mindstream_Shared_Logger$');
 
-  logger.info('Mindstream_Back_Test', 'Completed');
+  logger.info('Mindstream_Back_Test', 'Completed', { requestId: 'request-1' });
   const error = new Error('Failed');
   logger.exception('Mindstream_Back_Test', error);
 
-  assert.deepEqual(calls[0], { level: 'info', source: 'Mindstream_Back_Test', message: 'Completed', data: undefined });
+  assert.deepEqual(calls[0], {
+    level: 'info',
+    source: 'Mindstream_Back_Test',
+    message: 'Completed',
+    data: { requestId: 'request-1' },
+  });
   assert.equal(calls[1].level, 'error');
   assert.equal(calls[1].source, 'Mindstream_Back_Test');
   assert.equal(calls[1].data.err, error);

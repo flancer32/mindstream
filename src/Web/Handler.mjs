@@ -9,9 +9,11 @@ export default class Mindstream_Back_Web_Handler {
     Mindstream_Back_Web_Api_FeedView$: feedView,
     Mindstream_Back_Web_Api_Attention$: attention,
     Mindstream_Back_Web_Api_Identity$: identity,
+    Mindstream_Shared_Logger$: logger,
     Fl32_Web_Back_Enum_Stage$: STAGE,
   }) {
     const PREFIX = '/api';
+    const NAMESPACE = 'Mindstream_Back_Web_Handler';
     const handlers = new Map([
       ['/feed', feedView],
       ['/attention', attention],
@@ -43,6 +45,15 @@ export default class Mindstream_Back_Web_Handler {
       throw new Error('API endpoint handler is invalid.');
     };
 
+    const extractClientIp = function (req) {
+      const forwarded = req?.headers?.['x-forwarded-for'];
+      const value = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+      if (typeof value === 'string' && value.trim()) {
+        return value.split(',', 1)[0].trim();
+      }
+      return req?.socket?.remoteAddress ?? req?.connection?.remoteAddress ?? null;
+    };
+
     this.getRegistrationInfo = function () {
       return Object.freeze({
         name: 'Mindstream_Back_Web_Handler',
@@ -57,13 +68,18 @@ export default class Mindstream_Back_Web_Handler {
       const res = context.response;
       const apiPath = extractApiPath(req?.url);
       if (!apiPath) return;
+      logger.info(NAMESPACE, 'API request received.', {
+        method: req?.method ?? null,
+        path: apiPath,
+        clientIp: extractClientIp(req),
+      });
       const endpoint = handlers.get(apiPath);
       if (endpoint) {
         await invokeEndpoint(endpoint, { req, res, path: apiPath });
       } else {
         await fallback.handle({ req, res, path: apiPath });
       }
-      context.complete();
+      context.completed = true;
     };
   }
 }
@@ -74,6 +90,7 @@ export const __deps__ = Object.freeze({
     'Mindstream_Back_Web_Api_FeedView$': 'Mindstream_Back_Web_Api_FeedView$',
     'Mindstream_Back_Web_Api_Attention$': 'Mindstream_Back_Web_Api_Attention$',
     'Mindstream_Back_Web_Api_Identity$': 'Mindstream_Back_Web_Api_Identity$',
+    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
     'Fl32_Web_Back_Enum_Stage$': 'Fl32_Web_Back_Enum_Stage$',
   },
 });
