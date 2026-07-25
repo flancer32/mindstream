@@ -1,70 +1,92 @@
+// @ts-check
+/**
+ * @namespace Mindstream_Shared_Logger
+ * @description Compatibility facade over the @teqfw/log source-bound logger provider.
+ */
 export default class Mindstream_Shared_Logger {
-  constructor({}) {
+  /**
+   * @param {Object} deps
+   * @param {TeqFw_Log_Provider} deps.provider
+   */
+  constructor({ provider }) {
+    /** @param {unknown} namespace @returns {void} */
     const assertNamespace = (namespace) => {
       if (!namespace) throw new Error('Namespace is required');
     };
 
+    /** @param {unknown} message @returns {void} */
     const assertMessage = (message) => {
       if (typeof message !== 'string') throw new TypeError('Message must be a string');
     };
 
+    /** @param {unknown} error @returns {void} */
     const assertError = (error) => {
       if (!(error instanceof Error)) throw new TypeError('Error instance is required');
     };
 
-    const buildEntry = (level, namespace, message, args, extra = {}) => ({
-      timestamp: new Date().toISOString(),
-      level,
-      namespace,
-      message,
-      args,
-      ...extra,
-    });
+    /** @param {string} namespace @returns {TeqFw_Log_Logger} */
+    const getLogger = (namespace) => provider.forSource(namespace);
 
-    const write = (method, entry) => {
-      if (console && typeof console[method] === 'function') {
-        console[method](entry);
-      }
-    };
-
-    this.debug = function (namespace, message, ...args) {
+    /**
+     * @param {string} namespace
+     * @param {string} message
+     * @returns {void}
+     */
+    this.debug = function (namespace, message) {
       assertNamespace(namespace);
       assertMessage(message);
-      write('debug', buildEntry('debug', namespace, message, args));
+      getLogger(namespace).debug(message);
     };
 
-    this.info = function (namespace, message, ...args) {
+    /**
+     * @param {string} namespace
+     * @param {string} message
+     * @returns {void}
+     */
+    this.info = function (namespace, message) {
       assertNamespace(namespace);
       assertMessage(message);
-      write('info', buildEntry('info', namespace, message, args));
+      getLogger(namespace).info(message);
     };
 
-    this.warn = function (namespace, message, ...args) {
+    /**
+     * @param {string} namespace
+     * @param {string} message
+     * @returns {void}
+     */
+    this.warn = function (namespace, message) {
       assertNamespace(namespace);
       assertMessage(message);
-      write('warn', buildEntry('warn', namespace, message, args));
+      getLogger(namespace).warn(message);
     };
 
-    this.error = function (namespace, message, ...args) {
+    /**
+     * @param {string} namespace
+     * @param {string} message
+     * @returns {void}
+     */
+    this.error = function (namespace, message) {
       assertNamespace(namespace);
       if (message instanceof Error) {
         throw new TypeError('Use exception() to log Error objects');
       }
       assertMessage(message);
-      write('error', buildEntry('error', namespace, message, args));
+      getLogger(namespace).error(message);
     };
 
-    this.exception = function (namespace, error, ...args) {
+    /**
+     * @param {string} namespace
+     * @param {Error} error
+     * @returns {void}
+     */
+    this.exception = function (namespace, error) {
       assertNamespace(namespace);
       assertError(error);
-      const extra = {
-        errorMessage: error.message,
-        errorStack: error.stack,
-      };
-      if (error.cause !== undefined) {
-        extra.errorCause = error.cause;
-      }
-      write('error', buildEntry('exception', namespace, error.message, args, extra));
+      getLogger(namespace).error(error.message, { err: error });
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: Object.freeze({ provider: 'TeqFw_Log_Provider$' }),
+});

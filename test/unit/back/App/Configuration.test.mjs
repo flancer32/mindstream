@@ -1,198 +1,47 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import path from 'node:path';
 
 import { createTestContainer } from '../../di-node.mjs';
 
-function createProcessMock(env = {}) {
-  return { env: { ...env } };
-}
-
-function createFsMock({ exists = false, content = '' } = {}) {
-  let lastPath = null;
-  return {
-    existsSync(filePath) {
-      lastPath = filePath;
-      return exists;
-    },
-    readFileSync(filePath) {
-      lastPath = filePath;
-      if (!exists) {
-        throw new Error('ENOENT');
-      }
-      return content;
-    },
-    getLastPath() {
-      return lastPath;
-    },
-  };
-}
-
-function createLoggerMock() {
-  return {
-    exception() {},
-  };
-}
-
-test('Mindstream_Back_App_Configuration builds structure from process.env only', async () => {
-  const container = await createTestContainer();
-  const processMock = createProcessMock();
-  const fsMock = createFsMock({ exists: false });
-
-  container.register('node:process', processMock);
-  container.register('node:fs', fsMock);
-  container.register('node:path', path);
-  container.register('Mindstream_Shared_Logger$', createLoggerMock());
-
-  const config = await container.get('Mindstream_Back_App_Configuration$');
-  await config.init('/project');
-
-  const value = config.get();
-
-  assert.deepEqual(Object.keys(value).sort(), ['db', 'llm', 'server']);
-  assert.deepEqual(Object.keys(value.server).sort(), ['port', 'type']);
-  assert.deepEqual(Object.keys(value.db).sort(), ['client', 'database', 'host', 'password', 'port', 'user']);
-  assert.deepEqual(Object.keys(value.llm).sort(), ['apiKey', 'baseUrl', 'embeddingModel', 'generationModel']);
-  assert.equal(value.server.port, undefined);
-  assert.equal(value.server.type, undefined);
-  assert.equal(value.db.client, undefined);
-  assert.equal(value.db.host, undefined);
-  assert.equal(value.db.port, undefined);
-  assert.equal(value.db.database, undefined);
-  assert.equal(value.db.user, undefined);
-  assert.equal(value.db.password, undefined);
-  assert.equal(value.llm.apiKey, undefined);
-  assert.equal(value.llm.baseUrl, undefined);
-  assert.equal(value.llm.generationModel, undefined);
-  assert.equal(value.llm.embeddingModel, undefined);
+const createReader = (namespaces = {}) => ({
+  get(namespace) {
+    return { ...(namespaces[namespace] ?? {}) };
+  },
 });
 
-test('Mindstream_Back_App_Configuration loads .env from project root and respects existing env', async () => {
+test('Mindstream_Back_App_Configuration normalizes @teqfw/cfg namespace projections', async () => {
   const container = await createTestContainer();
-  const processMock = createProcessMock({
-    SERVER_PORT: '8081',
-    SERVER_TYPE: 'http2',
-    DB_CLIENT: 'pg',
-    DB_HOST: 'db.local',
-    DB_PORT: '5432',
-    DB_DATABASE: 'mindstream',
-    DB_USER: 'app',
-    DB_PASSWORD: 'secret',
-    LLM_API_KEY: 'env-key',
-    LLM_BASE_URL: 'https://example.test/v1',
-    LLM_GENERATION_MODEL: 'gen-x',
-    LLM_EMBEDDING_MODEL: 'embed-x',
+  container.register('TeqFw_Cfg_Reader$', createReader({
+    TEQFW_WEB: { PORT: '8081', TYPE: 'http2' },
+    MINDSTREAM: {
+      DB_CLIENT: 'pg', DB_HOST: 'db.local', DB_PORT: '5432', DB_DATABASE: 'mindstream', DB_USER: 'app', DB_PASSWORD: 'secret',
+      LLM_API_KEY: 'key', LLM_BASE_URL: 'https://example.test/v1', LLM_GENERATION_MODEL: 'gen-x', LLM_EMBEDDING_MODEL: 'embed-x',
+    },
+  }));
+  const config = await container.get('Mindstream_Back_App_Configuration$');
+
+  await config.init();
+  const value = config.get();
+
+  assert.deepEqual(value, {
+    server: { port: 8081, type: 'http2' },
+    db: { client: 'pg', host: 'db.local', port: 5432, database: 'mindstream', user: 'app', password: 'secret' },
+    llm: { apiKey: 'key', baseUrl: 'https://example.test/v1', generationModel: 'gen-x', embeddingModel: 'embed-x' },
   });
-  const envContent = [
-    '# comment',
-    'SERVER_PORT=9999',
-    'SERVER_TYPE=https',
-    'DB_CLIENT = mysql',
-    'DB_HOST= env-host',
-    'DB_PORT= 3306',
-    'DB_DATABASE = env-db',
-    'DB_USER=env-user',
-    'DB_PASSWORD=env-pass',
-    'LLM_API_KEY=env-override',
-    'LLM_BASE_URL= https://env.test/v1',
-    'LLM_GENERATION_MODEL=env-gen',
-    'LLM_EMBEDDING_MODEL=env-embed',
-  ].join('\n');
-  const fsMock = createFsMock({ exists: true, content: envContent });
-
-  container.register('node:process', processMock);
-  container.register('node:fs', fsMock);
-  container.register('node:path', path);
-  container.register('Mindstream_Shared_Logger$', createLoggerMock());
-
-  const config = await container.get('Mindstream_Back_App_Configuration$');
-  await config.init('/project');
-
-  const value = config.get();
-
-  assert.equal(value.server.port, 8081);
-  assert.equal(value.server.type, 'http2');
-  assert.equal(value.db.client, 'pg');
-  assert.equal(value.db.host, 'db.local');
-  assert.equal(value.db.port, 5432);
-  assert.equal(value.db.database, 'mindstream');
-  assert.equal(value.db.user, 'app');
-  assert.equal(value.db.password, 'secret');
-  assert.equal(value.llm.apiKey, 'env-key');
-  assert.equal(value.llm.baseUrl, 'https://example.test/v1');
-  assert.equal(value.llm.generationModel, 'gen-x');
-  assert.equal(value.llm.embeddingModel, 'embed-x');
-  assert.equal(processMock.env.SERVER_PORT, '8081');
-  assert.equal(processMock.env.SERVER_TYPE, 'http2');
-  assert.equal(fsMock.getLastPath(), path.join('/project', '.env'));
-});
-
-test('Mindstream_Back_App_Configuration applies .env values when env is missing', async () => {
-  const container = await createTestContainer();
-  const processMock = createProcessMock();
-  const envContent = [
-    'SERVER_PORT = 7000',
-    'SERVER_TYPE = http',
-    'DB_CLIENT=sqlite3',
-    'DB_HOST = local',
-    'DB_PORT= 7777',
-    'DB_DATABASE= mindstream_local',
-    'DB_USER = local-user',
-    'DB_PASSWORD= local-pass',
-    'LLM_API_KEY= key-123',
-    'LLM_BASE_URL = https://llm.local/v1',
-    'LLM_GENERATION_MODEL= local-gen',
-    'LLM_EMBEDDING_MODEL= local-embed',
-  ].join('\n');
-  const fsMock = createFsMock({ exists: true, content: envContent });
-
-  container.register('node:process', processMock);
-  container.register('node:fs', fsMock);
-  container.register('node:path', path);
-  container.register('Mindstream_Shared_Logger$', createLoggerMock());
-
-  const config = await container.get('Mindstream_Back_App_Configuration$');
-  await config.init('/project');
-
-  const value = config.get();
-
-  assert.equal(value.server.port, 7000);
-  assert.equal(value.server.type, 'http');
-  assert.equal(value.db.client, 'sqlite3');
-  assert.equal(value.db.host, 'local');
-  assert.equal(value.db.port, 7777);
-  assert.equal(value.db.database, 'mindstream_local');
-  assert.equal(value.db.user, 'local-user');
-  assert.equal(value.db.password, 'local-pass');
-  assert.equal(value.llm.apiKey, 'key-123');
-  assert.equal(value.llm.baseUrl, 'https://llm.local/v1');
-  assert.equal(value.llm.generationModel, 'local-gen');
-  assert.equal(value.llm.embeddingModel, 'local-embed');
-});
-
-test('Mindstream_Back_App_Configuration ignores missing .env and returns a frozen configuration object', async () => {
-  const container = await createTestContainer();
-  const processMock = createProcessMock({ SERVER_PORT: '5050', SERVER_TYPE: 'http' });
-  const fsMock = createFsMock({ exists: false });
-
-  container.register('node:process', processMock);
-  container.register('node:fs', fsMock);
-  container.register('node:path', path);
-  container.register('Mindstream_Shared_Logger$', createLoggerMock());
-
-  const config = await container.get('Mindstream_Back_App_Configuration$');
-  await config.init('/project');
-
-  const value = config.get();
-
-  assert.equal(value.server.port, 5050);
-  assert.equal(typeof value.server.port, 'number');
-  assert.equal(value.server.type, 'http');
   assert.ok(Object.isFrozen(value));
   assert.ok(Object.isFrozen(value.server));
-  assert.ok(Object.isFrozen(value.db));
-  assert.ok(Object.isFrozen(value.llm));
-  assert.throws(() => {
-    value.server.port = 1234;
-  }, TypeError);
+});
+
+test('Mindstream_Back_App_Configuration exposes the fixed structure for absent namespaces', async () => {
+  const container = await createTestContainer();
+  container.register('TeqFw_Cfg_Reader$', createReader());
+  const config = await container.get('Mindstream_Back_App_Configuration$');
+
+  assert.throws(() => config.get(), /not initialized/);
+  await config.init();
+  assert.deepEqual(config.get(), {
+    server: { port: undefined, type: undefined },
+    db: { client: undefined, host: undefined, port: undefined, database: undefined, user: undefined, password: undefined },
+    llm: { apiKey: undefined, baseUrl: undefined, generationModel: undefined, embeddingModel: undefined },
+  });
 });

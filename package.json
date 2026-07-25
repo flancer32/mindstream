@@ -4,16 +4,32 @@
   "private": true,
   "type": "module",
   "license": "Apache-2.0",
+  "teqfw": {
+    "namespaces": [
+      {
+        "prefix": "Mindstream_Back_",
+        "path": "./src",
+        "ext": ".mjs"
+      },
+      {
+        "prefix": "Mindstream_Shared_",
+        "path": "./web/app/Shared",
+        "ext": ".mjs"
+      }
+    ]
+  },
   "bin": {
-    "mindstream": "./bin/app.mjs"
+    "mindstream": "./bin/cli.mjs"
   },
   "scripts": {
-    "start": "node ./bin/app.mjs runtime:web",
+    "start": "node ./bin/cli.mjs runtime:web",
     "test:unit": "node --test \"test/unit/**/*.test.mjs\""
   },
   "dependencies": {
-    "@flancer32/teq-web": "^0.11.0",
+    "@flancer32/teq-web": "github:flancer32/teq-web#main",
+    "@teqfw/cfg": "^0.1.0",
     "@teqfw/di": "^2.6.2",
+    "@teqfw/log": "^0.1.0",
     "knex": "^3.2.10",
     "pg": "^8.22.0"
   }

@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/di-compatibility.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260725`
 
 ## Purpose
 
@@ -28,9 +28,10 @@ The project fixes a **strictly limited set of root namespaces**:
 
 - `Mindstream_Back_`
 - `Mindstream_Shared_`
-- `Mindstream_Web_`
 
 Use of any other root namespace in the MVP is prohibited.
+
+The package declares the active roots in `package.json#teqfw.namespaces`: `Mindstream_Back_` maps to `src/` and `Mindstream_Shared_` maps to `web/app/Shared/`. The composition root builds these rules, together with dependency namespaces, through `TeqFw_Di_Config_NamespaceRegistry` before its first `container.get()` call.
 
 ### Zone Semantics
 

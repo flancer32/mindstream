@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/configuration/structure.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260725`
 
 ## Purpose
 
@@ -19,6 +19,8 @@ It **does not describe values**, loading sources, parameter semantics, or the lo
 ---
 
 ## General Configuration Form
+
+`@teqfw/cfg` addresses values as `NAMESPACE__PARAMETER`. The application uses `TEQFW_WEB` for the `@flancer32/teq-web` transport runtime and uses `MINDSTREAM` for product-owned settings. The product parameters are `MINDSTREAM__DB_*` and `MINDSTREAM__LLM_*`. `Mindstream_Back_App_Configuration` maps them to the object below.
 
 The backend configuration is represented as a single object with these top-level sections:
 

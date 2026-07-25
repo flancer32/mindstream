@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/configuration.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260725`
 
 ## Purpose
 
@@ -10,7 +10,7 @@ This document defines the **normative configuration model of the Mindstream back
 
 It specifies:
 
-- how configuration is handled in the project;
+- how `@teqfw/cfg` is composed and consumed in the project;
 - which invariants are mandatory;
 - which value sources are allowed.
 
@@ -20,7 +20,7 @@ This document belongs only to the `code/` layer and does not introduce architect
 
 ## Status Of Configuration
 
-The Mindstream backend configuration is represented as an **internal application object**.
+The Mindstream backend uses `@teqfw/cfg` as the sole raw-configuration loader and snapshot owner. `Mindstream_Back_App_Configuration` is an internal typed projection over its namespace readers.
 
 The configuration object:
 
@@ -48,41 +48,25 @@ Creating additional configuration objects, configuration duplicates, or alternat
 
 ## Value Sources
 
-**The canonical source of configuration values is `process.env`.**
-
-There are no other value sources in the configuration model.
-
-Use of a `.env` file is allowed **only as a mechanism for preparing `process.env`** and is not treated as an alternative configuration source.
+The bootstrap explicitly loads the optional project-root `.env` Source followed by the explicit `process.env` Source. `@teqfw/cfg` therefore gives `process.env` higher precedence for each complete key. No module reads `process.env` directly. `MINDSTREAM` is the product configuration namespace; `TEQFW_WEB` is reserved for the `@flancer32/teq-web` runtime configuration.
 
 ---
 
 ## Loading The `.env` File
 
-Loading a `.env` file located at the project root is allowed.
-
-`.env` loading invariants:
-
-- loading is initiated by application code during configuration initialization;
-- the project root path is passed into the application from outside, through bootstrap;
-- if the `.env` file exists, it is parsed and its values are written into `process.env`;
-- absence of the `.env` file is not an error;
-- values already present in `process.env` are not overwritten.
-
-Loading `.env` is treated as **runtime-environment preparation**, not as part of the configuration model.
+The bootstrap creates a dotenv Source only when `.env` exists; absence is not an error. Loading is one-shot and completes before `Mindstream_Back_App_Configuration.init()` reads the snapshot.
 
 ---
 
 ## Access To Environment Parameters
 
-Reading `process.env` is allowed **only** at the initialization point of `Mindstream_Back_App_Configuration`.
-
-Direct access to `process.env` from application modules, services, adapters, or infrastructure components is prohibited and treated as an engineering violation.
+Reading `process.env` is allowed only in the bootstrap when it creates `TeqFw_Cfg_Source_ProcessEnv`. Application code reads detached namespace projections through `TeqFw_Cfg_Reader`.
 
 ---
 
 ## Normalization
 
-All values from `process.env` are converted to the required types and shape **at the moment the configuration object is initialized**.
+Raw values from `@teqfw/cfg` are converted to the required types and shape **at the moment the configuration object is initialized**.
 
 The configuration object contains **only normalized values** ready for direct use. Passing raw environment strings into application code is prohibited.
 

@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/logging.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260725`
 
 ## Purpose
 
@@ -13,6 +13,8 @@ Logging is treated as a mandatory observability layer that provides reproducible
 This document belongs only to the `code/` layer and does not introduce architectural, product, composition, or operational decisions.
 
 ## Logging Status In The MVP
+
+Mindstream uses `@teqfw/log` as its logging implementation. The DI-managed `TeqFw_Log_Provider` returns source-bound loggers; the temporary `Mindstream_Shared_Logger` facade preserves existing call sites while delegating every record to that provider.
 
 Within the Mindstream MVP:
 
@@ -45,10 +47,12 @@ Deletion, unavailability, or rotation of logs does not affect system correctness
 
 The MVP uses a strictly fixed set of logging levels:
 
+- `trace`
 - `debug`
 - `info`
 - `warn`
 - `error`
+- `fatal`
 
 This set is normative.
 
@@ -56,23 +60,9 @@ Absence of a level, arbitrary custom levels, or semantic distortion of levels is
 
 ## The `exception` Method
 
-Exceptions are logged through a separate method `exception`.
+The compatibility facade exposes `exception` for existing callers. It emits an `error` record with the caught standard `Error` in structured `data.err`.
 
-`exception`:
-
-- is not an alias of `error`;
-- is intended only for exceptional situations;
-- accepts the standard JavaScript `Error` object.
-
-The MVP uses the built-in `Error` contract without custom or extended exception types.
-
-When logging through `exception`, the following must be recorded:
-
-- `error.message`;
-- `error.stack`;
-- `error.cause`, if present.
-
-Using `error` instead of `exception` to log `Error` objects is a semantic violation.
+`exception` is intended only for exceptional situations and accepts the standard JavaScript `Error` object. Its delegated `error` record retains the error in `data.err`, so the package writer can safely serialize its message, stack, and optional cause.
 
 ## Namespace As Mandatory Context
 
@@ -111,7 +101,7 @@ The exact serialization format is not fixed byte-by-byte, but these components a
 
 ## Platform Neutrality
 
-`Mindstream_Shared_Logger` belongs to the `Mindstream_Shared_` zone and is treated as platform-agnostic.
+`TeqFw_Log_Provider` is the DI root for logging. Each record is bound to a stable TeqFW component source such as `Mindstream_Back_Web_Server`; platform-specific output is owned by `@teqfw/log`.
 
 - the logger does not use platform APIs directly;
 - output goes through the console mechanism provided by the runtime;

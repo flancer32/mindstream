@@ -38,18 +38,12 @@ Mindstream не является рекомендательным сервисо
 
 ## Переменные окружения
 
-- `SERVER_PORT`
-- `SERVER_TYPE`
-- `DB_CLIENT`
-- `DB_HOST`
-- `DB_PORT`
-- `DB_DATABASE`
-- `DB_USER`
-- `DB_PASSWORD`
-- `LLM_API_KEY`
-- `LLM_BASE_URL`
-- `LLM_GENERATION_MODEL`
-- `LLM_EMBEDDING_MODEL`
+- `TEQFW_WEB__PORT`
+- `TEQFW_WEB__TYPE`
+- `MINDSTREAM__DB_CLIENT`, `MINDSTREAM__DB_HOST`, `MINDSTREAM__DB_PORT`, `MINDSTREAM__DB_DATABASE`, `MINDSTREAM__DB_USER`, `MINDSTREAM__DB_PASSWORD`
+- `MINDSTREAM__LLM_API_KEY`, `MINDSTREAM__LLM_BASE_URL`, `MINDSTREAM__LLM_GENERATION_MODEL`, `MINDSTREAM__LLM_EMBEDDING_MODEL`
+
+Конфигурация загружается один раз в bootstrap через `@teqfw/cfg`: значения из `process.env` имеют приоритет над необязательным `.env`. Логи создаются через `@teqfw/log` с источником, соответствующим TeqFW-адресу компонента.
 
 ## Запуск (dev)
 
@@ -60,15 +54,15 @@ Mindstream не является рекомендательным сервисо
 CREATE EXTENSION vector;
 ```
 
-3. Создайте схему в пустой базе: `node ./bin/app.mjs db:schema:create`.
-4. При необходимости пересоздать схему с переносом данных используйте: `node ./bin/app.mjs db:schema:renew` (операция разрушительная).
-5. Обнаружьте публикации из RSS Хабра: `node ./bin/app.mjs ingest:discover:habr`.
-6. Извлеките тексты публикаций: `node ./bin/app.mjs ingest:extract:habr`.
-7. Сформируйте обзор и аннотацию: `node ./bin/app.mjs process:generate:summaries`.
-8. Сформируйте эмбеддинги: `node ./bin/app.mjs process:generate:embeddings`.
+3. Создайте схему в пустой базе: `node ./bin/cli.mjs db:schema:create`.
+4. При необходимости пересоздать схему с переносом данных используйте: `node ./bin/cli.mjs db:schema:renew` (операция разрушительная).
+5. Обнаружьте публикации из RSS Хабра: `node ./bin/cli.mjs ingest:discover:habr`.
+6. Извлеките тексты публикаций: `node ./bin/cli.mjs ingest:extract:habr`.
+7. Сформируйте обзор и аннотацию: `node ./bin/cli.mjs process:generate:summaries`.
+8. Сформируйте эмбеддинги: `node ./bin/cli.mjs process:generate:embeddings`.
 9. Запустите сервер: `npm start`.
 
-Шаги 7–8 используют внешний LLM API и требуют заполненных `LLM_*` переменных.
+Шаги 7–8 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
 После запуска откройте `http://localhost:3000`.
 
 ## Attention API (MVP)

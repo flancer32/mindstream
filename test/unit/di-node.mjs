@@ -102,7 +102,13 @@ const parseDestructuredDeps = (source) => {
 };
 
 const selectExport = (namespace, exportName) => {
-  if (exportName === null) return namespace;
+  if (exportName === null) {
+    const defaultValue = namespace.default;
+    if (defaultValue && typeof defaultValue === 'object' && 'TRACE' in defaultValue && 'FATAL' in defaultValue) {
+      return namespace;
+    }
+    return defaultValue ?? namespace;
+  }
   if (!(exportName in namespace)) {
     throw new Error(`Export '${exportName}' is not found in module namespace.`);
   }
@@ -154,8 +160,20 @@ export async function createTestContainer() {
     { prefix: 'Mindstream_Shared_', target: path.join(projectRoot, 'web', 'app', 'Shared'), defaultExt: '.mjs' },
     { prefix: 'Fl32_Web_', target: path.join(projectRoot, 'node_modules', '@flancer32', 'teq-web', 'src'), defaultExt: '.mjs' },
     { prefix: 'Teqfw_Di_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'di', 'src'), defaultExt: '.mjs' },
+    { prefix: 'TeqFw_Cfg_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'cfg', 'src'), defaultExt: '.mjs' },
+    { prefix: 'TeqFw_Log_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'log', 'src'), defaultExt: '.mjs' },
   ];
   const mocks = new Map();
+  mocks.set('TeqFw_Log_Provider$', {
+    forSource() {
+      return {
+        debug() {},
+        info() {},
+        warn() {},
+        error() {},
+      };
+    },
+  });
   const cache = new Map();
 
   const container = {
