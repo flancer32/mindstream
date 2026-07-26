@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 NODE_BIN="node"
-APP_BIN="$SCRIPT_DIR/app.mjs"
+APP_BIN="$SCRIPT_DIR/cli.mjs"
 
 echo "== Mindstream data update started =="
 echo "Project root: $PROJECT_ROOT"
