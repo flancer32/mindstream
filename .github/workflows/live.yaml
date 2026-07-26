@@ -98,7 +98,7 @@ jobs:
 
             # Start runtime:web in PM2 cluster mode (4 workers)
             cd "${{ env.APP_DIR }}/prod"
-            pm2 start bin/app.mjs \
+            pm2 start bin/cli.mjs \
               --name mindstream-web \
               -i 4 \
               -- runtime:web
