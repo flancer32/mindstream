@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/attention/interest-vector.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -11,7 +11,7 @@ The user interest vector is a local aggregated representation of a user's semant
 The interest vector is used for:
 
 - estimating publication relevance relative to the user's current attention;
-- locally reordering items in the personal feed.
+- deriving local score-based feed projections, including threshold-based visibility.
 
 The vector is **not**:
 
@@ -154,13 +154,15 @@ These priorities are qualitative and are used to interpret contributions without
 The interest vector is used:
 
 - for local estimation of the user's potential interest in each publication;
-- as input to ranking items in the personal feed.
+- as input to local feed projections.
 
 The interest vector is **not used**:
 
-- to filter the Content Collection;
+- to filter or mutate the Content Collection;
 - to change server-side data;
 - to form canonical read models.
+
+Browser UI code receives scores and a derived indication that an interest profile is active; it does not receive the vector itself. A single browser-local cutoff is derived from or compared with those scores and is shared by highlighting and optional hiding.
 
 ## MVP Constraints
 

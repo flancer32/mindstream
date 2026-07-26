@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/constraints/mvp-scope.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -92,7 +92,7 @@ Global feedback loops, reactive system learning, and real-time recalculation of 
 
 The MVP user interface exists only for reading publications, recording attention signals, and visualizing the personal feed.
 
-The interface does not provide controls for algorithms, personalization settings, or explanations of why the feed was formed the way it was.
+The interface does not provide controls for algorithms, personalization settings, or explanations of why the feed was formed the way it was, except for one browser-local interest threshold used for indicator highlighting and optional hiding of already loaded publications after an interest profile exists. Highlighting and hiding must not use separate threshold values. This narrow control must not rank publications, filter sources, alter server requests, or mutate the corpus.
 
 ## Outside MVP Scope
 

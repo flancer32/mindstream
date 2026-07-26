@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/es6-modules.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -11,6 +11,12 @@ This document defines the **normative ES6 module form** for the Mindstream proje
 It specifies the mandatory module form, constructor structure, encapsulation model, and rules for building the public API of an instance.
 
 This document belongs to the `code/` layer and describes engineering implementation form. It does not describe architecture, product meaning, dependency-binding rules, or DI-graph configuration.
+
+## Scope Boundary
+
+This normative form applies to server modules under `src/` and to other modules explicitly assembled through `@teqfw/di`, currently including `web/app/`.
+
+Native browser UI modules under `web/ui/js/` are governed by `ctx/docs/code/browser/`. A DOM-owning module there may extend `HTMLElement`, use Custom Elements lifecycle methods, import its native browser module graph statically, and register a custom element at module scope. Pure browser services remain ES modules but do not become custom elements.
 
 ## Normative Module Form
 
@@ -103,7 +109,7 @@ The class is **not used** for:
 - extensible hierarchies;
 - behavior reuse through `extends`.
 
-Use of `extends`, `super`, and inheritance chains is a violation of normative form.
+Use of `extends`, `super`, and inheritance chains is a violation of the server and DI-managed normative form. Browser UI under `web/ui/js/` is outside that prohibition; direct `HTMLElement` inheritance is required by its documented native Web Components.
 
 ## Top-Level Module Logic
 
@@ -115,6 +121,8 @@ Top-level code in an ES6 module is allowed only if all of the following are true
 
 Any initialization that affects module behavior must occur inside the constructor.
 
+Documented `customElements.define(...)` calls under `web/ui/js/` are the browser exception: registration may occur at module scope, while visible behavior starts through the platform lifecycle.
+
 ## Constraints And Prohibitions
 
 The following are prohibited for ES6 modules in Mindstream:
@@ -122,7 +130,7 @@ The following are prohibited for ES6 modules in Mindstream:
 - using factory functions instead of `class`;
 - declaring public methods outside the constructor;
 - modifying the `deps` object;
-- statically importing project code outside the composition root;
+- statically importing project code outside the DI composition root, except inside the documented native browser module graph under `web/ui/js/`;
 - using private modifiers as the primary encapsulation mechanism;
 - building OO hierarchies and inheritance.
 
@@ -130,8 +138,10 @@ The following are prohibited for ES6 modules in Mindstream:
 
 The rules in this document are **rigid engineering invariants** of the Mindstream code layer.
 
-Code that violates the fixed ES6 module form:
+DI-managed code that violates the fixed ES6 module form:
 
 - is treated as incompatible with the project code layer;
 - is a codebase defect;
 - is not a permissible style deviation or technical debt.
+
+Native Web Components are valid only within the explicit browser exception and remain defects if their DOM-owning responsibility or custom-element contract is undocumented.

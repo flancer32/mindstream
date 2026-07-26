@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/composition/state.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -50,6 +50,10 @@ The absence of publications in the feed is a normal user-experience form.
 
 Emptiness is not treated as an error, failure, or temporary state.
 
+### Filtered Feed
+
+When all available feed pages are loaded but locally hidden below the active interest threshold, the reader sees a distinct filtered-empty state with the current shared threshold and may show all loaded publications. This is not an empty backend feed.
+
 ### Small Feed
 
 A feed with a very limited number of publications is an allowed experience form.
@@ -92,7 +96,7 @@ States prohibited in `constraints/mvp-scope.md` are absent, including:
 
 - repeated publication state in the feed;
 - error state as a separate user-experience form;
-- state of controlling algorithms or personalization parameters;
+- state of controlling algorithms or personalization parameters other than the unified local interest-threshold control and hiding toggle;
 - state of explaining why the feed was formed;
 - state of social interaction.
 

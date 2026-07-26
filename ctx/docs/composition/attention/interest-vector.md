@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/composition/attention/interest-vector.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -104,14 +104,15 @@ If decay is used:
 The attention module uses the interest vector for:
 
 - estimating a user's potential interest in each publication;
-- sorting items in the personal feed;
-- excluding publications with insufficient relevance.
+- deriving local scores for feed projections.
 
 Scores:
 
 - are recalculated on every interest-vector update;
 - are cached until the next attention event;
 - are used by the UI without direct access to the interest vector.
+
+The UI may receive only scores and a derived indication that an interest profile exists. A zero vector leaves all publications visible even when the saved hiding toggle is enabled. Once a profile exists, highlighting and optional hiding compare scores with the same resolved interest threshold.
 
 ## Interaction With The UI
 

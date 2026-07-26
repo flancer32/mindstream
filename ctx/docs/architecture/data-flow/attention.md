@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/data-flow/attention.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -11,6 +11,8 @@ This document defines **Attention flows** in the Mindstream MVP.
 Attention flows are the architecturally permitted write-only data flows that originate in the browser context and, under the required conditions, are transmitted to the server-side storage contour as statistical facts.
 
 This document describes only Attention flows and does not cover **Content Collection flows** or local computational loops inside the browser contour.
+
+Local score-based highlighting and feed hiding are one browser-only projection governed by the same interest cutoff: they consume derived local scoring information, send no threshold through this flow, and have no effect on attention transfer or collective statistics.
 
 ---
 

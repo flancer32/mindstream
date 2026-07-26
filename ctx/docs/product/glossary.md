@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/glossary.md`
 - Template Version: `20260605`
-- Changed: `20260619`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -27,7 +27,7 @@ Does NOT define:
 - Corpus terms — publication, corpus, semantic representation, annotation, overview, embedding.
 - Participation terms — user context, user profile, profile UUID, demo mode.
 - Attention terms — attention signal, interest profile, interest vector, aggregated attention statistics.
-- Projection terms — feed, similarity.
+- Projection terms — feed, similarity, interest threshold.
 - Composition terms — interest indicator.
 
 ## Core Terms
@@ -82,6 +82,10 @@ Shared statistical product context derived from the attention signals of initial
 
 **Feed**  
 Local personal projection of the corpus for one user context and not a shared global system object.
+
+**Interest Threshold**
+
+One browser-local interest cutoff used consistently for bright interest-indicator highlighting and, when hiding is enabled, for publication visibility. The cutoff may be derived automatically or selected directly by the reader and never alters the shared corpus.
 
 **Similarity**  
 Numerical correspondence measure between semantic representations, user preference vectors, and shared attention statistics.

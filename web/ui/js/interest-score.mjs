@@ -41,6 +41,8 @@ export const scoreItem = (item) => {
 
 export const getScore = (pubId) => attention.getScore(pubId);
 
+export const hasInterestProfile = () => attention.hasInterestProfile();
+
 export const resolveScore = (item) => {
   const pubId = resolvePubId(item);
   if (pubId !== null && typeof pubId !== 'undefined') {

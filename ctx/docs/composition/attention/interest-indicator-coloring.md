@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/composition/attention/interest-indicator-coloring.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -105,13 +105,15 @@ The rule:
 - does not replace the percentage value of the indicator;
 - does not promise objective importance outside the current local set.
 
-## Manual Override
+## Shared Interest Threshold
 
-The user may set a manual highlighting threshold with the settings slider. In that case, the automatic algorithm described here is not used.
+The automatic algorithm produces the active interest threshold when no manual value exists. The same result controls bright highlighting and, when local hiding is enabled, publication visibility.
 
-Manual mode compares a direct numeric threshold against the numeric indicator shown on the publication card.
+The user may set a manual interest threshold with the settings slider. In that case, the automatic algorithm described here is not used. Manual mode compares one direct numeric threshold against the numeric indicator shown on every publication card.
 
-The manual-threshold rule is defined separately in `ctx/docs/composition/attention/threshold-control.md`.
+The unified-threshold rule is defined separately in `ctx/docs/composition/attention/threshold-control.md`.
+
+Automatic threshold calculation always considers the complete loaded publication set, including cards hidden below the threshold. Hidden cards must not be removed from the calculation and therefore cannot cause threshold feedback loops.
 
 ## Document Boundary
 

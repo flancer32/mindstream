@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/AGENTS.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -12,6 +12,7 @@ Documents at this level record code-shaping invariants, implementation constrain
 
 ## Level Map
 
+- `browser/` — browser application, Web Component, and browser-resident UI-state contracts.
 - `cli/` — deeper code-level documentation for the command-line surface and its execution model.
 - `configuration/` — deeper code-level documentation for configuration structure and subordinate configuration contracts.
 - `storage/` — deeper code-level documentation for the storage implementation layer and schema-oriented engineering rules.

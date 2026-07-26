@@ -1,275 +1,103 @@
-import * as identity from './identity.mjs';
+import './identity-menu.mjs';
+import InterestFilter, { defaults as interestFilterDefaults } from './interest-filter.mjs';
 import * as interestIndicator from './interest-indicator.mjs';
 import * as interestScores from './interest-score.mjs';
 
-const feedRoot = document.getElementById('feed');
+const STORAGE_KEY_THRESHOLD = 'mindstream:threshold';
+const STORAGE_KEY_FILTER_ENABLED = 'mindstream:interestFilterEnabled';
+const LEGACY_STORAGE_KEY_FILTER_THRESHOLD = 'mindstream:interestFilterThreshold';
 
-if (feedRoot) {
-  const STORAGE_KEY_THRESHOLD = 'mindstream:threshold';
+const normalizeStoredThreshold = (value) => {
+  if (value === null || value === '') return null;
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0 || number > 100) return null;
+  return Math.round(number);
+};
 
-  const state = {
-    cursor: null,
-    loading: false,
-    done: false,
-    sources: new Map(),
-    items: new Map(),
-    visible: new Set(),
-    attentionReady: false,
-    markers: new Map(),
-    manualThreshold: null,
-  };
+export default class Mindstream_Web_Feed extends HTMLElement {
+  constructor() {
+    super();
+    this._initialized = false;
+    this._interestFilter = new InterestFilter();
+    this._state = {
+      attentionReady: false,
+      cards: new Map(),
+      cursor: null,
+      done: false,
+      filterEnabled: interestFilterDefaults.enabled,
+      items: new Map(),
+      loading: false,
+      manualThreshold: null,
+      markers: new Map(),
+      resolvedThresholdPercent: 0,
+      sources: new Map(),
+    };
+  }
 
-  const loadThreshold = () => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY_THRESHOLD);
-      if (raw !== null) {
-        const value = Number(raw);
-        if (Number.isFinite(value) && value >= 0 && value <= 100) {
-          state.manualThreshold = value;
-        }
-      }
-    } catch {
-      // ignore
+  connectedCallback() {
+    if (!this._initialized) {
+      this._initialized = true;
+      this._loadSettings();
+      this._render();
     }
-  };
+    this._createObservers();
+    this._pageObserver.observe(this._sentinel);
+    if (!this._state.items.size) this._loadMore();
+  }
 
-  const saveThreshold = (value) => {
-    try {
-      if (value === null) {
-        localStorage.removeItem(STORAGE_KEY_THRESHOLD);
-      } else {
-        localStorage.setItem(STORAGE_KEY_THRESHOLD, String(value));
-      }
-    } catch {
-      // ignore
+  disconnectedCallback() {
+    this._pageObserver?.disconnect();
+    this._pageObserver = null;
+  }
+
+  _applyInterestScore(markerFill, markerValue, score) {
+    const percent = interestIndicator.scoreToPercent(score);
+    markerFill.style.height = `${percent}%`;
+    markerValue.textContent = `${percent}%`;
+  }
+
+  _appendItems(items) {
+    const fragment = document.createDocumentFragment();
+    for (const item of items) {
+      if (this._state.cards.has(item.id)) continue;
+      this._state.items.set(item.id, item);
+      const card = this._renderItem(item);
+      this._state.cards.set(item.id, card);
+      fragment.append(card);
     }
-  };
+    this.insertBefore(fragment, this._sentinel);
+  }
 
-  loadThreshold();
+  _buildAllItems() {
+    return Array.from(this._state.items.values());
+  }
 
-  const header = document.createElement('section');
-  header.className = 'feed-header';
-  const headerTop = document.createElement('div');
-  headerTop.className = 'feed-header-top';
-  const headerText = document.createElement('div');
-  headerText.className = 'feed-header-text';
-  const headerTitle = document.createElement('h1');
-  headerTitle.className = 'feed-title';
-  headerTitle.textContent = 'Mindstream Feed';
-  const headerSubtitle = document.createElement('p');
-  headerSubtitle.className = 'feed-subtitle';
-  headerSubtitle.textContent = 'Curated signal from your sources.';
-
-  const identityMenu = document.createElement('div');
-  identityMenu.className = 'identity-menu';
-  const identityToggle = document.createElement('button');
-  identityToggle.className = 'identity-menu__toggle';
-  identityToggle.type = 'button';
-  identityToggle.setAttribute('aria-label', 'Identity menu');
-  identityToggle.setAttribute('aria-expanded', 'false');
-  const toggleBarTop = document.createElement('span');
-  toggleBarTop.className = 'identity-menu__bar';
-  const toggleBarMid = document.createElement('span');
-  toggleBarMid.className = 'identity-menu__bar';
-  const toggleBarBottom = document.createElement('span');
-  toggleBarBottom.className = 'identity-menu__bar';
-  identityToggle.append(toggleBarTop, toggleBarMid, toggleBarBottom);
-
-  const identityPanel = document.createElement('div');
-  identityPanel.className = 'identity-menu__panel';
-  identityPanel.hidden = true;
-
-  const identityAction = document.createElement('button');
-  identityAction.className = 'identity-menu__action';
-  identityAction.type = 'button';
-  identityAction.textContent = 'Активировать идентичность';
-
-  const identityValue = document.createElement('div');
-  identityValue.className = 'identity-menu__value';
-
-  const thresholdDivider = document.createElement('hr');
-  thresholdDivider.className = 'identity-menu__divider';
-
-  const thresholdSection = document.createElement('div');
-  thresholdSection.className = 'identity-menu__threshold';
-
-  const thresholdHeader = document.createElement('div');
-  thresholdHeader.className = 'identity-menu__threshold-header';
-
-  const thresholdLabel = document.createElement('span');
-  thresholdLabel.textContent = 'Порог интереса';
-
-  const thresholdValue = document.createElement('span');
-  thresholdValue.className = 'identity-menu__threshold-value';
-  thresholdValue.textContent = state.manualThreshold !== null ? `${state.manualThreshold}%` : 'авто';
-
-  thresholdHeader.append(thresholdLabel, thresholdValue);
-
-  const thresholdSlider = document.createElement('input');
-  thresholdSlider.className = 'identity-menu__threshold-slider';
-  thresholdSlider.type = 'range';
-  thresholdSlider.min = '0';
-  thresholdSlider.max = '100';
-  thresholdSlider.value = state.manualThreshold !== null ? String(state.manualThreshold) : '80';
-  thresholdSlider.setAttribute('aria-label', 'Порог интереса');
-
-  const thresholdControls = document.createElement('div');
-  thresholdControls.className = 'identity-menu__threshold-controls';
-
-  const thresholdStepDown = document.createElement('button');
-  thresholdStepDown.className = 'identity-menu__threshold-step';
-  thresholdStepDown.type = 'button';
-  thresholdStepDown.textContent = '←';
-  thresholdStepDown.setAttribute('aria-label', 'Уменьшить порог интереса на 1%');
-
-  const thresholdStepUp = document.createElement('button');
-  thresholdStepUp.className = 'identity-menu__threshold-step';
-  thresholdStepUp.type = 'button';
-  thresholdStepUp.textContent = '→';
-  thresholdStepUp.setAttribute('aria-label', 'Увеличить порог интереса на 1%');
-
-  thresholdControls.append(thresholdStepDown, thresholdSlider, thresholdStepUp);
-
-  const thresholdReset = document.createElement('button');
-  thresholdReset.className = 'identity-menu__threshold-reset';
-  thresholdReset.type = 'button';
-  thresholdReset.textContent = 'Сбросить (авто)';
-  thresholdReset.hidden = state.manualThreshold === null;
-
-  const syncThresholdControls = () => {
-    thresholdValue.textContent = state.manualThreshold !== null ? `${state.manualThreshold}%` : 'авто';
-    thresholdSlider.value = state.manualThreshold !== null ? String(state.manualThreshold) : '80';
-    thresholdReset.hidden = state.manualThreshold === null;
-
-    const value = state.manualThreshold ?? Number(thresholdSlider.value);
-    thresholdStepDown.disabled = thresholdSlider.disabled || value <= 0;
-    thresholdStepUp.disabled = thresholdSlider.disabled || value >= 100;
-  };
-
-  const applyManualThreshold = (value) => {
-    const nextValue = Math.min(100, Math.max(0, Math.round(value)));
-    state.manualThreshold = nextValue;
-    saveThreshold(nextValue);
-    syncThresholdControls();
-    refreshAllScores();
-  };
-
-  thresholdSlider.addEventListener('input', () => {
-    applyManualThreshold(Number(thresholdSlider.value));
-  });
-
-  thresholdStepDown.addEventListener('click', () => {
-    applyManualThreshold((state.manualThreshold ?? Number(thresholdSlider.value)) - 1);
-  });
-
-  thresholdStepUp.addEventListener('click', () => {
-    applyManualThreshold((state.manualThreshold ?? Number(thresholdSlider.value)) + 1);
-  });
-
-  thresholdReset.addEventListener('click', () => {
-    state.manualThreshold = null;
-    saveThreshold(null);
-    syncThresholdControls();
-    refreshAllScores();
-  });
-
-  syncThresholdControls();
-
-  thresholdSection.append(thresholdHeader, thresholdControls, thresholdReset);
-
-  identityPanel.append(identityAction, identityValue, thresholdDivider, thresholdSection);
-  identityMenu.append(identityToggle, identityPanel);
-
-  headerText.append(headerTitle, headerSubtitle);
-  headerTop.append(headerText, identityMenu);
-  header.append(headerTop);
-
-  const status = document.createElement('div');
-  status.className = 'feed-status';
-  status.textContent = 'Loading feed…';
-
-  const sentinel = document.createElement('div');
-  sentinel.className = 'feed-sentinel';
-
-  feedRoot.append(header, status, sentinel);
-
-  const closeIdentityMenu = () => {
-    identityPanel.hidden = true;
-    identityToggle.setAttribute('aria-expanded', 'false');
-  };
-
-  const openIdentityMenu = () => {
-    identityPanel.hidden = false;
-    identityToggle.setAttribute('aria-expanded', 'true');
-  };
-
-  const toggleIdentityMenu = () => {
-    if (identityPanel.hidden) {
-      openIdentityMenu();
-    } else {
-      closeIdentityMenu();
-    }
-  };
-
-  const syncIdentityMenu = () => {
-    const currentIdentity = identity.getIdentity();
-    if (currentIdentity) {
-      identityAction.hidden = true;
-      identityValue.hidden = false;
-      identityValue.textContent = currentIdentity;
-    } else {
-      identityAction.hidden = false;
-      identityValue.hidden = true;
-      identityValue.textContent = '';
-    }
-  };
-
-  identityToggle.addEventListener('click', (event) => {
-    event.stopPropagation();
-    toggleIdentityMenu();
-  });
-
-  identityAction.addEventListener('click', () => {
-    const confirmed = window.confirm(
-      'Активация идентичности: сигналы внимания будут агрегироваться на сервере. Продолжить?'
-    );
-    if (!confirmed) return;
-    identity.activateIdentity();
-    syncIdentityMenu();
-    closeIdentityMenu();
-  });
-
-  document.addEventListener('click', (event) => {
-    if (!identityMenu.contains(event.target)) {
-      closeIdentityMenu();
-    }
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      closeIdentityMenu();
-    }
-  });
-
-  identity.watchIdentity(() => {
-    syncIdentityMenu();
-  });
-
-  syncIdentityMenu();
-  identity.ensureIdentityRegistered();
-
-  const buildUrl = () => {
+  _buildUrl() {
     const url = new URL('/api/feed', window.location.origin);
-    if (state.cursor?.id !== undefined && state.cursor?.id !== null) {
-      url.searchParams.set('id', String(state.cursor.id));
-      if (state.cursor.publishedAt) {
-        url.searchParams.set('publishedAt', state.cursor.publishedAt);
+    if (this._state.cursor?.id !== undefined && this._state.cursor?.id !== null) {
+      url.searchParams.set('id', String(this._state.cursor.id));
+      if (this._state.cursor.publishedAt) {
+        url.searchParams.set('publishedAt', this._state.cursor.publishedAt);
       }
     }
     return url.toString();
-  };
+  }
 
-  const formatDate = (value) => {
+  _createObservers() {
+    this._pageObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) this._loadMore();
+      },
+      { rootMargin: '200px 0px' }
+    );
+  }
+
+  _cursorKey(cursor) {
+    if (cursor?.id === undefined || cursor?.id === null) return null;
+    return `${cursor.id}:${cursor.publishedAt || ''}`;
+  }
+
+  _formatDate(value) {
     if (!value) return 'Unknown date';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return 'Unknown date';
@@ -277,89 +105,207 @@ if (feedRoot) {
       dateStyle: 'medium',
       timeStyle: 'short',
     }).format(date);
-  };
+  }
 
-  const resolveSource = (sourceCode) => {
-    if (!sourceCode) return null;
-    return state.sources.get(sourceCode) || null;
-  };
+  _hasInterestProfile() {
+    return this._state.attentionReady && interestScores.hasInterestProfile();
+  }
 
-  const buildAllItems = () => {
-    const list = [];
-    for (const entry of state.items.values()) {
-      list.push(entry);
+  _hasVisibleCards() {
+    return Array.from(this._state.cards.values()).some((card) => !card.hidden);
+  }
+
+  async _loadMore() {
+    if (this._state.loading || this._state.done) return;
+    this._state.loading = true;
+    this._updateStatus('Loading feed…');
+
+    try {
+      const response = await fetch(this._buildUrl(), {
+        headers: { accept: 'application/json' },
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const payload = await response.json();
+      const sources = Array.isArray(payload?.sources) ? payload.sources : [];
+      const items = Array.isArray(payload?.items) ? payload.items : [];
+      for (const source of sources) {
+        if (source?.code) this._state.sources.set(source.code, source);
+      }
+
+      if (!items.length) {
+        this._state.done = true;
+        this._updateStatus(this._state.items.size ? 'You reached the end.' : 'Feed is empty for now.');
+        return;
+      }
+
+      if (!this._state.attentionReady) {
+        interestScores.initAttention(items);
+        this._state.attentionReady = true;
+      }
+
+      this._appendItems(items);
+      const nextCursor = payload.cursor || null;
+      if (!nextCursor || this._cursorKey(nextCursor) === this._cursorKey(this._state.cursor)) {
+        this._state.done = true;
+      }
+      this._state.cursor = nextCursor;
+      this._refreshProjection();
+    } catch (error) {
+      console.error(error);
+      this._updateStatus('Unable to load the feed.');
+      this._state.done = true;
+    } finally {
+      this._state.loading = false;
+      if (
+        this._state.done
+        && this._state.items.size
+        && !this._hasVisibleCards()
+        && this._state.filterEnabled
+        && this._hasInterestProfile()
+      ) {
+        this._showFilteredEmptyStatus();
+      } else {
+        if (this._hasVisibleCards()) this._updateStatus('');
+        this._requestFillForVisiblePublication();
+      }
     }
-    return list;
-  };
+  }
 
-  const recordAttention = async (payload, item) => {
+  _loadSettings() {
+    try {
+      const storedThreshold = localStorage.getItem(STORAGE_KEY_THRESHOLD);
+      const legacyThreshold = localStorage.getItem(LEGACY_STORAGE_KEY_FILTER_THRESHOLD);
+      this._state.manualThreshold = normalizeStoredThreshold(
+        storedThreshold ?? legacyThreshold
+      );
+
+      const storedEnabled = localStorage.getItem(STORAGE_KEY_FILTER_ENABLED);
+      this._state.filterEnabled = storedEnabled === 'true'
+        ? true
+        : storedEnabled === 'false'
+          ? false
+          : interestFilterDefaults.enabled;
+    } catch {
+      // Browser-local settings are optional.
+    }
+  }
+
+  async _recordAttention(payload, item) {
     await interestScores.recordAttention(payload, item, {
-      items: buildAllItems(),
+      items: this._buildAllItems(),
     });
-    refreshAllScores();
-  };
+    this._refreshProjection();
+  }
 
-  const applyInterestScore = (markerFill, markerValue, score) => {
-    const percent = interestIndicator.scoreToPercent(score);
-    markerFill.style.height = `${percent}%`;
-    markerValue.textContent = `${percent}%`;
-  };
-
-  const refreshMarkerHighlighting = () => {
+  _refreshProjection() {
     const allScores = [];
-    for (const [pubId, item] of state.items.entries()) {
+    for (const [pubId, item] of this._state.items.entries()) {
       const score = interestScores.getScore(pubId) ?? interestScores.scoreItem(item);
       allScores.push({ pubId, score });
+      const marker = this._state.markers.get(pubId);
+      if (marker) this._applyInterestScore(marker.fill, marker.value, score);
     }
 
-    const result = state.manualThreshold !== null
-      ? interestIndicator.resolveTopInterestRangeManual(allScores, state.manualThreshold)
-      : interestIndicator.resolveTopInterestRange(allScores);
-    const { topIds } = result;
-    syncThresholdControls();
+    const result = this._state.manualThreshold === null
+      ? interestIndicator.resolveTopInterestRange(allScores)
+      : interestIndicator.resolveTopInterestRangeManual(
+        allScores,
+        this._state.manualThreshold
+      );
+    this._state.resolvedThresholdPercent = result.threshold * 100;
 
-    for (const [pubId, marker] of state.markers.entries()) {
-      const isTopInterest = topIds.has(pubId);
-      marker.root.classList.toggle('interest-marker--top', isTopInterest);
-      marker.value.classList.toggle('interest-marker__value--top', isTopInterest);
+    for (const [pubId, marker] of this._state.markers.entries()) {
+      const isAboveThreshold = result.topIds.has(pubId);
+      marker.root.classList.toggle('interest-marker--top', isAboveThreshold);
+      marker.value.classList.toggle('interest-marker__value--top', isAboveThreshold);
     }
-  };
 
-  const refreshAllScores = () => {
-    for (const [pubId, marker] of state.markers.entries()) {
-      const item = state.items.get(pubId);
+    this._refreshVisibility(this._state.resolvedThresholdPercent);
+  }
+
+  _refreshVisibility(thresholdPercent) {
+    for (const [pubId, card] of this._state.cards.entries()) {
+      const item = this._state.items.get(pubId);
       if (!item) continue;
       const score = interestScores.getScore(pubId) ?? interestScores.scoreItem(item);
-      applyInterestScore(marker.fill, marker.value, score);
+      card.hidden = !this._interestFilter.shouldShowPublication({
+        enabled: this._state.filterEnabled,
+        hasInterestProfile: this._hasInterestProfile(),
+        score,
+        thresholdPercent,
+      });
     }
-    refreshMarkerHighlighting();
-  };
 
-  const renderItem = (item) => {
-    const source = resolveSource(item.sourceCode);
+    if (
+      this._state.done
+      && this._state.items.size
+      && !this._hasVisibleCards()
+      && this._state.filterEnabled
+      && this._hasInterestProfile()
+    ) {
+      this._showFilteredEmptyStatus(thresholdPercent);
+    } else if (!this._state.loading) {
+      this._updateStatus('');
+    }
+  }
+
+  _render() {
+    const header = document.createElement('section');
+    header.className = 'feed-header';
+    const headerTop = document.createElement('div');
+    headerTop.className = 'feed-header-top';
+    const headerText = document.createElement('div');
+    headerText.className = 'feed-header-text';
+    const headerTitle = document.createElement('h1');
+    headerTitle.className = 'feed-title';
+    headerTitle.textContent = 'Mindstream Feed';
+    const headerSubtitle = document.createElement('p');
+    headerSubtitle.className = 'feed-subtitle';
+    headerSubtitle.textContent = 'Curated signal from your sources.';
+    headerText.append(headerTitle, headerSubtitle);
+
+    this._identityMenu = document.createElement('mindstream-identity-menu');
+    this._identityMenu.filterEnabled = this._state.filterEnabled;
+    this._identityMenu.thresholdPercent = this._state.manualThreshold;
+    this._identityMenu.addEventListener('interest-settings-change', (event) => {
+      this._state.filterEnabled = event.detail.filterEnabled;
+      this._state.manualThreshold = normalizeStoredThreshold(event.detail.thresholdPercent);
+      this._saveSettings();
+      this._refreshProjection();
+      this._requestFillForVisiblePublication();
+    });
+
+    headerTop.append(headerText, this._identityMenu);
+    header.append(headerTop);
+
+    this._status = document.createElement('div');
+    this._status.className = 'feed-status';
+    this._status.textContent = 'Loading feed…';
+    this._sentinel = document.createElement('div');
+    this._sentinel.className = 'feed-sentinel';
+    this.append(header, this._status, this._sentinel);
+  }
+
+  _renderItem(item) {
+    const source = item.sourceCode
+      ? this._state.sources.get(item.sourceCode) || null
+      : null;
     const card = document.createElement('article');
     card.className = 'feed-card';
     card.dataset.pubId = String(item.id);
 
-    const sourceName = source?.name || item.sourceCode || 'Unknown source';
-    const sourceUrl = source?.url || '#';
-
-    const titleText = item.title || 'Untitled publication';
-
     const meta = document.createElement('div');
     meta.className = 'feed-meta';
-
     const sourceLink = document.createElement('a');
     sourceLink.className = 'feed-source';
-    sourceLink.href = sourceUrl;
+    sourceLink.href = source?.url || '#';
     sourceLink.target = '_blank';
     sourceLink.rel = 'noopener noreferrer';
-    sourceLink.textContent = sourceName;
-
+    sourceLink.textContent = source?.name || item.sourceCode || 'Unknown source';
     const date = document.createElement('div');
     date.className = 'feed-date';
-    date.textContent = formatDate(item.publishedAt);
-
+    date.textContent = this._formatDate(item.publishedAt);
     meta.append(sourceLink, date);
 
     const title = document.createElement('h2');
@@ -368,34 +314,29 @@ if (feedRoot) {
     titleLink.href = item.url;
     titleLink.target = '_blank';
     titleLink.rel = 'noopener noreferrer';
-    titleLink.textContent = titleText;
+    titleLink.textContent = item.title || 'Untitled publication';
     titleLink.addEventListener('click', () => {
-      recordAttention({ type: 'source_click', pubId: item.id }, item).catch((err) => {
-        console.error(err);
-      });
+      this._recordAttention({ type: 'source_click', pubId: item.id }, item)
+        .catch((error) => console.error(error));
     });
     title.append(titleLink);
 
     const annotation = document.createElement('p');
     annotation.className = 'feed-annotation';
     annotation.textContent = item.annotation;
-
-    const body = document.createElement('div');
-    body.className = 'feed-body';
+    const bodyContent = document.createElement('div');
+    bodyContent.className = 'feed-body-content';
+    bodyContent.append(title, annotation);
 
     const marker = document.createElement('div');
     marker.className = 'interest-marker';
     const markerFill = document.createElement('div');
     markerFill.className = 'interest-marker__fill';
     marker.append(markerFill);
-
     const markerValue = document.createElement('div');
     markerValue.className = 'interest-marker__value';
-
-    const bodyContent = document.createElement('div');
-    bodyContent.className = 'feed-body-content';
-    bodyContent.append(title, annotation);
-
+    const body = document.createElement('div');
+    body.className = 'feed-body';
     body.append(marker, markerValue, bodyContent);
 
     const details = document.createElement('details');
@@ -406,7 +347,6 @@ if (feedRoot) {
     overview.textContent = item.overview;
     const actions = document.createElement('div');
     actions.className = 'feed-actions';
-
     const readMore = document.createElement('a');
     readMore.className = 'feed-action-link';
     readMore.href = item.url;
@@ -415,11 +355,9 @@ if (feedRoot) {
     readMore.textContent = '↗';
     readMore.setAttribute('aria-label', 'Open original publication');
     readMore.addEventListener('click', () => {
-      recordAttention({ type: 'source_click', pubId: item.id }, item).catch((err) => {
-        console.error(err);
-      });
+      this._recordAttention({ type: 'source_click', pubId: item.id }, item)
+        .catch((error) => console.error(error));
     });
-
     const collapse = document.createElement('button');
     collapse.className = 'feed-action-button';
     collapse.type = 'button';
@@ -431,111 +369,81 @@ if (feedRoot) {
     });
     details.addEventListener('toggle', () => {
       if (!details.open) return;
-      recordAttention({ type: 'overview_open', pubId: item.id }, item).catch((err) => {
-        console.error(err);
-      });
+      this._recordAttention({ type: 'overview_open', pubId: item.id }, item)
+        .catch((error) => console.error(error));
     });
-
     actions.append(readMore, collapse);
     details.append(summary, overview, actions);
 
     card.append(meta, body, details);
-    state.markers.set(item.id, { root: marker, fill: markerFill, value: markerValue });
-    applyInterestScore(markerFill, markerValue, interestScores.resolveScore(item));
-
+    this._state.markers.set(item.id, {
+      fill: markerFill,
+      root: marker,
+      value: markerValue,
+    });
+    this._applyInterestScore(markerFill, markerValue, interestScores.resolveScore(item));
     return card;
-  };
+  }
 
-  const updateStatus = (text) => {
-    status.textContent = text;
-    status.hidden = !text;
-  };
-
-  const appendItems = (items, observer) => {
-    const fragment = document.createDocumentFragment();
-    for (const item of items) {
-      state.items.set(item.id, item);
-      const card = renderItem(item);
-      fragment.append(card);
-      observer.observe(card);
+  _requestFillForVisiblePublication() {
+    if (
+      this._state.loading
+      || this._state.done
+      || !this._state.items.size
+      || this._hasVisibleCards()
+      || !this._state.filterEnabled
+      || !this._hasInterestProfile()
+    ) {
+      return;
     }
-    feedRoot.insertBefore(fragment, sentinel);
-  };
+    queueMicrotask(() => this._loadMore());
+  }
 
-  const loadMore = async () => {
-    if (state.loading || state.done) return;
-    state.loading = true;
-    updateStatus('Loading feed…');
-
+  _saveSettings() {
     try {
-      const response = await fetch(buildUrl(), {
-        headers: { accept: 'application/json' },
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+      if (this._state.manualThreshold === null) {
+        localStorage.removeItem(STORAGE_KEY_THRESHOLD);
+      } else {
+        localStorage.setItem(
+          STORAGE_KEY_THRESHOLD,
+          String(this._state.manualThreshold)
+        );
       }
-      const payload = await response.json();
-      const sources = Array.isArray(payload?.sources) ? payload.sources : [];
-      const items = Array.isArray(payload?.items) ? payload.items : [];
-
-      for (const source of sources) {
-        if (source?.code) {
-          state.sources.set(source.code, source);
-        }
-      }
-
-      if (!items.length) {
-        if (!state.cursor) {
-          updateStatus('Feed is empty for now.');
-        } else {
-          updateStatus('You reached the end.');
-        }
-        state.done = true;
-        return;
-      }
-
-      if (!state.attentionReady) {
-        interestScores.initAttention(items);
-        state.attentionReady = true;
-      }
-
-      appendItems(items, visibilityObserver);
-      refreshAllScores();
-      state.cursor = payload.cursor || null;
-      updateStatus('');
-    } catch (err) {
-      updateStatus('Unable to load the feed.');
-      state.done = true;
-    } finally {
-      state.loading = false;
+      localStorage.setItem(
+        STORAGE_KEY_FILTER_ENABLED,
+        String(this._state.filterEnabled)
+      );
+      localStorage.removeItem(LEGACY_STORAGE_KEY_FILTER_THRESHOLD);
+    } catch {
+      // Browser-local settings are optional.
     }
-  };
+  }
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        loadMore();
-      }
-    },
-    { rootMargin: '200px 0px' }
-  );
+  _showFilteredEmptyStatus(
+    thresholdPercent = this._state.resolvedThresholdPercent
+  ) {
+    const displayThreshold = Math.round(Number(thresholdPercent) || 0);
+    this._status.textContent = `Нет публикаций с соответствием интересам от ${displayThreshold}%.`;
+    const showAll = document.createElement('button');
+    showAll.className = 'feed-status__action';
+    showAll.type = 'button';
+    showAll.textContent = 'Показать все';
+    showAll.addEventListener('click', () => {
+      this._state.filterEnabled = false;
+      this._identityMenu.filterEnabled = false;
+      this._saveSettings();
+      this._refreshProjection();
+    });
+    this._status.append(showAll);
+    this._status.hidden = false;
+  }
 
-  const visibilityObserver = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        const pubId = entry.target?.dataset?.pubId;
-        if (!pubId) continue;
-        if (entry.isIntersecting) {
-          state.visible.add(Number(pubId));
-        } else {
-          state.visible.delete(Number(pubId));
-        }
-      }
-      refreshMarkerHighlighting();
-    },
-    { rootMargin: '0px 0px -10% 0px' }
-  );
+  _updateStatus(text) {
+    this._status.textContent = text;
+    this._status.hidden = !text;
+  }
+}
 
-  observer.observe(sentinel);
-  loadMore();
+if (!customElements.get('mindstream-feed')) {
+  customElements.define('mindstream-feed', Mindstream_Web_Feed);
 }

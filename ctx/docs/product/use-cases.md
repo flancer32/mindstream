@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/use-cases.md`
 - Template Version: `20260605`
-- Changed: `20260619`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -72,6 +72,18 @@ Related domain areas: attention and interest, personal feed projection.
 
 Lifecycle position: recurring value-delivery stage.
 
+### Interest-Threshold Feed Projection
+
+User goal: use one understandable interest level to identify matching publications and optionally hide locally loaded publications below it, while retaining the ability to restore them immediately.
+
+Participating roles: profiled reader, product runtime.
+
+Expected product outcome: highlighting and optional hiding use the same browser-local cutoff; after an interest profile exists, the reader can narrow the local feed projection without changing the shared corpus or another reader's availability.
+
+Related domain areas: attention and interest, personal feed projection.
+
+Lifecycle position: recurring reading-orientation stage.
+
 ## Core Use Cases
 
 - Explore the demo corpus without profile initialization.
@@ -79,6 +91,7 @@ Lifecycle position: recurring value-delivery stage.
 - Read semantic representations of a publication before opening the original source.
 - Generate positive attention signals through meaningful reading actions.
 - Receive a locally formed feed projection of the shared corpus.
+- Set one local interest threshold for publication highlighting and optional feed hiding.
 
 ## Use Case Format
 

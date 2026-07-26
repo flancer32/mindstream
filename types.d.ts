@@ -42,6 +42,9 @@ declare global {
   type Mindstream_Back_Storage_Schema = import("./src/Storage/Schema.mjs").default;
   type Mindstream_Back_Storage_SchemaManager = import("./src/Storage/SchemaManager.mjs").default;
   type Mindstream_Shared_Logger = import("./web/app/Shared/Logger.mjs").default;
+  type Mindstream_Web_Feed = import("./web/ui/js/feed.mjs").default;
+  type Mindstream_Web_IdentityMenu = import("./web/ui/js/identity-menu.mjs").default;
+  type Mindstream_Web_InterestFilter = import("./web/ui/js/interest-filter.mjs").default;
 }
 
 export {};

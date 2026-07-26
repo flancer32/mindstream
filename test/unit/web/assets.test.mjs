@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '../../..');
 
 const indexPath = path.join(projectRoot, 'web', 'index.html');
+const feedCssPath = path.join(projectRoot, 'web', 'ui', 'css', 'feed.css');
 
 test('index.html exists and looks like valid HTML', async () => {
   const content = await fs.readFile(indexPath, 'utf8');
@@ -18,4 +19,13 @@ test('index.html exists and looks like valid HTML', async () => {
   assert.ok(normalized.includes('<head'));
   assert.ok(normalized.includes('<body'));
   assert.ok(normalized.includes('</html>'));
+});
+
+test('hidden feed cards override the card display mode', async () => {
+  const content = await fs.readFile(feedCssPath, 'utf8');
+
+  assert.match(
+    content,
+    /\.feed-card\[hidden\]\s*\{[^}]*display:\s*none\s*;/u
+  );
 });

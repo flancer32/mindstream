@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/composition/ui.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -20,9 +20,9 @@ The feed is the primary visual form of the product and is presented as a list of
 
 Each publication is shown in the feed with a title, meta information, and visual signs of user attention, including a positive publication mark.
 
-The feed has no controls for filtering or sorting.
+The feed has no controls for sorting. It provides one interest-threshold control and one narrow local hiding toggle for already loaded publications.
 
-The only exception is the manual numeric threshold for interest-indicator highlighting available in the settings panel. Its rule is defined in `ctx/docs/composition/attention/threshold-control.md`.
+The settings panel contains one numeric interest threshold used by both interest-indicator highlighting and optional local feed hiding. Their shared rule is defined in `ctx/docs/composition/attention/threshold-control.md`; hiding behavior is refined in `ctx/docs/composition/attention/feed-filter-control.md`.
 
 ## Forms Of Publication Presence
 
@@ -77,7 +77,7 @@ Repeated publications in the feed are not allowed and are not treated as a valid
 
 ## Absent Forms As Invariants
 
-Visual applied forms prohibited by `constraints/mvp-scope.md` are absent, including personalization settings, filters and sorting controls, feed explanations, negative ratings, social elements, and error messages as a separate class of UI entities.
+Visual applied forms prohibited by `constraints/mvp-scope.md` are absent, including personalization settings, filters and sorting controls beyond the unified interest threshold and narrow local hiding toggle, feed explanations, negative ratings, social elements, and error messages as a separate class of UI entities.
 
 ## Document Boundary
 

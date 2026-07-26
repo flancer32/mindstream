@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/testing.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -62,7 +62,9 @@ Each test must be idempotent and must not leave traces of execution behind. If a
 
 ## Web Tests
 
-Frontend code is tested in Node.js. Real browsers and e2e tests are absent in the MVP. Browser API emulation is performed only through manual mock objects injected through DI. Libraries such as `jsdom` and `happy-dom` are not allowed.
+Frontend code is tested in Node.js. Real browsers and e2e tests are absent in the MVP. Libraries such as `jsdom` and `happy-dom` are not allowed.
+
+DI-managed frontend modules receive manual browser API mocks through DI. Native Web Components under `web/ui/js/` are tested by installing minimal manual platform globals before dynamic import, because the browser platform owns their construction and lifecycle. Such tests must restore changed globals after execution.
 
 ## Document Status
 

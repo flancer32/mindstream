@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/composition/interaction.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260726`
 
 ## Purpose
 
@@ -23,6 +23,10 @@ The following user actions exist in the Mindstream MVP.
 The user scans the publication feed as a personal projection of the available corpus.
 
 This action records initial contact with publications and is not treated as deep attention.
+
+### Interest-Threshold Adjustment
+
+The user may adjust one local interest threshold that controls bright indicator highlighting and, after an interest profile exists, may independently enable or disable hiding below that same threshold. These actions do not control scoring, ranking, or the shared corpus.
 
 ### Reading The Annotation
 
@@ -66,8 +70,8 @@ A positive mark is a separate attention action and may accompany any form of acc
 Actions prohibited by `constraints/mvp-scope.md` are absent, including:
 
 - negative publication ratings;
-- controlling algorithms or personalization parameters;
-- manual filtering and sorting of the feed;
+- controlling algorithms or personalization parameters beyond the unified local interest threshold and hiding toggle;
+- manual sorting of the feed;
 - explanations of why the feed was formed;
 - social interaction;
 - content creation or editing.

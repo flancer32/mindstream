@@ -1,9 +1,36 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import test from 'node:test';
+import test, { after } from 'node:test';
 import { pathToFileURL } from 'node:url';
 
 const modulePath = path.resolve('web/ui/js/feed.mjs');
+const changedGlobalNames = [
+  'CustomEvent',
+  'HTMLElement',
+  'IntersectionObserver',
+  'addEventListener',
+  'customElements',
+  'document',
+  'fetch',
+  'localStorage',
+  'location',
+  'navigator',
+  'removeEventListener',
+  'window',
+];
+const originalGlobalDescriptors = new Map(
+  changedGlobalNames.map((name) => [
+    name,
+    Object.getOwnPropertyDescriptor(globalThis, name),
+  ])
+);
+
+after(() => {
+  for (const [name, descriptor] of originalGlobalDescriptors.entries()) {
+    if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+    else delete globalThis[name];
+  }
+});
 
 class FakeClassList {
   constructor(owner) {
@@ -24,29 +51,16 @@ class FakeClassList {
     this._syncToOwner();
   }
 
-  toggle(token, force) {
-    if (force === true) {
-      this.tokens.add(token);
-      this._syncToOwner();
-      return true;
-    }
-    if (force === false) {
-      this.tokens.delete(token);
-      this._syncToOwner();
-      return false;
-    }
-    if (this.tokens.has(token)) {
-      this.tokens.delete(token);
-      this._syncToOwner();
-      return false;
-    }
-    this.tokens.add(token);
-    this._syncToOwner();
-    return true;
-  }
-
   contains(token) {
     return this.tokens.has(token);
+  }
+
+  toggle(token, force) {
+    const next = force === undefined ? !this.tokens.has(token) : Boolean(force);
+    if (next) this.tokens.add(token);
+    else this.tokens.delete(token);
+    this._syncToOwner();
+    return next;
   }
 }
 
@@ -59,13 +73,14 @@ class FakeNode {
     this.style = {};
     this.attributes = new Map();
     this.eventListeners = new Map();
-    this.hidden = false;
+    this.checked = false;
     this.disabled = false;
-    this.value = '';
-    this.type = '';
+    this.hidden = false;
     this.open = false;
-    this._textContent = '';
+    this.type = '';
+    this.value = '';
     this._className = '';
+    this._textContent = '';
     this.classList = new FakeClassList(this);
   }
 
@@ -87,17 +102,18 @@ class FakeNode {
     this.children = [];
   }
 
+  addEventListener(type, handler) {
+    if (!this.eventListeners.has(type)) this.eventListeners.set(type, []);
+    this.eventListeners.get(type).push(handler);
+  }
+
   append(...nodes) {
-    for (const node of nodes) {
-      this.appendChild(node);
-    }
+    for (const node of nodes) this.appendChild(node);
   }
 
   appendChild(node) {
     if (node instanceof FakeFragment) {
-      for (const child of [...node.children]) {
-        this.appendChild(child);
-      }
+      for (const child of [...node.children]) this.appendChild(child);
       return node;
     }
     node.parentNode = this;
@@ -105,69 +121,75 @@ class FakeNode {
     return node;
   }
 
-  insertBefore(node, referenceNode) {
-    if (node instanceof FakeFragment) {
-      for (const child of [...node.children]) {
-        this.insertBefore(child, referenceNode);
-      }
-      return node;
-    }
-    const index = this.children.indexOf(referenceNode);
-    const targetIndex = index >= 0 ? index : this.children.length;
-    node.parentNode = this;
-    this.children.splice(targetIndex, 0, node);
-    return node;
-  }
-
-  setAttribute(name, value) {
-    this.attributes.set(name, String(value));
-  }
-
-  addEventListener(type, handler) {
-    if (!this.eventListeners.has(type)) {
-      this.eventListeners.set(type, []);
-    }
-    this.eventListeners.get(type).push(handler);
+  contains(node) {
+    if (node === this) return true;
+    return this.children.some((child) => child.contains?.(node));
   }
 
   dispatchEvent(event) {
     const handlers = this.eventListeners.get(event.type) || [];
-    for (const handler of handlers) {
-      handler(event);
-    }
+    for (const handler of handlers) handler(event);
+    if (event.bubbles && this.parentNode) this.parentNode.dispatchEvent(event);
     return true;
   }
 
-  click() {
-    this.dispatchEvent({ type: 'click', target: this });
+  focus() {}
+
+  insertBefore(node, referenceNode) {
+    if (node instanceof FakeFragment) {
+      for (const child of [...node.children]) this.insertBefore(child, referenceNode);
+      return node;
+    }
+    const index = this.children.indexOf(referenceNode);
+    node.parentNode = this;
+    this.children.splice(index < 0 ? this.children.length : index, 0, node);
+    return node;
   }
 
-  contains(node) {
-    if (node === this) return true;
-    return this.children.some((child) => child.contains?.(node));
+  removeEventListener(type, handler) {
+    const handlers = this.eventListeners.get(type) || [];
+    this.eventListeners.set(type, handlers.filter((entry) => entry !== handler));
+  }
+
+  setAttribute(name, value) {
+    this.attributes.set(name, String(value));
   }
 }
 
 class FakeFragment extends FakeNode {}
 
 class FakeDocument {
-  constructor(feedRoot) {
-    this.feedRoot = feedRoot;
+  constructor(registry) {
+    this.registry = registry;
+    this.eventListeners = new Map();
   }
 
-  getElementById(id) {
-    return id === 'feed' ? this.feedRoot : null;
-  }
-
-  createElement(tagName) {
-    return new FakeNode(tagName);
+  addEventListener(type, handler) {
+    if (!this.eventListeners.has(type)) this.eventListeners.set(type, []);
+    this.eventListeners.get(type).push(handler);
   }
 
   createDocumentFragment() {
     return new FakeFragment('#fragment');
   }
 
-  addEventListener() {}
+  createElement(tagName) {
+    const Constructor = this.registry.get(tagName);
+    return Constructor ? new Constructor() : new FakeNode(tagName);
+  }
+
+  removeEventListener(type, handler) {
+    const handlers = this.eventListeners.get(type) || [];
+    this.eventListeners.set(type, handlers.filter((entry) => entry !== handler));
+  }
+}
+
+class FakeCustomEvent {
+  constructor(type, options = {}) {
+    this.type = type;
+    this.bubbles = Boolean(options.bubbles);
+    this.detail = options.detail;
+  }
 }
 
 const createStorage = (seed = {}) => {
@@ -176,56 +198,57 @@ const createStorage = (seed = {}) => {
     getItem(key) {
       return data.has(key) ? data.get(key) : null;
     },
-    setItem(key, value) {
-      data.set(key, String(value));
-    },
     removeItem(key) {
       data.delete(key);
+    },
+    setItem(key, value) {
+      data.set(key, String(value));
     },
   };
 };
 
 const collectByClass = (node, className, result = []) => {
-  if (node.classList?.contains(className)) {
-    result.push(node);
-  }
-  for (const child of node.children || []) {
-    collectByClass(child, className, result);
-  }
+  if (node.classList?.contains(className)) result.push(node);
+  for (const child of node.children || []) collectByClass(child, className, result);
   return result;
 };
 
-const loadModule = async () => {
-  const url = pathToFileURL(modulePath);
-  url.searchParams.set('t', `${Date.now()}-${Math.random()}`);
-  return import(url.href);
+const waitFor = async (predicate) => {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    if (predicate()) return;
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+  throw new Error('Timed out waiting for feed rendering.');
 };
 
-test('feed applies stored manual threshold immediately after items are appended', async () => {
-  const feedRoot = new FakeNode('div');
-  const document = new FakeDocument(feedRoot);
-  const observers = [];
-
-  Object.defineProperty(globalThis, 'document', { value: document, configurable: true, writable: true });
-  Object.defineProperty(globalThis, 'window', {
-    value: {
-      location: { origin: 'https://mindstream.test' },
-      confirm: () => true,
+test('feed uses one Web Component threshold for highlighting and optional hiding', async () => {
+  const registry = new Map();
+  globalThis.HTMLElement = FakeNode;
+  globalThis.CustomEvent = FakeCustomEvent;
+  globalThis.customElements = {
+    define(name, Constructor) {
+      registry.set(name, Constructor);
     },
-    configurable: true,
-    writable: true,
-  });
-  Object.defineProperty(globalThis, 'location', {
-    value: globalThis.window.location,
-    configurable: true,
-    writable: true,
-  });
+    get(name) {
+      return registry.get(name);
+    },
+  };
+  globalThis.document = new FakeDocument(registry);
+  globalThis.window = {
+    confirm: () => true,
+    location: { origin: 'https://mindstream.test' },
+  };
+  globalThis.location = globalThis.window.location;
   Object.defineProperty(globalThis, 'navigator', {
-    value: { sendBeacon: () => true },
     configurable: true,
+    value: { sendBeacon: () => true },
   });
+  globalThis.addEventListener = () => {};
+  globalThis.removeEventListener = () => {};
   globalThis.localStorage = createStorage({
     'mindstream:threshold': '80',
+    'mindstream:interestFilterEnabled': 'true',
+    'mindstream:interestFilterThreshold': '65',
     'mindstream.attention.interestVector': JSON.stringify({ dim: 2, vector: [1, 0] }),
     'mindstream.attention.recentSignals': JSON.stringify([]),
   });
@@ -233,148 +256,84 @@ test('feed applies stored manual threshold immediately after items are appended'
     ok: true,
     async json() {
       return {
-        sources: [],
+        cursor: null,
         items: [
           {
+            annotation: 'A',
+            embeddings: { overview: [1, 0] },
             id: 101,
+            overview: 'A+',
+            publishedAt: '2026-06-20T00:00:00.000Z',
             sourceCode: 'src',
             title: 'Top item',
             url: 'https://example.com/top',
-            annotation: 'A',
-            overview: 'A+',
-            publishedAt: '2026-06-20T00:00:00.000Z',
-            embeddings: { overview: [1, 0] },
           },
           {
+            annotation: 'B',
+            embeddings: { overview: [0, 1] },
             id: 102,
+            overview: 'B+',
+            publishedAt: '2026-06-20T00:00:00.000Z',
             sourceCode: 'src',
             title: 'Lower item',
             url: 'https://example.com/lower',
-            annotation: 'B',
-            overview: 'B+',
-            publishedAt: '2026-06-20T00:00:00.000Z',
-            embeddings: { overview: [0, 1] },
           },
         ],
-        cursor: null,
+        sources: [],
       };
     },
   });
   globalThis.IntersectionObserver = class {
-    constructor(callback) {
-      this.callback = callback;
-      observers.push(this);
-    }
-
-    observe() {}
-    unobserve() {}
     disconnect() {}
-  };
-  globalThis.addEventListener = () => {};
-  globalThis.removeEventListener = () => {};
-
-  await loadModule();
-  await Promise.resolve();
-
-  const topMarkers = collectByClass(feedRoot, 'interest-marker--top');
-  const allMarkers = collectByClass(feedRoot, 'interest-marker');
-  const slider = collectByClass(feedRoot, 'identity-menu__threshold-slider')[0];
-
-  assert.equal(observers.length >= 2, true);
-  assert.equal(allMarkers.length, 2);
-  assert.equal(topMarkers.length, 1);
-  assert.equal(slider.disabled, false);
-});
-
-test('feed threshold arrows adjust manual threshold by one percent', async () => {
-  const feedRoot = new FakeNode('div');
-  const document = new FakeDocument(feedRoot);
-
-  Object.defineProperty(globalThis, 'document', { value: document, configurable: true, writable: true });
-  Object.defineProperty(globalThis, 'window', {
-    value: {
-      location: { origin: 'https://mindstream.test' },
-      confirm: () => true,
-    },
-    configurable: true,
-    writable: true,
-  });
-  Object.defineProperty(globalThis, 'location', {
-    value: globalThis.window.location,
-    configurable: true,
-    writable: true,
-  });
-  Object.defineProperty(globalThis, 'navigator', {
-    value: { sendBeacon: () => true },
-    configurable: true,
-  });
-  const storage = createStorage({
-    'mindstream:threshold': '80',
-    'mindstream.attention.interestVector': JSON.stringify({ dim: 2, vector: [1, 0] }),
-    'mindstream.attention.recentSignals': JSON.stringify([]),
-  });
-  globalThis.localStorage = storage;
-  globalThis.fetch = async () => ({
-    ok: true,
-    async json() {
-      return {
-        sources: [],
-        items: [
-          {
-            id: 101,
-            sourceCode: 'src',
-            title: 'Top item',
-            url: 'https://example.com/top',
-            annotation: 'A',
-            overview: 'A+',
-            publishedAt: '2026-06-20T00:00:00.000Z',
-            embeddings: { overview: [1, 0] },
-          },
-          {
-            id: 102,
-            sourceCode: 'src',
-            title: 'Lower item',
-            url: 'https://example.com/lower',
-            annotation: 'B',
-            overview: 'B+',
-            publishedAt: '2026-06-20T00:00:00.000Z',
-            embeddings: { overview: [0, 1] },
-          },
-        ],
-        cursor: null,
-      };
-    },
-  });
-  globalThis.IntersectionObserver = class {
     observe() {}
-    unobserve() {}
-    disconnect() {}
   };
-  globalThis.addEventListener = () => {};
-  globalThis.removeEventListener = () => {};
 
-  await loadModule();
-  await Promise.resolve();
+  const url = pathToFileURL(modulePath);
+  url.searchParams.set('t', `${Date.now()}-${Math.random()}`);
+  await import(url.href);
 
-  const slider = collectByClass(feedRoot, 'identity-menu__threshold-slider')[0];
-  const value = collectByClass(feedRoot, 'identity-menu__threshold-value')[0];
-  const [decrementButton, incrementButton] = collectByClass(feedRoot, 'identity-menu__threshold-step');
+  const feed = document.createElement('mindstream-feed');
+  feed.connectedCallback();
+  feed._identityMenu.connectedCallback();
+  await waitFor(() => collectByClass(feed, 'feed-card').length === 2);
 
-  incrementButton.click();
-  assert.equal(slider.value, '81');
-  assert.equal(value.textContent, '81%');
-  assert.equal(storage.getItem('mindstream:threshold'), '81');
+  const sliders = collectByClass(feed, 'identity-menu__threshold-slider');
+  const toggles = collectByClass(feed, 'identity-menu__filter-toggle');
+  const cards = collectByClass(feed, 'feed-card');
 
-  decrementButton.click();
-  assert.equal(slider.value, '80');
-  assert.equal(value.textContent, '80%');
-  assert.equal(storage.getItem('mindstream:threshold'), '80');
+  assert.equal(sliders.length, 1);
+  assert.equal(toggles.length, 1);
+  assert.equal(collectByClass(feed, 'interest-marker--top').length, 1);
+  assert.equal(cards[0].hidden, false);
+  assert.equal(cards[1].hidden, true);
 
-  slider.value = '100';
-  slider.dispatchEvent({ type: 'input', target: slider });
-  assert.equal(incrementButton.disabled, true);
+  sliders[0].value = '0';
+  sliders[0].dispatchEvent({ type: 'input' });
+  assert.equal(collectByClass(feed, 'interest-marker--top').length, 2);
+  assert.equal(cards[0].hidden, false);
+  assert.equal(cards[1].hidden, false);
+  assert.equal(localStorage.getItem('mindstream:threshold'), '0');
+  assert.equal(localStorage.getItem('mindstream:interestFilterThreshold'), null);
 
-  slider.value = '0';
-  slider.dispatchEvent({ type: 'input', target: slider });
-  assert.equal(decrementButton.disabled, true);
+  sliders[0].value = '80';
+  sliders[0].dispatchEvent({ type: 'input' });
+  assert.equal(cards[0].hidden, false);
+  assert.equal(cards[1].hidden, true);
+
+  const checkbox = toggles[0].children[0];
+  checkbox.checked = false;
+  checkbox.dispatchEvent({ type: 'change' });
+
+  assert.equal(collectByClass(feed, 'interest-marker--top').length, 1);
+  assert.equal(cards[0].hidden, false);
+  assert.equal(cards[1].hidden, false);
+  assert.equal(localStorage.getItem('mindstream:interestFilterEnabled'), 'false');
+
+  checkbox.checked = true;
+  checkbox.dispatchEvent({ type: 'change' });
+
+  assert.equal(collectByClass(feed, 'interest-marker--top').length, 1);
+  assert.equal(cards[0].hidden, false);
+  assert.equal(cards[1].hidden, true);
+  assert.equal(localStorage.getItem('mindstream:interestFilterEnabled'), 'true');
 });

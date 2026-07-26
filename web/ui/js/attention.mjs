@@ -291,6 +291,14 @@ export const getScore = (pubId) => (scoreCache.has(pubId) ? scoreCache.get(pubId
 
 export const getScores = () => new Map(scoreCache);
 
+export const hasInterestProfile = () => {
+  ensureInitialized();
+  for (const value of interestVector) {
+    if (value !== 0) return true;
+  }
+  return false;
+};
+
 export const reset = () => {
   ensureInitialized();
   interestVector = createZeroVector(dimension);

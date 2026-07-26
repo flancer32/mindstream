@@ -31,7 +31,7 @@ body {
   min-height: 100vh;
 }
 
-main#feed {
+mindstream-feed#feed {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -188,6 +188,19 @@ main#feed {
   color: var(--muted);
 }
 
+.identity-menu__filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.identity-menu__filter-toggle input {
+  accent-color: var(--interest-marker-top);
+}
+
 .identity-menu__threshold-value {
   font-weight: 600;
   color: var(--text);
@@ -288,6 +301,10 @@ main#feed {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.feed-card[hidden] {
+  display: none;
 }
 
 .feed-meta {
@@ -457,12 +474,30 @@ main#feed {
   padding: 16px 0;
 }
 
+.feed-status__action {
+  margin-left: 8px;
+  border: 0;
+  padding: 0;
+  color: var(--link);
+  background: transparent;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.feed-status__action:hover,
+.feed-status__action:focus {
+  color: var(--accent);
+  outline: none;
+}
+
 .feed-sentinel {
   height: 1px;
 }
 
 @media (min-width: 720px) {
-  main#feed {
+  mindstream-feed#feed {
     padding: 40px 20px 100px;
   }
 
