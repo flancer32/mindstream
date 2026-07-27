@@ -35,8 +35,10 @@ test('identity menu includes a bilingual about dialog', async () => {
   const content = await fs.readFile(source, 'utf8');
 
   assert.match(content, /About Mindstream/u);
-  assert.match(content, /О Mindstream/u);
+  assert.match(content, /О проекте Mindstream/u);
   assert.match(content, /identity-menu__about-panel/u);
+  assert.match(content, /https:\/\/habr\.com\/ru\/articles\/983094\//u);
+  assert.match(content, /https:\/\/wiredgeese\.com\/en\/contact\.html/u);
 });
 
 test('identity menu shows a short identity and can copy its full value', async () => {

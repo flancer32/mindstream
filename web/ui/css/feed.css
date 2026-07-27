@@ -242,10 +242,36 @@ mindstream-feed#feed {
   font-size: 1.35rem;
 }
 
-.identity-menu__about-text {
-  margin: 0;
+.identity-menu__about-content {
   color: var(--muted);
   line-height: 1.55;
+}
+
+.identity-menu__about-content p {
+  margin: 0 0 14px;
+}
+
+.identity-menu__about-content p:last-child {
+  margin-bottom: 0;
+}
+
+.identity-menu__about-content a {
+  color: var(--link);
+  text-underline-offset: 2px;
+}
+
+.identity-menu__about-content a:hover,
+.identity-menu__about-content a:focus {
+  color: var(--accent);
+}
+
+.identity-menu__about-articles {
+  margin: -6px 0 14px;
+  padding-left: 20px;
+}
+
+.identity-menu__about-articles li + li {
+  margin-top: 6px;
 }
 
 .identity-menu__about-actions {

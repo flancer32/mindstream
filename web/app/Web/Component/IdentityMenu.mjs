@@ -14,11 +14,41 @@ export default class Mindstream_Web_Component_IdentityMenu {
     const about = Object.freeze({
       en: Object.freeze({
         title: 'About Mindstream',
-        text: 'Mindstream is a personal reading space for finding your way through a growing stream of publications. It brings together material from your selected sources and presents every publication in a compact form: a title, an annotation, and a fuller overview when you want to go deeper. The goal is not to tell you what to read or to optimize your attention. Instead, Mindstream helps you make your own informed choices about where to spend it. As you open overviews and visit original publications, the app records positive attention signals. In full-access mode, these signals can contribute to a personal interest profile that makes the feed easier to scan. The interest indicator shows how closely a publication matches that profile within the current feed. You remain in control: you can use an automatic threshold or choose one manually, and optionally hide publications below it. Mindstream does not include ratings, social features, or explanations of recommendation algorithms. It is a quiet tool for orientation, reading, and returning to the original source when something genuinely matters to you.',
+        paragraphs: Object.freeze([
+          'Every day we face more information than we can realistically read and understand. The challenge is no longer finding knowledge but deciding what truly deserves our attention.',
+          'Mindstream explores a different way to navigate this growing stream.',
+          'The application currently collects articles from Habr and generates concise AI summaries, helping you decide whether an article is worth reading before opening the original.',
+          'As you use the feed, Mindstream builds a personal interest profile and estimates how closely new publications match the subjects that have already attracted your attention. You can also set an interest threshold and hide less relevant content.',
+          'All calculations are performed locally in your browser. By default, no reading data leaves your device. If you choose to activate an anonymous identity, anonymized attention signals may be stored on the server. A future version will aggregate these signals to produce community recommendations without exposing individual user data.',
+          'Habr is currently the first content source. Additional sources and user-submitted articles are planned.',
+        ]),
+        question: 'Mindstream explores a simple question: can human attention become a foundation for navigating an ever-growing world of knowledge?',
+        learnMore: 'Learn more:',
+        articles: Object.freeze([
+          Object.freeze({ href: 'https://habr.com/ru/articles/983094/?utm_source=chatgpt.com', label: 'Knowledge Is Everywhere. What Do We Do?' }),
+          Object.freeze({ href: 'https://habr.com/ru/articles/995070/?utm_source=chatgpt.com', label: 'From Ideas to Code: Testing the Theory of Attention' }),
+        ]),
+        invitation: "If you see commercial potential in this approach and are interested in a pilot, partnership, or product development, I'd be glad to discuss it.",
+        contact: Object.freeze({ href: 'https://wiredgeese.com/en/contact.html?utm_source=mindstream', label: 'Contact me' }),
       }),
       ru: Object.freeze({
-        title: 'О Mindstream',
-        text: 'Mindstream — это личное пространство для чтения и ориентации в растущем потоке публикаций. Приложение собирает материалы из выбранных источников и показывает каждую публикацию в компактной форме: заголовок, аннотацию и более подробный обзор для тех случаев, когда хочется разобраться глубже. Его задача — не указывать, что читать, и не оптимизировать ваше внимание. Вместо этого Mindstream помогает самостоятельно решать, чему его уделить. Когда вы открываете обзор или переходите к оригинальной публикации, приложение фиксирует положительные сигналы внимания. В режиме полного доступа эти сигналы могут участвовать в создании личного профиля интересов, который упрощает просмотр ленты. Индикатор интереса показывает, насколько публикация соответствует этому профилю в пределах текущей ленты. Управление остаётся у вас: можно использовать автоматический порог или задать его вручную, а также скрывать публикации ниже порога. В Mindstream нет оценок, социальных функций и объяснений рекомендательных алгоритмов. Это спокойный инструмент для ориентации, чтения и перехода к первоисточнику, когда тема действительно важна. Он не отвлекает лишними настройками или уведомлениями.',
+        title: 'О проекте Mindstream',
+        paragraphs: Object.freeze([
+          'Каждый день мы сталкиваемся с таким объёмом информации, который невозможно полностью прочитать и осмыслить. Сегодня проблема уже не в поиске знаний, а в выборе того, что действительно заслуживает внимания.',
+          'Mindstream помогает решать именно эту задачу.',
+          'Сейчас приложение собирает публикации с Хабра и автоматически создаёт для каждой краткое изложение при помощи языковой модели. Это позволяет быстро понять смысл статьи и решить, стоит ли читать оригинал.',
+          'Во время работы с лентой Mindstream формирует персональный профиль интересов и показывает, насколько новые публикации соответствуют темам, которые уже привлекали твоё внимание. Можно задать порог интереса и скрыть менее релевантные материалы.',
+          'Все вычисления выполняются локально в браузере. По умолчанию данные о чтении никуда не передаются. При добровольной активации анонимной идентичности обезличенные сигналы внимания могут сохраняться на сервере. В будущем их планируется использовать для расчёта коллективных рекомендаций без раскрытия персональных данных.',
+          'Сегодня Mindstream работает с Хабром. В дальнейшем планируется поддержка других источников и возможность добавлять собственные статьи.',
+        ]),
+        question: 'Mindstream проверяет простую гипотезу: можно ли использовать внимание человека как основу для навигации в постоянно растущем мире знаний?',
+        learnMore: 'Подробнее о проекте:',
+        articles: Object.freeze([
+          Object.freeze({ href: 'https://habr.com/ru/articles/983094/?utm_source=chatgpt.com', label: 'Знаний слишком много. Что делать?' }),
+          Object.freeze({ href: 'https://habr.com/ru/articles/995070/?utm_source=chatgpt.com', label: 'От идей к коду: проверяю теорию внимания на практике' }),
+        ]),
+        invitation: 'Если ты видишь коммерческий потенциал этого подхода и заинтересован в пилотном проекте, партнёрстве или совместной разработке, буду рад обсудить сотрудничество.',
+        contact: Object.freeze({ href: 'https://wiredgeese.com/ru/contact.html?utm_source=mindstream', label: 'Контакты' }),
       }),
     });
 
@@ -223,7 +253,40 @@ export default class Mindstream_Web_Component_IdentityMenu {
       _setAboutLanguage(language) {
         const content = about[language];
         this._aboutTitle.textContent = content.title;
-        this._aboutText.textContent = content.text;
+        this._aboutContent.lang = language;
+        const paragraphs = content.paragraphs.map((text) => {
+          const paragraph = document.createElement('p');
+          paragraph.textContent = text;
+          return paragraph;
+        });
+        const question = document.createElement('p');
+        const emphasis = document.createElement('strong');
+        emphasis.textContent = content.question;
+        question.append(emphasis);
+        const learnMore = document.createElement('p');
+        learnMore.textContent = content.learnMore;
+        const articles = document.createElement('ul');
+        articles.className = 'identity-menu__about-articles';
+        for (const article of content.articles) {
+          const item = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = article.href;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = article.label;
+          item.append(link);
+          articles.append(item);
+        }
+        const invitation = document.createElement('p');
+        invitation.textContent = content.invitation;
+        const contact = document.createElement('p');
+        const contactLink = document.createElement('a');
+        contactLink.href = content.contact.href;
+        contactLink.target = '_blank';
+        contactLink.rel = 'noopener noreferrer';
+        contactLink.textContent = content.contact.label;
+        contact.append(contactLink);
+        this._aboutContent.replaceChildren(...paragraphs, question, learnMore, articles, invitation, contact);
         this._aboutEnglish.setAttribute('aria-pressed', String(language === 'en'));
         this._aboutRussian.setAttribute('aria-pressed', String(language === 'ru'));
       }
@@ -316,8 +379,8 @@ export default class Mindstream_Web_Component_IdentityMenu {
         this._aboutPanel.setAttribute('aria-modal', 'true');
         this._aboutTitle = document.createElement('h2');
         this._aboutTitle.className = 'identity-menu__about-title';
-        this._aboutText = document.createElement('p');
-        this._aboutText.className = 'identity-menu__about-text';
+        this._aboutContent = document.createElement('div');
+        this._aboutContent.className = 'identity-menu__about-content';
         const aboutHeader = document.createElement('div');
         aboutHeader.className = 'identity-menu__about-header';
         const aboutActions = document.createElement('div');
@@ -340,7 +403,7 @@ export default class Mindstream_Web_Component_IdentityMenu {
         this._aboutClose.title = 'Close about dialog';
         aboutActions.append(this._aboutEnglish, this._aboutRussian);
         aboutHeader.append(aboutActions, this._aboutTitle, this._aboutClose);
-        this._aboutPanel.append(aboutHeader, this._aboutText);
+        this._aboutPanel.append(aboutHeader, this._aboutContent);
         this._setAboutLanguage('en');
         section.append(header, controls, this._reset, filterLabel);
         this._panel.append(identityHeader, this._identityAction, divider, section);
