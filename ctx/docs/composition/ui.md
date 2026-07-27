@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/composition/ui.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -12,7 +12,7 @@ This document defines the visual applied form of the Mindstream MVP: which appli
 
 The Mindstream MVP has exactly one visual interaction surface.
 
-There are no separate screens for profile initialization, access-mode switching, help, or explanations. All interaction forms exist within one unified reading and orientation surface.
+There are no separate screens for profile initialization or access-mode switching. All interaction forms exist within one unified reading and orientation surface. An optional bilingual About pop-up may briefly describe the application's purpose without explaining feed formation.
 
 ## Feed As The Base Form
 
@@ -77,7 +77,7 @@ Repeated publications in the feed are not allowed and are not treated as a valid
 
 ## Absent Forms As Invariants
 
-Visual applied forms prohibited by `constraints/mvp-scope.md` are absent, including personalization settings, filters and sorting controls beyond the unified interest threshold and narrow local hiding toggle, feed explanations, negative ratings, social elements, and error messages as a separate class of UI entities.
+Visual applied forms prohibited by `constraints/mvp-scope.md` are absent, including personalization settings, filters and sorting controls beyond the unified interest threshold and narrow local hiding toggle, feed-formation explanations, negative ratings, social elements, and error messages as a separate class of UI entities.
 
 ## Document Boundary
 

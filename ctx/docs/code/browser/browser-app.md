@@ -60,7 +60,7 @@ Pure calculation, scoring, local-state, transport, and identity services remain 
 
 The feed component owns loaded publications, pagination, local projection state, and card rendering. It delegates HTTP request construction and response-contract validation to `Mindstream_Web_Transport_Feed`.
 
-The identity-menu component owns its panel DOM, identity activation interaction, and the unified interest-threshold controls. It communicates setting changes through a browser event and does not calculate publication scores or card visibility itself.
+The identity-menu component owns its fixed floating control, panel DOM, identity activation interaction, and the unified interest-threshold controls. It supports mouse and touch dragging, chooses the panel direction from the largest available viewport space, communicates setting changes through a browser event, and does not calculate publication scores or card visibility itself.
 
 Browser-local persistence is an implementation concern of the feed boundary. One stored manual threshold may be absent to represent automatic mode; the hiding toggle is stored independently because it enables a consumer of the threshold rather than defining another threshold.
 

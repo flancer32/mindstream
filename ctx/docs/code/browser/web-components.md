@@ -38,8 +38,10 @@ Role: identity-panel and interest-control owner.
 
 Responsibilities:
 
+- remain fixed above the page, support pointer dragging, and open the panel into the largest available viewport space;
 - open and dismiss `identity-menu__panel`;
-- present or activate the browser-bound profile UUID;
+- present the first section of the browser-bound profile UUID, copy its full value, or activate the identity when it is absent;
+- present an About action that opens a bilingual static application-purpose dialog;
 - present one interest-threshold slider, one-percent step actions, and automatic reset;
 - present the independent checkbox that enables hiding below the same threshold;
 - reflect externally assigned `thresholdPercent` and `filterEnabled` properties.

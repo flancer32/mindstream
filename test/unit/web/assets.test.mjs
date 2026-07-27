@@ -29,3 +29,34 @@ test('hidden feed cards override the card display mode', async () => {
     /\.feed-card\[hidden\]\s*\{[^}]*display:\s*none\s*;/u
   );
 });
+
+test('identity menu includes a bilingual about dialog', async () => {
+  const source = path.join(projectRoot, 'web', 'app', 'Web', 'Component', 'IdentityMenu.mjs');
+  const content = await fs.readFile(source, 'utf8');
+
+  assert.match(content, /About Mindstream/u);
+  assert.match(content, /О Mindstream/u);
+  assert.match(content, /identity-menu__about-panel/u);
+});
+
+test('identity menu shows a short identity and can copy its full value', async () => {
+  const source = path.join(projectRoot, 'web', 'app', 'Web', 'Component', 'IdentityMenu.mjs');
+  const content = await fs.readFile(source, 'utf8');
+
+  assert.match(content, /currentIdentity\.split\('-'\)\[0\]\}-\.\.\./u);
+  assert.match(content, /clipboard\?\.writeText\(currentIdentity\)/u);
+});
+
+test('identity menu styles it as a fixed floating control', async () => {
+  const content = await fs.readFile(feedCssPath, 'utf8');
+
+  assert.match(content, /\.identity-menu\s*\{[^}]*position:\s*fixed\s*;/u);
+  assert.match(content, /\.identity-menu__panel\s*\{[^}]*position:\s*fixed\s*;/u);
+  assert.match(content, /\.identity-menu--filter-enabled \.identity-menu__toggle/u);
+});
+
+test('about dialog uses a compact mobile header layout', async () => {
+  const content = await fs.readFile(feedCssPath, 'utf8');
+
+  assert.match(content, /@media \(max-width: 480px\)[\s\S]*\.identity-menu__about-title\s*\{[^}]*flex:\s*0 0 100%/u);
+});

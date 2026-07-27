@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/browser/ui-states.md`
 - Template Version: `20260726`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -27,7 +27,7 @@ The filtered-empty state reports the active cutoff and offers a “show all” a
 
 ## Widget-Level States
 
-The Identity Menu is closed or open. It shows either the identity activation action or the current profile UUID. Its threshold is either automatic or a manual integer percentage, while hiding is enabled or disabled independently.
+The Identity Menu is closed or open. It shows either the identity activation action or the current profile UUID. Its threshold is either automatic or a manual integer percentage, while hiding is enabled or disabled independently. Its About dialog is closed or open and presents the same static application-purpose description in English or Russian.
 
 ## State Transitions
 
