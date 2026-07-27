@@ -4,24 +4,54 @@
  * @description Handles /api/feed requests and builds Feed View DTO.
  */
 export default class Mindstream_Back_Web_Api_FeedView {
-  constructor({
-    Mindstream_Back_Storage_Knex$: knexProvider,
-    Mindstream_Shared_Logger$: logger,
-    Fl32_Web_Back_Helper_Respond$: respond,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Mindstream_Shared_Api_Feed$} deps.feed
+ * @param {Fl32_Web_Back_Helper_Respond$} deps.respond
+ */
+constructor({
+    knexProvider,
+    logger,
+    feed,
+    respond,
   }) {
     const NAMESPACE = 'Mindstream_Back_Web_Api_FeedView';
     const MAX_ITEMS = 50;
 
-    const getKnex = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getKnex = function () {
       return knexProvider.get();
     };
 
-    const ensureError = function (err) {
+    /**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+const ensureError = function (err) {
       if (err instanceof Error) return err;
       return new Error(String(err));
     };
 
-    const normalizeCursor = function (cursor) {
+    /**
+ * @param {unknown} cursor
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} cursor
+ * @returns {unknown}
+ */
+const normalizeCursor = function (cursor) {
       if (!cursor) return null;
       if (typeof cursor !== 'object') {
         throw new Error('Cursor must be an object.');
@@ -40,7 +70,15 @@ export default class Mindstream_Back_Web_Api_FeedView {
       return { id, publishedAt };
     };
 
-    const normalizePublishedAt = function (value) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const normalizePublishedAt = function (value) {
       if (!value) return undefined;
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) {
@@ -49,27 +87,65 @@ export default class Mindstream_Back_Web_Api_FeedView {
       return date.toISOString();
     };
 
-    const normalizeTitle = function (value) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const normalizeTitle = function (value) {
       if (typeof value !== 'string') return undefined;
       const trimmed = value.trim();
       return trimmed ? trimmed : undefined;
     };
 
-    const normalizeText = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeText = function (value, name) {
       if (typeof value !== 'string' || !value.trim()) {
         throw new Error(`${name} must be a non-empty string.`);
       }
       return value;
     };
 
-    const normalizeUrl = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeUrl = function (value, name) {
       if (typeof value !== 'string' || !value.trim()) {
         throw new Error(`${name} must be a non-empty string.`);
       }
       return value;
     };
 
-    const normalizeVector = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeVector = function (value, name) {
       if (Array.isArray(value)) {
         const normalized = value.map((item) => {
           const num = Number(item);
@@ -107,7 +183,17 @@ export default class Mindstream_Back_Web_Api_FeedView {
       throw new Error(`${name} must be a vector array or string.`);
     };
 
-    const applyCursorFilter = function (query, cursor) {
+    /**
+ * @param {unknown} query
+ * @param {unknown} cursor
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} query
+ * @param {unknown} cursor
+ * @returns {unknown}
+ */
+const applyCursorFilter = function (query, cursor) {
       if (!cursor) return;
       if (cursor.publishedAt) {
         query.where(function () {
@@ -122,7 +208,15 @@ export default class Mindstream_Back_Web_Api_FeedView {
       query.where('p.id', '<', cursor.id);
     };
 
-    const buildQuery = function (cursor) {
+    /**
+ * @param {unknown} cursor
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} cursor
+ * @returns {unknown}
+ */
+const buildQuery = function (cursor) {
       const query = getKnex()('publications as p')
         .join('publication_summaries as s', 'p.id', 's.publication_id')
         .join('publication_embeddings as e', 'p.id', 'e.publication_id')
@@ -153,7 +247,15 @@ export default class Mindstream_Back_Web_Api_FeedView {
       return query;
     };
 
-    const mapRow = function (row) {
+    /**
+ * @param {unknown} row
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} row
+ * @returns {unknown}
+ */
+const mapRow = function (row) {
       if (!row || typeof row !== 'object') {
         throw new Error('Feed row is invalid.');
       }
@@ -194,7 +296,15 @@ export default class Mindstream_Back_Web_Api_FeedView {
       };
     };
 
-    const parseQuery = function (url) {
+    /**
+ * @param {unknown} url
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} url
+ * @returns {unknown}
+ */
+const parseQuery = function (url) {
       if (!url) return {};
       const raw = String(url);
       const questionIndex = raw.indexOf('?');
@@ -212,7 +322,15 @@ export default class Mindstream_Back_Web_Api_FeedView {
       return Object.fromEntries(params.entries());
     };
 
-    const buildCursorFromQuery = function (query) {
+    /**
+ * @param {unknown} query
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} query
+ * @returns {unknown}
+ */
+const buildCursorFromQuery = function (query) {
       const idValue = query?.id;
       if (idValue === undefined || idValue === null || idValue === '') return null;
       const id = Number(idValue);
@@ -229,7 +347,17 @@ export default class Mindstream_Back_Web_Api_FeedView {
       return normalizeCursor({ id });
     };
 
-    this.getFeedView = async function ({ cursor } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.cursor
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.getFeedView = async function (params = {}) {
+      const { cursor } = params;
       const normalizedCursor = normalizeCursor(cursor);
       const rows = await buildQuery(normalizedCursor);
       const mapped = (rows ?? []).map(mapRow);
@@ -250,17 +378,29 @@ export default class Mindstream_Back_Web_Api_FeedView {
       }
 
       const last = items[items.length - 1];
-      return {
+      return feed.createResponse({
         sources,
         items,
         cursor: {
           publishedAt: last.publishedAt,
           id: last.id,
         },
-      };
+      });
     };
 
-    this.handle = async function ({ req, res }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.req
+ * @param {unknown} deps.res
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.req
+ * @param {unknown} deps.res
+ * @returns {Promise<unknown>}
+ */
+this.handle = async function ({ req, res }) {
       try {
         const query = parseQuery(req?.url);
         const cursor = buildCursorFromQuery(query);
@@ -283,9 +423,10 @@ export default class Mindstream_Back_Web_Api_FeedView {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Fl32_Web_Back_Helper_Respond$': 'Fl32_Web_Back_Helper_Respond$',
-  },
+  default: Object.freeze({
+    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    logger: 'Mindstream_Back_Logger$',
+    feed: 'Mindstream_Shared_Api_Feed$',
+    respond: 'Fl32_Web_Back_Helper_Respond$',
+  }),
 });

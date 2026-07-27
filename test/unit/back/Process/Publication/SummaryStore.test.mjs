@@ -54,7 +54,7 @@ test('Mindstream_Back_Process_Publication_SummaryStore saves new summaries', asy
   const { knex, inserts, state } = createKnexStub();
 
   container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
 
   const store = await container.get('Mindstream_Back_Process_Publication_SummaryStore$');
   const row = await store.saveSummary({
@@ -78,7 +78,7 @@ test('Mindstream_Back_Process_Publication_SummaryStore skips existing summaries'
   });
 
   container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
 
   const store = await container.get('Mindstream_Back_Process_Publication_SummaryStore$');
   const row = await store.saveSummary({
@@ -100,7 +100,7 @@ test('Mindstream_Back_Process_Publication_SummaryStore rejects incomplete summar
   });
 
   container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
 
   const store = await container.get('Mindstream_Back_Process_Publication_SummaryStore$');
   await assert.rejects(

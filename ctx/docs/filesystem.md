@@ -28,6 +28,7 @@ Defines the declarative structure of the repository at the top level only, listi
 - `.env` — local environment configuration for development use.
 - `.env.example` — environment configuration template.
 - `.gitignore` — version control exclusion rules.
+- `jsconfig.json` — JavaScript type-checking configuration and dependency type visibility.
 - `.markdownlint.json` — Markdown lint configuration.
 - `AGENTS.md` — root-level agent instructions.
 - `LICENSE` — license definition.

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "types": "types.d.ts",
   "license": "Apache-2.0",
   "teqfw": {
     "namespaces": [
@@ -37,5 +38,8 @@
     "@teqfw/log": "^0.1.0",
     "knex": "^3.2.10",
     "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
   }
 }

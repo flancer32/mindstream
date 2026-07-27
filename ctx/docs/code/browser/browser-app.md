@@ -45,7 +45,7 @@ Pure calculation, scoring, local-state, transport, and identity services remain 
 
 - `Mindstream_Web_App` — browser composition root application service; starts component registration.
 - `Mindstream_Web_Component_Registry` — registers linked element classes under their public custom-element names.
-- `Mindstream_Web_Component_Feed` — Feed Web Component definition; owns feed DOM, pagination, projection, and lifecycle listeners.
+- `Mindstream_Web_Component_Feed` — Feed Web Component definition; owns feed DOM, projection, and lifecycle listeners.
 - `Mindstream_Web_Component_IdentityMenu` — Identity Menu Web Component definition; owns panel DOM and control events.
 - `Mindstream_Web_Identity` — browser-local anonymous identity and attention-beacon transport service.
 - `Mindstream_Web_Attention` — browser-local interest-vector state, persistence, scoring cache, and attention recording service.
@@ -53,10 +53,12 @@ Pure calculation, scoring, local-state, transport, and identity services remain 
 - `Mindstream_Web_InterestFilter` — visibility policy for a resolved threshold.
 - `Mindstream_Web_InterestIndicator` — threshold and marker calculation service.
 - `Mindstream_Web_Platform_Browser` — injected boundary for browser globals and constructors.
+- `Mindstream_Web_Transport_Feed` — browser HTTP adapter that requests and validates feed pages through `Mindstream_Shared_Api_Feed`.
+- `Mindstream_Web_Transport_Beacon` — browser beacon adapter that sends already-created Shared DTOs.
 
 ## State And Communication
 
-The feed component owns loaded publications, pagination, local projection state, and card rendering.
+The feed component owns loaded publications, pagination, local projection state, and card rendering. It delegates HTTP request construction and response-contract validation to `Mindstream_Web_Transport_Feed`.
 
 The identity-menu component owns its panel DOM, identity activation interaction, and the unified interest-threshold controls. It communicates setting changes through a browser event and does not calculate publication scores or card visibility itself.
 

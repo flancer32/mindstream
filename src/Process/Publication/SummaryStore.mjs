@@ -4,14 +4,35 @@
  * @description Persists generated summaries for publications.
  */
 export default class Mindstream_Back_Process_Publication_SummaryStore {
-  constructor({ Mindstream_Back_Storage_Knex$: knexProvider, Mindstream_Shared_Logger$: logger }) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Logger$} deps.logger
+ */
+constructor({ knexProvider, logger }) {
     const NAMESPACE = 'Mindstream_Back_Process_Publication_SummaryStore';
 
-    const getKnex = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getKnex = function () {
       return knexProvider.get();
     };
 
-    const normalizeId = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeId = function (value, name) {
       const num = Number(value);
       if (!Number.isFinite(num)) {
         throw new Error(`${name} must be a number.`);
@@ -19,20 +40,52 @@ export default class Mindstream_Back_Process_Publication_SummaryStore {
       return num;
     };
 
-    const normalizeText = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeText = function (value, name) {
       if (typeof value !== 'string' || !value.trim()) {
         throw new Error(`${name} must be a non-empty string.`);
       }
       return value.trim();
     };
 
-    this.findByPublicationId = async function (publicationId) {
+    /**
+ * @param {unknown} publicationId
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} publicationId
+ * @returns {Promise<unknown>}
+ */
+this.findByPublicationId = async function (publicationId) {
       const id = normalizeId(publicationId, 'Publication id');
       const row = await getKnex()('publication_summaries').where({ publication_id: id }).first();
       return row ?? null;
     };
 
-    this.saveSummary = async function ({ publicationId, overview, annotation }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.publicationId
+ * @param {unknown} deps.overview
+ * @param {unknown} deps.annotation
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.publicationId
+ * @param {unknown} deps.overview
+ * @param {unknown} deps.annotation
+ * @returns {Promise<unknown>}
+ */
+this.saveSummary = async function ({ publicationId, overview, annotation }) {
       const id = normalizeId(publicationId, 'Publication id');
       const overviewText = normalizeText(overview, 'Overview');
       const annotationText = normalizeText(annotation, 'Annotation');
@@ -61,8 +114,8 @@ export default class Mindstream_Back_Process_Publication_SummaryStore {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-  },
+  default: Object.freeze({
+    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    logger: 'Mindstream_Back_Logger$',
+  }),
 });

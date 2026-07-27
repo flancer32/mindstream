@@ -4,18 +4,38 @@
  * @description Persists discovered publications in Storage.
  */
 export default class Mindstream_Back_Ingest_Publication_Store {
-  constructor({
-    Mindstream_Back_Storage_Knex$: knexProvider,
-    Mindstream_Shared_Logger$: logger,
-    Mindstream_Back_Ingest_Publication_Status$: statusCatalog,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Mindstream_Back_Ingest_Publication_Status$} deps.statusCatalog
+ */
+constructor({
+    knexProvider,
+    logger,
+    statusCatalog,
   }) {
     const NAMESPACE = 'Mindstream_Back_Ingest_Publication_Store';
 
-    const getKnex = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getKnex = function () {
       return knexProvider.get();
     };
 
-    const buildSourcePayload = function (source) {
+    /**
+ * @param {unknown} source
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} source
+ * @returns {unknown}
+ */
+const buildSourcePayload = function (source) {
       const now = new Date().toISOString();
       return {
         id: source.id,
@@ -29,12 +49,30 @@ export default class Mindstream_Back_Ingest_Publication_Store {
       };
     };
 
-    const ensureSource = async function (trx, source) {
+    /**
+ * @param {unknown} trx
+ * @param {unknown} source
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} trx
+ * @param {unknown} source
+ * @returns {Promise<unknown>}
+ */
+const ensureSource = async function (trx, source) {
       const payload = buildSourcePayload(source);
       await trx('publication_sources').insert(payload).onConflict('id').ignore();
     };
 
-    const buildPublicationPayloads = function (items) {
+    /**
+ * @param {unknown} items
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} items
+ * @returns {unknown}
+ */
+const buildPublicationPayloads = function (items) {
       const now = new Date().toISOString();
       return items.map((item) => ({
         source_id: item.source_id,
@@ -48,7 +86,19 @@ export default class Mindstream_Back_Ingest_Publication_Store {
       }));
     };
 
-    this.saveDiscovered = async function ({ source, items }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.source
+ * @param {unknown} deps.items
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.source
+ * @param {unknown} deps.items
+ * @returns {Promise<unknown>}
+ */
+this.saveDiscovered = async function ({ source, items }) {
       const rows = Array.isArray(items) ? items : [];
       if (!rows.length) {
         logger.info(NAMESPACE, 'No publications to persist.');
@@ -68,7 +118,19 @@ export default class Mindstream_Back_Ingest_Publication_Store {
       logger.info(NAMESPACE, `Stored ${rows.length} discovered publications.`);
     };
 
-    this.listForExtraction = async function ({ sourceId, status, limit } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.sourceId
+ * @param {unknown} deps.status
+ * @param {unknown} deps.limit
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.listForExtraction = async function (params = {}) {
+      const { sourceId, status, limit } = params;
       const source = Number(sourceId);
       if (!Number.isFinite(source)) {
         throw new Error('Source id must be a number.');
@@ -83,7 +145,19 @@ export default class Mindstream_Back_Ingest_Publication_Store {
       return rows ?? [];
     };
 
-    this.updateStatus = async function ({ id, status }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.id
+ * @param {unknown} deps.status
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.id
+ * @param {unknown} deps.status
+ * @returns {Promise<unknown>}
+ */
+this.updateStatus = async function ({ id, status }) {
       const pubId = Number(id);
       if (!Number.isFinite(pubId)) {
         throw new Error('Publication id must be a number.');
@@ -97,9 +171,9 @@ export default class Mindstream_Back_Ingest_Publication_Store {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Mindstream_Back_Ingest_Publication_Status$': 'Mindstream_Back_Ingest_Publication_Status$',
-  },
+  default: Object.freeze({
+    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    logger: 'Mindstream_Back_Logger$',
+    statusCatalog: 'Mindstream_Back_Ingest_Publication_Status$',
+  }),
 });

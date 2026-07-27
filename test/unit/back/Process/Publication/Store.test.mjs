@@ -109,7 +109,7 @@ test('Mindstream_Back_Process_Publication_Store selects publications without sum
   });
 
   container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   const store = await container.get('Mindstream_Back_Process_Publication_Store$');
@@ -132,7 +132,7 @@ test('Mindstream_Back_Process_Publication_Store selects publications for embeddi
   });
 
   container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   const store = await container.get('Mindstream_Back_Process_Publication_Store$');
@@ -153,7 +153,7 @@ test('Mindstream_Back_Process_Publication_Store updates status', async () => {
   const { knex, updates } = createKnexStub();
 
   container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   const store = await container.get('Mindstream_Back_Process_Publication_Store$');

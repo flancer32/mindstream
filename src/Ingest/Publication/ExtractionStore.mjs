@@ -4,14 +4,35 @@
  * @description Persists extracted HTML and markdown for publications.
  */
 export default class Mindstream_Back_Ingest_Publication_ExtractionStore {
-  constructor({ Mindstream_Back_Storage_Knex$: knexProvider, Mindstream_Shared_Logger$: logger }) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Logger$} deps.logger
+ */
+constructor({ knexProvider, logger }) {
     const NAMESPACE = 'Mindstream_Back_Ingest_Publication_ExtractionStore';
 
-    const getKnex = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getKnex = function () {
       return knexProvider.get();
     };
 
-    const normalizeId = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeId = function (value, name) {
       const num = Number(value);
       if (!Number.isFinite(num)) {
         throw new Error(`${name} must be a number.`);
@@ -19,13 +40,33 @@ export default class Mindstream_Back_Ingest_Publication_ExtractionStore {
       return num;
     };
 
-    this.findByPublicationId = async function (publicationId) {
+    /**
+ * @param {unknown} publicationId
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} publicationId
+ * @returns {Promise<unknown>}
+ */
+this.findByPublicationId = async function (publicationId) {
       const id = normalizeId(publicationId, 'Publication id');
       const row = await getKnex()('publication_extractions').where({ publication_id: id }).first();
       return row ?? null;
     };
 
-    this.saveHtml = async function ({ publicationId, html }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.publicationId
+ * @param {unknown} deps.html
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.publicationId
+ * @param {unknown} deps.html
+ * @returns {Promise<unknown>}
+ */
+this.saveHtml = async function ({ publicationId, html }) {
       const id = normalizeId(publicationId, 'Publication id');
       if (typeof html !== 'string' || !html) {
         throw new Error('HTML payload must be a non-empty string.');
@@ -53,7 +94,19 @@ export default class Mindstream_Back_Ingest_Publication_ExtractionStore {
       return await knexRef('publication_extractions').where({ publication_id: id }).first();
     };
 
-    this.saveMarkdown = async function ({ publicationId, markdown }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.publicationId
+ * @param {unknown} deps.markdown
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.publicationId
+ * @param {unknown} deps.markdown
+ * @returns {Promise<unknown>}
+ */
+this.saveMarkdown = async function ({ publicationId, markdown }) {
       const id = normalizeId(publicationId, 'Publication id');
       if (typeof markdown !== 'string' || !markdown) {
         throw new Error('Markdown payload must be a non-empty string.');
@@ -80,8 +133,8 @@ export default class Mindstream_Back_Ingest_Publication_ExtractionStore {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-  },
+  default: Object.freeze({
+    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    logger: 'Mindstream_Back_Logger$',
+  }),
 });

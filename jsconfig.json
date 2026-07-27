@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "target": "ESNext"
+  },
+  "include": [
+    "src",
+    "web/app",
+    "test",
+    "types.d.ts",
+    "node_modules/@teqfw/*/types.d.ts",
+    "node_modules/@flancer32/*/types.d.ts"
+  ]
+}

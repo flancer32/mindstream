@@ -44,7 +44,10 @@ The package declares the active roots in `package.json#teqfw.namespaces`: `Minds
 
 - has no access to platform APIs;
 - does not use `node:*`, DOM, `fetch`, `process`, or similar dependencies;
-- contains DTOs, utilities, and pure business logic.
+- contains DTOs, utilities, and pure business logic;
+- owns cross-platform transport validation, but not HTTP serialization or transport execution.
+
+`Mindstream_Shared_` must be mapped by every composition root that consumes its contracts. The browser composition root maps it to `/app/Shared`; the backend resolver maps it through `package.json#teqfw.namespaces`.
 
 `Mindstream_Web_`:
 
@@ -171,6 +174,26 @@ Use of suffixes `$` and `$$` is mandatory:
 - The normative form is `default export`.
 - `.export` is allowed but is not the base path.
 - `(factory)` and `(proxy)` are not part of the base MVP set.
+
+### Dependency Descriptor Names
+
+`__deps__` uses the canonical export-scoped form. The descriptor key is the local constructor parameter name, and its value is the CDC to resolve:
+
+```js
+export const __deps__ = Object.freeze({
+  default: {
+    registry: 'Mindstream_Web_Component_Registry$',
+  },
+});
+
+export default class Mindstream_Web_App {
+  constructor({ registry }) {
+    // ...
+  }
+}
+```
+
+Using a CDC as a constructor-property key, including an identity mapping such as `'Mindstream_Web_Component_Registry$': 'Mindstream_Web_Component_Registry$'`, is prohibited. Local dependency names must match between `__deps__.default`, the constructor destructuring, and its JSDoc `deps.<name>` entry.
 
 ## Platform Dependencies
 

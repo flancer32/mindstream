@@ -4,13 +4,32 @@
  * @description Parses RSS XML into a list of item descriptors.
  */
 export default class Mindstream_Back_Ingest_Rss_Parser {
-  constructor({}) {
-    const stripCdata = function (value) {
+/**
+ * @param {unknown} deps
+ */
+constructor({}) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const stripCdata = function (value) {
       if (typeof value !== 'string') return '';
       return value.replace(/<!\[CDATA\[(.*?)\]\]>/gis, '$1');
     };
 
-    const decodeEntities = function (value) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const decodeEntities = function (value) {
       if (typeof value !== 'string') return '';
       return value
         .replace(/&amp;/g, '&')
@@ -20,7 +39,17 @@ export default class Mindstream_Back_Ingest_Rss_Parser {
         .replace(/&apos;/g, "'");
     };
 
-    const extractTagValue = function (chunk, tagName) {
+    /**
+ * @param {unknown} chunk
+ * @param {unknown} tagName
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} chunk
+ * @param {unknown} tagName
+ * @returns {unknown}
+ */
+const extractTagValue = function (chunk, tagName) {
       if (!chunk || !tagName) return '';
       const regex = new RegExp(`<${tagName}\\b[^>]*>([\\s\\S]*?)<\\/${tagName}>`, 'i');
       const match = regex.exec(chunk);
@@ -29,7 +58,15 @@ export default class Mindstream_Back_Ingest_Rss_Parser {
       return decodeEntities(String(raw).trim());
     };
 
-    const extractItems = function (xml) {
+    /**
+ * @param {unknown} xml
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} xml
+ * @returns {unknown}
+ */
+const extractItems = function (xml) {
       if (!xml) return [];
       const items = [];
       const regex = /<item\b[^>]*>([\s\S]*?)<\/item>/gi;
@@ -40,7 +77,15 @@ export default class Mindstream_Back_Ingest_Rss_Parser {
       return items;
     };
 
-    this.parseItems = function (rssXml) {
+    /**
+ * @param {unknown} rssXml
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} rssXml
+ * @returns {unknown}
+ */
+this.parseItems = function (rssXml) {
       const xml = typeof rssXml === 'string' ? rssXml : '';
       const items = extractItems(xml);
       return items.map((itemXml) => ({

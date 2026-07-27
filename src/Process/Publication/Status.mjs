@@ -4,7 +4,10 @@
  * @description Publication status registry for summary and embedding workflows.
  */
 export default class Mindstream_Back_Process_Publication_Status {
-  constructor({}) {
+/**
+ * @param {unknown} deps
+ */
+constructor({}) {
     this.SUMMARY_FAILED = 'summary_failed';
     this.SUMMARY_READY = 'summary_ready';
     this.EMBEDDING_PENDING = 'embedding_pending';

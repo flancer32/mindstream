@@ -4,20 +4,37 @@
  * @description Starts the HTTP server and registers the API handler.
  */
 export default class Mindstream_Back_Web_Server {
-  constructor({
-    Mindstream_Shared_Logger$: logger,
-    Mindstream_Back_App_Configuration$: config,
-    Fl32_Web_Back_Server$: server,
-    Fl32_Web_Back_Config_Runtime__Factory$: runtimeConfigFactory,
-    Fl32_Web_Back_PipelineEngine$: pipelineEngine,
-    Mindstream_Back_Web_Handler$: apiHandler,
-    Fl32_Web_Back_Handler_Static$: staticHandler,
-    Fl32_Web_Back_Dto_Source__Factory$: sourceFactory,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Mindstream_Back_App_Configuration$} deps.config
+ * @param {Fl32_Web_Back_Server$} deps.server
+ * @param {Fl32_Web_Back_Config_Runtime__Factory$} deps.runtimeConfigFactory
+ * @param {Fl32_Web_Back_PipelineEngine$} deps.pipelineEngine
+ * @param {Mindstream_Back_Web_Handler$} deps.apiHandler
+ * @param {Fl32_Web_Back_Handler_Static$} deps.staticHandler
+ * @param {Fl32_Web_Back_Dto_Source__Factory$} deps.sourceFactory
+ */
+constructor({
+    logger,
+    config,
+    server,
+    runtimeConfigFactory,
+    pipelineEngine,
+    apiHandler,
+    staticHandler,
+    sourceFactory,
   }) {
     const NAMESPACE = 'Mindstream_Back_Web_Server';
     let started = false;
 
-    const buildServerConfig = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const buildServerConfig = function () {
       const cfg = config.get();
       const port = cfg?.server?.port;
       const type = cfg?.server?.type;
@@ -25,7 +42,13 @@ export default class Mindstream_Back_Web_Server {
       return runtimeConfigFactory.freeze();
     };
 
-    this.start = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.start = async function () {
       if (started) {
         throw new Error('Web server is already started.');
       }
@@ -50,21 +73,27 @@ export default class Mindstream_Back_Web_Server {
       }
     };
 
-    this.wait = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.wait = async function () {
       await new Promise(() => {});
     };
   }
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Mindstream_Back_App_Configuration$': 'Mindstream_Back_App_Configuration$',
-    'Fl32_Web_Back_Server$': 'Fl32_Web_Back_Server$',
-    'Fl32_Web_Back_Config_Runtime__Factory$': 'Fl32_Web_Back_Config_Runtime__Factory$',
-    'Fl32_Web_Back_PipelineEngine$': 'Fl32_Web_Back_PipelineEngine$',
-    'Mindstream_Back_Web_Handler$': 'Mindstream_Back_Web_Handler$',
-    'Fl32_Web_Back_Handler_Static$': 'Fl32_Web_Back_Handler_Static$',
-    'Fl32_Web_Back_Dto_Source__Factory$': 'Fl32_Web_Back_Dto_Source__Factory$',
-  },
+  default: Object.freeze({
+    logger: 'Mindstream_Back_Logger$',
+    config: 'Mindstream_Back_App_Configuration$',
+    server: 'Fl32_Web_Back_Server$',
+    runtimeConfigFactory: 'Fl32_Web_Back_Config_Runtime__Factory$',
+    pipelineEngine: 'Fl32_Web_Back_PipelineEngine$',
+    apiHandler: 'Mindstream_Back_Web_Handler$',
+    staticHandler: 'Fl32_Web_Back_Handler_Static$',
+    sourceFactory: 'Fl32_Web_Back_Dto_Source__Factory$',
+  }),
 });

@@ -4,19 +4,29 @@
  * @description Backend application composition root.
  */
 export default class Mindstream_Back_App {
-  /**
-   * @param {Object} deps
-   * @param {Mindstream_Back_App_Configuration} deps.Mindstream_Back_App_Configuration$
-   *        Application configuration service.
-   * @param {Mindstream_Back_App_Cli_Dispatcher} deps.Mindstream_Back_App_Cli_Dispatcher$
-   *        CLI dispatcher responsible for command parsing and execution.
-   */
-  constructor({
-    Mindstream_Back_App_Configuration$: config,
-    Mindstream_Back_App_Cli_Dispatcher$: cliDispatcher,
-    Mindstream_Back_Storage_Knex$: knexProvider,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_App_Configuration$} deps.config
+ * @param {Mindstream_Back_App_Cli_Dispatcher$} deps.cliDispatcher
+ * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ */
+constructor({
+    config,
+    cliDispatcher,
+    knexProvider,
   }) {
-    this.run = async function ({ projectRoot, cliArgs } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.projectRoot
+ * @param {unknown} deps.cliArgs
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.run = async function (params = {}) {
+      const { projectRoot, cliArgs } = params;
       await config.init(projectRoot);
       if (!cliDispatcher?.dispatch) {
         throw new Error('CLI dispatcher is not available.');
@@ -24,7 +34,13 @@ export default class Mindstream_Back_App {
       return await cliDispatcher.dispatch({ cliArgs });
     };
 
-    this.stop = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.stop = async function () {
       if (knexProvider?.destroy) {
         await knexProvider.destroy();
       }
@@ -33,9 +49,9 @@ export default class Mindstream_Back_App {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_App_Configuration$': 'Mindstream_Back_App_Configuration$',
-    'Mindstream_Back_App_Cli_Dispatcher$': 'Mindstream_Back_App_Cli_Dispatcher$',
-    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
-  },
+  default: Object.freeze({
+    config: 'Mindstream_Back_App_Configuration$',
+    cliDispatcher: 'Mindstream_Back_App_Cli_Dispatcher$',
+    knexProvider: 'Mindstream_Back_Storage_Knex$',
+  }),
 });

@@ -4,8 +4,22 @@
  * @description CLI command to generate summaries for publications.
  */
 export default class Mindstream_Back_Cli_Process_Generate_Summaries {
-  constructor({ Mindstream_Back_Process_Generate_Summaries$: generator }) {
-    this.execute = async function ({ args } = {}) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Process_Generate_Summaries$} deps.generator
+ */
+constructor({ generator }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.args
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.execute = async function (params = {}) {
+      const { args } = params;
       if (Array.isArray(args) && args.length) {
         throw new Error('Command process:generate:summaries does not accept arguments.');
       }
@@ -15,7 +29,7 @@ export default class Mindstream_Back_Cli_Process_Generate_Summaries {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Process_Generate_Summaries$': 'Mindstream_Back_Process_Generate_Summaries$',
-  },
+  default: Object.freeze({
+    generator: 'Mindstream_Back_Process_Generate_Summaries$',
+  }),
 });

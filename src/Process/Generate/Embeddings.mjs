@@ -4,28 +4,66 @@
  * @description Generates embeddings for publication summaries.
  */
 export default class Mindstream_Back_Process_Generate_Embeddings {
-  constructor({
-    Mindstream_Shared_Logger$: logger,
-    Mindstream_Back_Integration_OpenAi$: embeddingClient,
-    Mindstream_Back_Process_Publication_Store$: publicationStore,
-    Mindstream_Back_Process_Publication_EmbeddingStore$: embeddingStore,
-    Mindstream_Back_Process_Publication_Status$: statusCatalog,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Mindstream_Back_Integration_OpenAi$} deps.embeddingClient
+ * @param {Mindstream_Back_Process_Publication_Store$} deps.publicationStore
+ * @param {Mindstream_Back_Process_Publication_EmbeddingStore$} deps.embeddingStore
+ * @param {Mindstream_Back_Process_Publication_Status$} deps.statusCatalog
+ */
+constructor({
+    logger,
+    embeddingClient,
+    publicationStore,
+    embeddingStore,
+    statusCatalog,
   }) {
     const NAMESPACE = 'Mindstream_Back_Process_Generate_Embeddings';
 
-    const ensureError = function (err) {
+    /**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+const ensureError = function (err) {
       if (err instanceof Error) return err;
       return new Error(String(err));
     };
 
-    const normalizeText = function (value, name, publicationId) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @param {unknown} publicationId
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @param {unknown} publicationId
+ * @returns {unknown}
+ */
+const normalizeText = function (value, name, publicationId) {
       if (typeof value !== 'string' || !value.trim()) {
         throw new Error(`Publication ${publicationId} ${name} is missing.`);
       }
       return value.trim();
     };
 
-    const normalizeVector = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeVector = function (value, name) {
       if (!Array.isArray(value) || value.length === 0) {
         throw new Error(`${name} embedding is missing.`);
       }
@@ -39,7 +77,15 @@ export default class Mindstream_Back_Process_Generate_Embeddings {
       return normalized;
     };
 
-    const extractVectors = function (response) {
+    /**
+ * @param {unknown} response
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} response
+ * @returns {unknown}
+ */
+const extractVectors = function (response) {
       if (!response) return null;
       if (Array.isArray(response.data)) {
         return response.data.map((item) => item?.embedding ?? null);
@@ -50,7 +96,15 @@ export default class Mindstream_Back_Process_Generate_Embeddings {
       return null;
     };
 
-    const processPublication = async function (publication) {
+    /**
+ * @param {unknown} publication
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} publication
+ * @returns {Promise<unknown>}
+ */
+const processPublication = async function (publication) {
       const publicationId = publication?.id;
       if (!Number.isFinite(Number(publicationId))) {
         throw new Error('Publication id is missing.');
@@ -90,7 +144,17 @@ export default class Mindstream_Back_Process_Generate_Embeddings {
       logger.info(NAMESPACE, `Embeddings generated for publication ${publicationId}.`);
     };
 
-    const handleError = async function (publicationId, err) {
+    /**
+ * @param {unknown} publicationId
+ * @param {unknown} err
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} publicationId
+ * @param {unknown} err
+ * @returns {Promise<unknown>}
+ */
+const handleError = async function (publicationId, err) {
       const error = ensureError(err);
       logger.exception(NAMESPACE, error);
       if (Number.isFinite(Number(publicationId)) && statusCatalog?.EMBEDDING_FAILED) {
@@ -98,7 +162,13 @@ export default class Mindstream_Back_Process_Generate_Embeddings {
       }
     };
 
-    this.execute = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.execute = async function () {
       logger.info(NAMESPACE, 'Embedding generation started.');
       const limit = 3;
       const batch = await publicationStore.listForEmbeddings({ limit });
@@ -134,11 +204,11 @@ export default class Mindstream_Back_Process_Generate_Embeddings {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Mindstream_Back_Integration_OpenAi$': 'Mindstream_Back_Integration_OpenAi$',
-    'Mindstream_Back_Process_Publication_Store$': 'Mindstream_Back_Process_Publication_Store$',
-    'Mindstream_Back_Process_Publication_EmbeddingStore$': 'Mindstream_Back_Process_Publication_EmbeddingStore$',
-    'Mindstream_Back_Process_Publication_Status$': 'Mindstream_Back_Process_Publication_Status$',
-  },
+  default: Object.freeze({
+    logger: 'Mindstream_Back_Logger$',
+    embeddingClient: 'Mindstream_Back_Integration_OpenAi$',
+    publicationStore: 'Mindstream_Back_Process_Publication_Store$',
+    embeddingStore: 'Mindstream_Back_Process_Publication_EmbeddingStore$',
+    statusCatalog: 'Mindstream_Back_Process_Publication_Status$',
+  }),
 });

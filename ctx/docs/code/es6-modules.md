@@ -40,7 +40,7 @@ The following example is normative in form:
  * @description Standard ES6 module for the DI container.
  */
 export default class Namespace_Area_Module {
-  constructor({ "node:http": http, Namespace_Area_Defaults$: DEF }) {
+  constructor({ http, defaults }) {
     const server = http.createServer();
 
     this.start = async function (cfg) {
@@ -52,6 +52,13 @@ export default class Namespace_Area_Module {
     };
   }
 }
+
+export const __deps__ = Object.freeze({
+  default: {
+    http: 'node:http',
+    defaults: 'Namespace_Area_Defaults$',
+  },
+});
 ```
 
 The example is normative in form, not a recommendation for implementation logic.
@@ -66,6 +73,12 @@ The example is normative in form, not a recommendation for implementation logic.
 `@teqfw/di` guarantees correctness of the `deps` composition. Any defensive or validation logic in the constructor is a defect.
 
 The `deps` object is treated as logically immutable and must not be modified inside the constructor.
+
+## JSDoc Dependency Types
+
+Every DI constructor documents `deps` as `object` and documents each `deps.<localName>` entry with the instance type that corresponds to its CDC. A CDC ending in `$` uses the matching `*$` alias from `types.d.ts`; the alias represents `InstanceType<ConstructorAlias>`, not the constructor itself.
+
+`any` is prohibited in JSDoc. Use an existing declaration from `types.d.ts` for application and package contracts, or a built-in type such as `unknown`, `string`, `number`, `object`, or `Promise<unknown>` where no named contract exists. Node and npm module dependencies may use their `typeof import(...)` type only in the DI constructor entry that receives that platform module.
 
 ## Encapsulation And State
 

@@ -25,7 +25,7 @@ test('Mindstream_Back_Process_Generate_Embeddings generates embeddings for pendi
   const container = await createTestContainer();
   const calls = { list: 0, embed: 0, saved: [], status: [] };
 
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   container.register('Mindstream_Back_Process_Publication_Store$', {
@@ -70,7 +70,7 @@ test('Mindstream_Back_Process_Generate_Embeddings skips publications with stored
   const container = await createTestContainer();
   const calls = { embed: 0, saved: [], status: [] };
 
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   container.register('Mindstream_Back_Process_Publication_Store$', {
@@ -110,7 +110,7 @@ test('Mindstream_Back_Process_Generate_Embeddings marks failures and continues',
   const container = await createTestContainer();
   const calls = { embed: 0, saved: [], status: [] };
 
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   container.register('Mindstream_Back_Process_Publication_Store$', {
@@ -163,7 +163,7 @@ test('Mindstream_Back_Process_Generate_Embeddings enforces atomic embedding save
   const container = await createTestContainer();
   const calls = { saved: [], status: [] };
 
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   container.register('Mindstream_Back_Process_Publication_Store$', {

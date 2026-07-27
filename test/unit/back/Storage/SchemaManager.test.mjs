@@ -206,7 +206,7 @@ test('Mindstream_Back_Storage_SchemaManager syncs pg sequences after renew', asy
       return knex;
     },
   });
-  container.register('Mindstream_Shared_Logger$', createLoggerStub());
+  container.register('Mindstream_Back_Logger$', createLoggerStub());
   container.register('node:fs/promises', fs);
   container.register('node:path', await import('node:path'));
   container.register('node:process', {
@@ -248,7 +248,7 @@ test('Mindstream_Back_Storage_SchemaManager initializes pg sequences for empty t
       return knex;
     },
   });
-  container.register('Mindstream_Shared_Logger$', createLoggerStub());
+  container.register('Mindstream_Back_Logger$', createLoggerStub());
   container.register('node:fs/promises', fs);
   container.register('node:path', await import('node:path'));
   container.register('node:process', {
@@ -291,7 +291,7 @@ test('Mindstream_Back_Storage_SchemaManager skips sequence sync for non-pg clien
       return knex;
     },
   });
-  container.register('Mindstream_Shared_Logger$', createLoggerStub());
+  container.register('Mindstream_Back_Logger$', createLoggerStub());
   container.register('node:fs/promises', fs);
   container.register('node:path', await import('node:path'));
   container.register('node:process', {
@@ -326,7 +326,7 @@ test('Mindstream_Back_Storage_SchemaManager creates vector columns and extension
       return knex;
     },
   });
-  container.register('Mindstream_Shared_Logger$', createLoggerStub());
+  container.register('Mindstream_Back_Logger$', createLoggerStub());
 
   const manager = await container.get('Mindstream_Back_Storage_SchemaManager$');
   await manager.createSchema();

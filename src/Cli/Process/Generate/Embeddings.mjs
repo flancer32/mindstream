@@ -4,8 +4,22 @@
  * @description CLI command to generate embeddings for publications.
  */
 export default class Mindstream_Back_Cli_Process_Generate_Embeddings {
-  constructor({ Mindstream_Back_Process_Generate_Embeddings$: generator }) {
-    this.execute = async function ({ args } = {}) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Process_Generate_Embeddings$} deps.generator
+ */
+constructor({ generator }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.args
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.execute = async function (params = {}) {
+      const { args } = params;
       if (Array.isArray(args) && args.length) {
         throw new Error('Command process:generate:embeddings does not accept arguments.');
       }
@@ -15,7 +29,7 @@ export default class Mindstream_Back_Cli_Process_Generate_Embeddings {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Process_Generate_Embeddings$': 'Mindstream_Back_Process_Generate_Embeddings$',
-  },
+  default: Object.freeze({
+    generator: 'Mindstream_Back_Process_Generate_Embeddings$',
+  }),
 });

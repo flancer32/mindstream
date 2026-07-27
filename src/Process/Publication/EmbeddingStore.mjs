@@ -4,14 +4,35 @@
  * @description Persists embeddings for publications.
  */
 export default class Mindstream_Back_Process_Publication_EmbeddingStore {
-  constructor({ Mindstream_Back_Storage_Knex$: knexProvider, Mindstream_Shared_Logger$: logger }) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Logger$} deps.logger
+ */
+constructor({ knexProvider, logger }) {
     const NAMESPACE = 'Mindstream_Back_Process_Publication_EmbeddingStore';
 
-    const getKnex = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getKnex = function () {
       return knexProvider.get();
     };
 
-    const normalizeId = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeId = function (value, name) {
       const num = Number(value);
       if (!Number.isFinite(num)) {
         throw new Error(`${name} must be a number.`);
@@ -19,7 +40,17 @@ export default class Mindstream_Back_Process_Publication_EmbeddingStore {
       return num;
     };
 
-    const normalizeVector = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeVector = function (value, name) {
       if (!Array.isArray(value) || value.length === 0) {
         throw new Error(`${name} must be a non-empty array.`);
       }
@@ -33,13 +64,35 @@ export default class Mindstream_Back_Process_Publication_EmbeddingStore {
       return normalized;
     };
 
-    this.findByPublicationId = async function (publicationId) {
+    /**
+ * @param {unknown} publicationId
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} publicationId
+ * @returns {Promise<unknown>}
+ */
+this.findByPublicationId = async function (publicationId) {
       const id = normalizeId(publicationId, 'Publication id');
       const row = await getKnex()('publication_embeddings').where({ publication_id: id }).first();
       return row ?? null;
     };
 
-    this.saveEmbeddings = async function ({ publicationId, overviewEmbedding, annotationEmbedding }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.publicationId
+ * @param {unknown} deps.overviewEmbedding
+ * @param {unknown} deps.annotationEmbedding
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.publicationId
+ * @param {unknown} deps.overviewEmbedding
+ * @param {unknown} deps.annotationEmbedding
+ * @returns {Promise<unknown>}
+ */
+this.saveEmbeddings = async function ({ publicationId, overviewEmbedding, annotationEmbedding }) {
       const id = normalizeId(publicationId, 'Publication id');
       const overviewVector = normalizeVector(overviewEmbedding, 'Overview embedding');
       const annotationVector = normalizeVector(annotationEmbedding, 'Annotation embedding');
@@ -77,8 +130,8 @@ export default class Mindstream_Back_Process_Publication_EmbeddingStore {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-  },
+  default: Object.freeze({
+    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    logger: 'Mindstream_Back_Logger$',
+  }),
 });

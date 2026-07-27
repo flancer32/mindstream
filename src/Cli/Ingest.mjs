@@ -4,11 +4,24 @@
  * @description CLI dispatcher for ingest:* commands.
  */
 export default class Mindstream_Back_Cli_Ingest {
-  constructor({
-    Mindstream_Back_Cli_Ingest_Discover_Habr$: discoverHabr,
-    Mindstream_Back_Cli_Ingest_Extract_Habr$: extractHabr,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Cli_Ingest_Discover_Habr$} deps.discoverHabr
+ * @param {Mindstream_Back_Cli_Ingest_Extract_Habr$} deps.extractHabr
+ */
+constructor({
+    discoverHabr,
+    extractHabr,
   }) {
-    const resolveTarget = function (commandParts) {
+    /**
+ * @param {unknown} commandParts
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} commandParts
+ * @returns {unknown}
+ */
+const resolveTarget = function (commandParts) {
       const parts = Array.isArray(commandParts) ? commandParts : [];
       const [segment, action, ...rest] = parts;
       if (rest.length) {
@@ -25,7 +38,18 @@ export default class Mindstream_Back_Cli_Ingest {
       return { command: map[key], name: `ingest:${segment}:${action}` };
     };
 
-    this.dispatch = async function ({ commandParts, args } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.commandParts
+ * @param {unknown} deps.args
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.dispatch = async function (params = {}) {
+      const { commandParts, args } = params;
       const { command, name } = resolveTarget(commandParts);
       if (!command?.execute) {
         throw new Error(`Command "${name}" is unavailable.`);
@@ -36,8 +60,8 @@ export default class Mindstream_Back_Cli_Ingest {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Cli_Ingest_Discover_Habr$': 'Mindstream_Back_Cli_Ingest_Discover_Habr$',
-    'Mindstream_Back_Cli_Ingest_Extract_Habr$': 'Mindstream_Back_Cli_Ingest_Extract_Habr$',
-  },
+  default: Object.freeze({
+    discoverHabr: 'Mindstream_Back_Cli_Ingest_Discover_Habr$',
+    extractHabr: 'Mindstream_Back_Cli_Ingest_Extract_Habr$',
+  }),
 });

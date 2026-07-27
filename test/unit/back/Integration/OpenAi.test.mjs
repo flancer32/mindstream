@@ -51,7 +51,7 @@ const setup = async function ({ response, fetchError, configOverride } = {}) {
   };
 
   container.register('Mindstream_Back_Platform_Fetch$', fetchStub);
-  container.register('Mindstream_Shared_Logger$', loggerStub);
+  container.register('Mindstream_Back_Logger$', loggerStub);
   container.register('Mindstream_Back_App_Configuration$', configService);
 
   const client = await container.get('Mindstream_Back_Integration_OpenAi$');

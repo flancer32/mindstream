@@ -22,7 +22,7 @@ test('Mindstream_Back_Web_Server registers api handler and starts once', async (
   const logger = buildLogger();
   const calls = [];
 
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
   container.register('Mindstream_Back_App_Configuration$', {
     get() {
       return { server: { port: 3001, type: 'http2' } };

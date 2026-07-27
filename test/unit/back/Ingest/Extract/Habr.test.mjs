@@ -27,7 +27,7 @@ test('Mindstream_Back_Ingest_Extract_Habr stores html and markdown', async () =>
   const calls = { status: [], html: [], markdown: [], fetch: 0 };
 
   container.register('Mindstream_Back_Ingest_Publication_Status$', buildStatusCatalog());
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('node:timers/promises', { setTimeout: async () => {} });
   container.register('Mindstream_Back_Ingest_Source_Habr$', { getSourceId() { return 1; } });
 
@@ -83,7 +83,7 @@ test('Mindstream_Back_Ingest_Extract_Habr skips already extracted items', async 
   const calls = { status: [], fetch: 0 };
 
   container.register('Mindstream_Back_Ingest_Publication_Status$', buildStatusCatalog());
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('node:timers/promises', { setTimeout: async () => {} });
   container.register('Mindstream_Back_Ingest_Source_Habr$', { getSourceId() { return 1; } });
 
@@ -131,7 +131,7 @@ test('Mindstream_Back_Ingest_Extract_Habr marks fetch errors as temporary', asyn
   const calls = { status: [] };
 
   container.register('Mindstream_Back_Ingest_Publication_Status$', buildStatusCatalog());
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('node:timers/promises', { setTimeout: async () => {} });
   container.register('Mindstream_Back_Ingest_Source_Habr$', { getSourceId() { return 1; } });
 
@@ -180,7 +180,7 @@ test('Mindstream_Back_Ingest_Extract_Habr marks extraction errors as broken', as
   const calls = { status: [], html: [] };
 
   container.register('Mindstream_Back_Ingest_Publication_Status$', buildStatusCatalog());
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('node:timers/promises', { setTimeout: async () => {} });
   container.register('Mindstream_Back_Ingest_Source_Habr$', { getSourceId() { return 1; } });
 

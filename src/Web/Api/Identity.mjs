@@ -4,24 +4,53 @@
  * @description Handles /api/identity registration requests.
  */
 export default class Mindstream_Back_Web_Api_Identity {
-  constructor({
-    Mindstream_Back_Storage_Knex$: knexProvider,
-    Mindstream_Shared_Logger$: logger,
-    Fl32_Web_Back_Helper_Respond$: respond,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Mindstream_Shared_Api_Identity$} deps.identityContract
+ * @param {Fl32_Web_Back_Helper_Respond$} deps.respond
+ */
+constructor({
+    knexProvider,
+    logger,
+    identityContract,
+    respond,
   }) {
     const NAMESPACE = 'Mindstream_Back_Web_Api_Identity';
-    const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/u;
 
-    const getKnex = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getKnex = function () {
       return knexProvider.get();
     };
 
-    const ensureError = function (err) {
+    /**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+const ensureError = function (err) {
       if (err instanceof Error) return err;
       return new Error(String(err));
     };
 
-    const readBody = function (req) {
+    /**
+ * @param {unknown} req
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} req
+ * @returns {unknown}
+ */
+const readBody = function (req) {
       return new Promise((resolve, reject) => {
         if (!req || typeof req.on !== 'function') {
           resolve('');
@@ -37,14 +66,15 @@ export default class Mindstream_Back_Web_Api_Identity {
       });
     };
 
-    const normalizeIdentity = function (value) {
-      if (typeof value !== 'string') return null;
-      const trimmed = value.trim();
-      if (!trimmed) return null;
-      return UUID_RE.test(trimmed) ? trimmed : null;
-    };
-
-    const storeIdentity = async function (identityId) {
+    /**
+ * @param {unknown} identityId
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} identityId
+ * @returns {Promise<unknown>}
+ */
+const storeIdentity = async function (identityId) {
       const registeredAt = new Date().toISOString();
       await getKnex()('anonymous_identities')
         .insert({ identity_uuid: identityId, registered_at: registeredAt })
@@ -52,7 +82,15 @@ export default class Mindstream_Back_Web_Api_Identity {
         .ignore();
     };
 
-    const respondNoContent = function (res) {
+    /**
+ * @param {unknown} res
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} res
+ * @returns {unknown}
+ */
+const respondNoContent = function (res) {
       if (respond?.code204_NoContent) {
         respond.code204_NoContent({ res });
         return;
@@ -62,7 +100,19 @@ export default class Mindstream_Back_Web_Api_Identity {
       res.end('');
     };
 
-    this.handle = async function ({ req, res }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.req
+ * @param {unknown} deps.res
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.req
+ * @param {unknown} deps.res
+ * @returns {Promise<unknown>}
+ */
+this.handle = async function ({ req, res }) {
       try {
         const raw = await readBody(req);
         let payload;
@@ -71,10 +121,8 @@ export default class Mindstream_Back_Web_Api_Identity {
         } catch {
           payload = null;
         }
-        const identityId = normalizeIdentity(payload?.identity);
-        if (identityId) {
-          await storeIdentity(identityId);
-        }
+        const registration = identityContract.createRegistration(payload);
+        await storeIdentity(registration.identity);
       } catch (err) {
         const error = ensureError(err);
         if (logger?.exception) {
@@ -88,9 +136,10 @@ export default class Mindstream_Back_Web_Api_Identity {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Fl32_Web_Back_Helper_Respond$': 'Fl32_Web_Back_Helper_Respond$',
-  },
+  default: Object.freeze({
+    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    logger: 'Mindstream_Back_Logger$',
+    identityContract: 'Mindstream_Shared_Api_Identity$',
+    respond: 'Fl32_Web_Back_Helper_Respond$',
+  }),
 });

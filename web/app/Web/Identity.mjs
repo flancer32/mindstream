@@ -1,37 +1,69 @@
-/** @namespace Mindstream_Web_Identity */
+// @ts-check
+/** @namespace Mindstream_Web_Identity  @description DI-managed Mindstream module. */
 export default class Mindstream_Web_Identity {
-  constructor({ Mindstream_Web_Platform_Browser$: browser }) {
+  /**
+ * @param {object} deps
+ * @param {Mindstream_Web_Platform_Browser$} deps.browser
+ * @param {Mindstream_Web_Transport_Beacon$} deps.beacon
+ * @param {Mindstream_Shared_Api_Attention$} deps.attentionContract
+ * @param {Mindstream_Shared_Api_Identity$} deps.identityContract
+ */
+constructor({ browser, beacon, attentionContract, identityContract }) {
     const STORAGE_IDENTITY_KEY = 'mindstream.identity.uuid';
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
     let cachedIdentity = null;
     let identityLoaded = false;
     let registeredInSession = false;
-    const storage = () => browser.getStorage();
-    const normalizeIdentity = (value) => typeof value === 'string' && UUID_RE.test(value.trim()) ? value.trim() : null;
-    const load = () => {
+    /**
+ * @returns {unknown}
+ */
+const storage = /**
+ * @returns {unknown}
+ */
+() => browser.getStorage();
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const normalizeIdentity = /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+(value) => typeof value === 'string' && UUID_RE.test(value.trim()) ? value.trim() : null;
+    /**
+ * @returns {unknown}
+ */
+const load = /**
+ * @returns {unknown}
+ */
+() => {
       if (!identityLoaded) {
         identityLoaded = true;
         cachedIdentity = normalizeIdentity(storage()?.getItem(STORAGE_IDENTITY_KEY));
       }
       return cachedIdentity;
     };
-    const send = (path, payload) => {
-      const navigator = browser.getNavigator();
-      if (typeof navigator?.sendBeacon !== 'function') return false;
-      try {
-        const origin = browser.getLocation()?.origin;
-        const url = origin ? new browser.URL(path, origin).toString() : path;
-        const body = browser.Blob ? new browser.Blob([JSON.stringify(payload)], { type: 'application/json' }) : JSON.stringify(payload);
-        return navigator.sendBeacon(url, body);
-      } catch { return false; }
-    };
-    const register = (identity) => {
+    /**
+ * @param {unknown} identity
+ * @returns {unknown}
+ */
+const register = /**
+ * @param {unknown} identity
+ * @returns {unknown}
+ */
+(identity) => {
       if (identity && !registeredInSession) {
         registeredInSession = true;
-        send('/api/identity', { identity });
+        beacon.sendJson('/api/identity', identityContract.createRegistration({ identity }));
       }
     };
-    const uuid = () => {
+    /**
+ * @returns {unknown}
+ */
+const uuid = /**
+ * @returns {unknown}
+ */
+() => {
       if (browser.crypto?.randomUUID) return browser.crypto.randomUUID();
       const bytes = new Uint8Array(16);
       browser.crypto?.getRandomValues?.(bytes);
@@ -40,8 +72,20 @@ export default class Mindstream_Web_Identity {
       const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0'));
       return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10).join('')}`;
     };
-    this.getIdentity = () => load();
-    this.activateIdentity = () => {
+    /**
+ * @returns {unknown}
+ */
+this.getIdentity = /**
+ * @returns {unknown}
+ */
+() => load();
+    /**
+ * @returns {unknown}
+ */
+this.activateIdentity = /**
+ * @returns {unknown}
+ */
+() => {
       const identity = load() ?? uuid();
       cachedIdentity = identity;
       identityLoaded = true;
@@ -49,18 +93,52 @@ export default class Mindstream_Web_Identity {
       register(identity);
       return identity;
     };
-    this.ensureIdentityRegistered = () => { const identity = load(); register(identity); return identity; };
-    this.sendAttentionSignal = ({ type, pubId } = {}) => {
+    /**
+ * @returns {unknown}
+ */
+this.ensureIdentityRegistered = /**
+ * @returns {unknown}
+ */
+() => { const identity = load(); register(identity); return identity; };
+    /**
+ * @param {unknown} payload
+ * @returns {unknown}
+ */
+this.sendAttentionSignal = /**
+ * @param {unknown} payload
+ * @returns {unknown}
+ */
+(payload = {}) => {
+      const { type, pubId } = payload;
       const identity = load();
       const publicationId = Number(pubId);
-      const attentionType = ({ overview_open: 'overview_view', source_click: 'link_click', source_click_after_overview: 'link_click_after_overview' })[type];
-      if (!identity || !Number.isFinite(publicationId) || !attentionType) return false;
+      if (!identity || !Number.isFinite(publicationId)) return false;
       register(identity);
-      return send('/api/attention', { identity, publication_id: publicationId, attention_type: attentionType });
+      try {
+        return beacon.sendJson('/api/attention', attentionContract.createClientSignal({ identity, pubId: publicationId, type }));
+      } catch {
+        return false;
+      }
     };
-    this.watchIdentity = (onChange) => {
+    /**
+ * @param {unknown} onChange
+ * @returns {unknown}
+ */
+this.watchIdentity = /**
+ * @param {unknown} onChange
+ * @returns {unknown}
+ */
+(onChange) => {
       if (typeof onChange !== 'function') return () => {};
-      const handler = (event) => {
+      /**
+ * @param {unknown} event
+ * @returns {unknown}
+ */
+const handler = /**
+ * @param {unknown} event
+ * @returns {unknown}
+ */
+(event) => {
         if (event?.key && event.key !== STORAGE_IDENTITY_KEY) return;
         identityLoaded = false;
         onChange(load());
@@ -71,4 +149,11 @@ export default class Mindstream_Web_Identity {
   }
 }
 
-export const __deps__ = Object.freeze({ default: Object.freeze({ 'Mindstream_Web_Platform_Browser$': 'Mindstream_Web_Platform_Browser$' }) });
+export const __deps__ = Object.freeze({
+  default: {
+    browser: 'Mindstream_Web_Platform_Browser$',
+    beacon: 'Mindstream_Web_Transport_Beacon$',
+    attentionContract: 'Mindstream_Shared_Api_Attention$',
+    identityContract: 'Mindstream_Shared_Api_Identity$',
+  },
+});

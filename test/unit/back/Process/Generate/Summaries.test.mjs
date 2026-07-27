@@ -24,7 +24,7 @@ test('Mindstream_Back_Process_Generate_Summaries generates summaries for pending
   const container = await createTestContainer();
   const calls = { list: 0, summarize: 0, saved: [], status: [] };
 
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   container.register('Mindstream_Back_Process_Publication_Store$', {
@@ -69,7 +69,7 @@ test('Mindstream_Back_Process_Generate_Summaries skips publications with summari
   const container = await createTestContainer();
   const calls = { summarize: 0 };
 
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   let listCalls = 0;
@@ -106,7 +106,7 @@ test('Mindstream_Back_Process_Generate_Summaries marks failures and continues', 
   const container = await createTestContainer();
   const calls = { status: [], saved: [], summarize: 0 };
 
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
   let listCalls = 0;

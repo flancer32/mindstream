@@ -4,8 +4,22 @@
  * @description CLI command to start runtime web server mode.
  */
 export default class Mindstream_Back_Cli_Runtime_Web {
-  constructor({ Mindstream_Back_Web_Server$: webServer }) {
-    this.execute = async function ({ args } = {}) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Web_Server$} deps.webServer
+ */
+constructor({ webServer }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.args
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.execute = async function (params = {}) {
+      const { args } = params;
       if (Array.isArray(args) && args.length) {
         throw new Error('Command runtime:web does not accept arguments.');
       }
@@ -23,7 +37,7 @@ export default class Mindstream_Back_Cli_Runtime_Web {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Web_Server$': 'Mindstream_Back_Web_Server$',
-  },
+  default: Object.freeze({
+    webServer: 'Mindstream_Back_Web_Server$',
+  }),
 });

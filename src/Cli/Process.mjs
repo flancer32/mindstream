@@ -4,11 +4,24 @@
  * @description CLI dispatcher for process:* commands.
  */
 export default class Mindstream_Back_Cli_Process {
-  constructor({
-    Mindstream_Back_Cli_Process_Generate_Summaries$: generateSummaries,
-    Mindstream_Back_Cli_Process_Generate_Embeddings$: generateEmbeddings,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Cli_Process_Generate_Summaries$} deps.generateSummaries
+ * @param {Mindstream_Back_Cli_Process_Generate_Embeddings$} deps.generateEmbeddings
+ */
+constructor({
+    generateSummaries,
+    generateEmbeddings,
   }) {
-    const resolveTarget = function (commandParts) {
+    /**
+ * @param {unknown} commandParts
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} commandParts
+ * @returns {unknown}
+ */
+const resolveTarget = function (commandParts) {
       const parts = Array.isArray(commandParts) ? commandParts : [];
       const [segment, action, ...rest] = parts;
       if (rest.length) {
@@ -25,7 +38,18 @@ export default class Mindstream_Back_Cli_Process {
       return { command: map[key], name: `process:${segment}:${action}` };
     };
 
-    this.dispatch = async function ({ commandParts, args } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.commandParts
+ * @param {unknown} deps.args
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.dispatch = async function (params = {}) {
+      const { commandParts, args } = params;
       const { command, name } = resolveTarget(commandParts);
       if (!command?.execute) {
         throw new Error(`Command "${name}" is unavailable.`);
@@ -36,8 +60,8 @@ export default class Mindstream_Back_Cli_Process {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Cli_Process_Generate_Summaries$': 'Mindstream_Back_Cli_Process_Generate_Summaries$',
-    'Mindstream_Back_Cli_Process_Generate_Embeddings$': 'Mindstream_Back_Cli_Process_Generate_Embeddings$',
-  },
+  default: Object.freeze({
+    generateSummaries: 'Mindstream_Back_Cli_Process_Generate_Summaries$',
+    generateEmbeddings: 'Mindstream_Back_Cli_Process_Generate_Embeddings$',
+  }),
 });

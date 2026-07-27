@@ -4,10 +4,19 @@
  * @description Applies declarative DB schema using knex.
  */
 export default class Mindstream_Back_Storage_SchemaManager {
-  constructor({
-    Mindstream_Back_Storage_Schema$: schemaProvider,
-    Mindstream_Shared_Logger$: logger,
-    Mindstream_Back_Storage_Knex$: knexProvider,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Storage_Schema$} deps.schemaProvider
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {typeof import("node:fs/promises")} deps.fsModule
+ * @param {typeof import("node:path")} deps.pathModule
+ * @param {typeof import("node:process")} deps.processModule
+ */
+constructor({
+    schemaProvider,
+    logger,
+    knexProvider,
     fsModule,
     pathModule,
     processModule,
@@ -20,20 +29,48 @@ export default class Mindstream_Back_Storage_SchemaManager {
     const fsRef = fsModule?.default ?? fsModule;
     const pathRef = pathModule?.default ?? pathModule;
     const processRef = processModule?.default ?? processModule;
-    const getKnex = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getKnex = function () {
       return knexProvider.get();
     };
 
-    const ensureError = function (err) {
+    /**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+const ensureError = function (err) {
       if (err instanceof Error) return err;
       return new Error(String(err));
     };
 
-    const getDeclaration = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getDeclaration = function () {
       return schemaProvider.getDeclaration();
     };
 
-    const assertSchema = function (schema) {
+    /**
+ * @param {unknown} schema
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} schema
+ * @returns {unknown}
+ */
+const assertSchema = function (schema) {
       if (!schema || typeof schema !== 'object') {
         throw new Error('Schema declaration is missing.');
       }
@@ -48,16 +85,40 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const getTableNames = function (schema) {
+    /**
+ * @param {unknown} schema
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} schema
+ * @returns {unknown}
+ */
+const getTableNames = function (schema) {
       return Object.keys(schema?.tables ?? {});
     };
 
-    const buildTempTableName = function (tableName) {
+    /**
+ * @param {unknown} tableName
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} tableName
+ * @returns {unknown}
+ */
+const buildTempTableName = function (tableName) {
       const stamp = Date.now();
       return `tmp_${tableName}_${stamp}`;
     };
 
-    const hasVectorColumns = function (schema) {
+    /**
+ * @param {unknown} schema
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} schema
+ * @returns {unknown}
+ */
+const hasVectorColumns = function (schema) {
       const tableNames = getTableNames(schema);
       for (const tableName of tableNames) {
         const columns = schema.tables[tableName]?.columns ?? {};
@@ -68,12 +129,34 @@ export default class Mindstream_Back_Storage_SchemaManager {
       return false;
     };
 
-    const ensureVectorExtension = async function (knexRef, schema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+const ensureVectorExtension = async function (knexRef, schema) {
       if (!hasVectorColumns(schema)) return;
       await knexRef.raw('CREATE EXTENSION IF NOT EXISTS vector');
     };
 
-    const createColumn = function (table, name, def) {
+    /**
+ * @param {unknown} table
+ * @param {unknown} name
+ * @param {unknown} def
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} table
+ * @param {unknown} name
+ * @param {unknown} def
+ * @returns {unknown}
+ */
+const createColumn = function (table, name, def) {
       const type = def?.type;
       if (!type) {
         throw new Error(`Column type is missing for "${name}".`);
@@ -106,7 +189,19 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const createTable = async function (knexRef, tableName, tableDef) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} tableName
+ * @param {unknown} tableDef
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} tableName
+ * @param {unknown} tableDef
+ * @returns {Promise<unknown>}
+ */
+const createTable = async function (knexRef, tableName, tableDef) {
       const columns = tableDef?.columns ?? {};
       const primaryKey = Array.isArray(tableDef?.primaryKey) ? tableDef.primaryKey : null;
       const primaryColumns = [];
@@ -133,7 +228,17 @@ export default class Mindstream_Back_Storage_SchemaManager {
       });
     };
 
-    const applyIndexes = async function (knexRef, schema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+const applyIndexes = async function (knexRef, schema) {
       const tableNames = getTableNames(schema);
       for (const tableName of tableNames) {
         const indexes = schema.tables[tableName]?.indexes ?? [];
@@ -155,7 +260,17 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const applyForeignKeys = async function (knexRef, schema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+const applyForeignKeys = async function (knexRef, schema) {
       const tableNames = getTableNames(schema);
       for (const tableName of tableNames) {
         const foreignKeys = schema.tables[tableName]?.foreignKeys ?? [];
@@ -177,7 +292,17 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const createTables = async function (knexRef, schema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+const createTables = async function (knexRef, schema) {
       await ensureVectorExtension(knexRef, schema);
       const tableNames = getTableNames(schema);
       for (const tableName of tableNames) {
@@ -185,7 +310,15 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const readSchemaState = async function (knexRef) {
+    /**
+ * @param {unknown} knexRef
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @returns {Promise<unknown>}
+ */
+const readSchemaState = async function (knexRef) {
       const exists = await knexRef.schema.hasTable(SCHEMA_TABLE);
       if (!exists) return { exists: false };
 
@@ -208,7 +341,17 @@ export default class Mindstream_Back_Storage_SchemaManager {
       };
     };
 
-    const writeSchemaState = async function (knexRef, schema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+const writeSchemaState = async function (knexRef, schema) {
       const payload = {
         [SCHEMA_VERSION_COLUMN]: schema.schemaVersion,
         [SCHEMA_JSON_COLUMN]: JSON.stringify(schema),
@@ -219,7 +362,17 @@ export default class Mindstream_Back_Storage_SchemaManager {
       await knexRef(SCHEMA_TABLE).insert(payload);
     };
 
-    const getExistingColumns = async function (knexRef, tableName) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} tableName
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} tableName
+ * @returns {Promise<unknown>}
+ */
+const getExistingColumns = async function (knexRef, tableName) {
       try {
         const info = await knexRef(tableName).columnInfo();
         return Object.keys(info ?? {});
@@ -228,30 +381,72 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const copyTableData = async function (knexRef, sourceTable, targetTable, columns) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} sourceTable
+ * @param {unknown} targetTable
+ * @param {unknown} columns
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} sourceTable
+ * @param {unknown} targetTable
+ * @param {unknown} columns
+ * @returns {Promise<unknown>}
+ */
+const copyTableData = async function (knexRef, sourceTable, targetTable, columns) {
       if (!columns.length) return;
       await knexRef(targetTable).insert(knexRef.select(columns).from(sourceTable));
     };
 
-    const ensureFs = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const ensureFs = function () {
       if (!fsRef || !pathRef) {
         throw new Error('Filesystem modules are not available for schema renewal.');
       }
     };
 
-    const getTmpDir = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getTmpDir = function () {
       ensureFs();
       const cwd = typeof processRef?.cwd === 'function' ? processRef.cwd() : '.';
       return pathRef.resolve(cwd, 'tmp');
     };
 
-    const buildDumpFilePath = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const buildDumpFilePath = function () {
       const stamp = new Date().toISOString().replace(/[:.]/gu, '-');
       const fileName = `schema-dump-${stamp}.json`;
       return pathRef.join(getTmpDir(), fileName);
     };
 
-    const dumpDataToFile = async function (knexRef, schema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+const dumpDataToFile = async function (knexRef, schema) {
       ensureFs();
       const tables = getTableNames(schema);
       const dump = {
@@ -272,13 +467,31 @@ export default class Mindstream_Back_Storage_SchemaManager {
       return filePath;
     };
 
-    const readDumpFile = async function (filePath) {
+    /**
+ * @param {unknown} filePath
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} filePath
+ * @returns {Promise<unknown>}
+ */
+const readDumpFile = async function (filePath) {
       ensureFs();
       const content = await fsRef.readFile(filePath, 'utf-8');
       return JSON.parse(content);
     };
 
-    const dropAllTables = async function (knexRef, schema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+const dropAllTables = async function (knexRef, schema) {
       const tableNames = getTableNames(schema).slice().reverse();
       for (const tableName of tableNames) {
         if (await knexRef.schema.hasTable(tableName)) {
@@ -287,11 +500,27 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const resolveClientName = function (knexRef) {
+    /**
+ * @param {unknown} knexRef
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} knexRef
+ * @returns {unknown}
+ */
+const resolveClientName = function (knexRef) {
       return knexRef?.client?.config?.client ?? '';
     };
 
-    const disableConstraints = async function (knexRef) {
+    /**
+ * @param {unknown} knexRef
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @returns {Promise<unknown>}
+ */
+const disableConstraints = async function (knexRef) {
       const client = resolveClientName(knexRef);
       if (!client) return false;
       try {
@@ -313,7 +542,15 @@ export default class Mindstream_Back_Storage_SchemaManager {
       return false;
     };
 
-    const enableConstraints = async function (knexRef) {
+    /**
+ * @param {unknown} knexRef
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @returns {Promise<unknown>}
+ */
+const enableConstraints = async function (knexRef) {
       const client = resolveClientName(knexRef);
       if (!client) return false;
       try {
@@ -335,7 +572,21 @@ export default class Mindstream_Back_Storage_SchemaManager {
       return false;
     };
 
-    const convertValue = function (value, columnDef, tableName, columnName) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} columnDef
+ * @param {unknown} tableName
+ * @param {unknown} columnName
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} columnDef
+ * @param {unknown} tableName
+ * @param {unknown} columnName
+ * @returns {unknown}
+ */
+const convertValue = function (value, columnDef, tableName, columnName) {
       if (value === undefined || value === null) return null;
       const type = columnDef?.type;
       switch (type) {
@@ -404,7 +655,19 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const buildInsertRow = function (tableName, columnDefs, sourceRow) {
+    /**
+ * @param {unknown} tableName
+ * @param {unknown} columnDefs
+ * @param {unknown} sourceRow
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} tableName
+ * @param {unknown} columnDefs
+ * @param {unknown} sourceRow
+ * @returns {unknown}
+ */
+const buildInsertRow = function (tableName, columnDefs, sourceRow) {
       const result = {};
       for (const [columnName, columnDef] of Object.entries(columnDefs)) {
         if (Object.prototype.hasOwnProperty.call(sourceRow, columnName)) {
@@ -428,7 +691,19 @@ export default class Mindstream_Back_Storage_SchemaManager {
       return result;
     };
 
-    const restoreDataFromDump = async function (knexRef, schema, dump) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @param {unknown} dump
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @param {unknown} dump
+ * @returns {Promise<unknown>}
+ */
+const restoreDataFromDump = async function (knexRef, schema, dump) {
       const newTables = getTableNames(schema);
       const dumpTables = dump?.tables ?? {};
       const constrained = await disableConstraints(knexRef);
@@ -451,7 +726,17 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const syncPostgresSequences = async function (knexRef, schema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+const syncPostgresSequences = async function (knexRef, schema) {
       const client = resolveClientName(knexRef);
       if (!client.includes('pg')) return;
 
@@ -474,7 +759,17 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    const withExecutor = async function (knexRef, handler) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} handler
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} handler
+ * @returns {Promise<unknown>}
+ */
+const withExecutor = async function (knexRef, handler) {
       if (knexRef && typeof knexRef.transaction === 'function') {
         await knexRef.transaction(async (trx) => {
           await handler(trx);
@@ -484,7 +779,19 @@ export default class Mindstream_Back_Storage_SchemaManager {
       await handler(knexRef);
     };
 
-    const recreateWithPreserve = async function (knexRef, schema, previousSchema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @param {unknown} previousSchema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @param {unknown} previousSchema
+ * @returns {Promise<unknown>}
+ */
+const recreateWithPreserve = async function (knexRef, schema, previousSchema) {
       const newTables = getTableNames(schema);
       const oldTables = getTableNames(previousSchema);
       const tablesToDrop = oldTables.filter((name) => !newTables.includes(name));
@@ -530,7 +837,17 @@ export default class Mindstream_Back_Storage_SchemaManager {
       });
     };
 
-    const findMissingTables = async function (knexRef, schema) {
+    /**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} knexRef
+ * @param {unknown} schema
+ * @returns {Promise<unknown>}
+ */
+const findMissingTables = async function (knexRef, schema) {
       const missing = [];
       for (const tableName of getTableNames(schema)) {
         const exists = await knexRef.schema.hasTable(tableName);
@@ -539,7 +856,13 @@ export default class Mindstream_Back_Storage_SchemaManager {
       return missing;
     };
 
-    this.applySchema = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.applySchema = async function () {
       const schema = getDeclaration();
       assertSchema(schema);
 
@@ -578,7 +901,13 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    this.recreateWithPreserve = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.recreateWithPreserve = async function () {
       const schema = getDeclaration();
       assertSchema(schema);
 
@@ -593,7 +922,13 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    this.createSchema = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.createSchema = async function () {
       const schema = getDeclaration();
       assertSchema(schema);
 
@@ -609,7 +944,13 @@ export default class Mindstream_Back_Storage_SchemaManager {
       }
     };
 
-    this.renewSchema = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.renewSchema = async function () {
       const schema = getDeclaration();
       assertSchema(schema);
 
@@ -677,12 +1018,12 @@ export default class Mindstream_Back_Storage_SchemaManager {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Storage_Schema$': 'Mindstream_Back_Storage_Schema$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
+  default: Object.freeze({
+    schemaProvider: 'Mindstream_Back_Storage_Schema$',
+    logger: 'Mindstream_Back_Logger$',
+    knexProvider: 'Mindstream_Back_Storage_Knex$',
     fsModule: 'node:fs/promises',
     pathModule: 'node:path',
     processModule: 'node:process',
-  },
+  }),
 });

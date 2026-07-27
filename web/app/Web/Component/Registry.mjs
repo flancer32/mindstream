@@ -1,11 +1,24 @@
-/** @namespace Mindstream_Web_Component_Registry */
+// @ts-check
+/** @namespace Mindstream_Web_Component_Registry  @description DI-managed Mindstream module. */
 export default class Mindstream_Web_Component_Registry {
-  constructor({
-    Mindstream_Web_Platform_Browser$: browser,
-    Mindstream_Web_Component_Feed$: Feed,
-    Mindstream_Web_Component_IdentityMenu$: IdentityMenu,
+  /**
+ * @param {object} deps
+ * @param {Mindstream_Web_Platform_Browser$} deps.browser
+ * @param {Mindstream_Web_Component_Feed$} deps.Feed
+ * @param {Mindstream_Web_Component_IdentityMenu$} deps.IdentityMenu
+ */
+constructor({
+    browser,
+    Feed,
+    IdentityMenu,
   }) {
-    this.register = function () {
+    /**
+ * @returns {unknown}
+ */
+this.register = /**
+ * @returns {unknown}
+ */
+function () {
       const registry = browser.getWindow()?.customElements ?? globalThis.customElements;
       if (!registry.get('mindstream-identity-menu')) {
         registry.define('mindstream-identity-menu', IdentityMenu);
@@ -18,9 +31,9 @@ export default class Mindstream_Web_Component_Registry {
 }
 
 export const __deps__ = Object.freeze({
-  default: Object.freeze({
-    'Mindstream_Web_Platform_Browser$': 'Mindstream_Web_Platform_Browser$',
-    'Mindstream_Web_Component_Feed$': 'Mindstream_Web_Component_Feed$',
-    'Mindstream_Web_Component_IdentityMenu$': 'Mindstream_Web_Component_IdentityMenu$',
-  }),
+  default: {
+    browser: 'Mindstream_Web_Platform_Browser$',
+    Feed: 'Mindstream_Web_Component_Feed$',
+    IdentityMenu: 'Mindstream_Web_Component_IdentityMenu$',
+  },
 });

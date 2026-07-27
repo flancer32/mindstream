@@ -4,24 +4,52 @@
  * @description Loads HTML for Habr publications via fetch.
  */
 export default class Mindstream_Back_Ingest_Extract_Habr_Fetcher {
-  constructor({ Mindstream_Back_Platform_Fetch$: fetchProvider }) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Platform_Fetch$} deps.fetchProvider
+ */
+constructor({ fetchProvider }) {
     const fetchRef = typeof fetchProvider?.fetch === 'function' ? fetchProvider.fetch.bind(fetchProvider) : fetchProvider;
 
-    const ensureFetch = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const ensureFetch = function () {
       if (typeof fetchRef !== 'function') {
         throw new Error('Fetch function is not available.');
       }
       return fetchRef;
     };
 
-    const buildError = function (message, details) {
+    /**
+ * @param {unknown} message
+ * @param {unknown} details
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} message
+ * @param {unknown} details
+ * @returns {unknown}
+ */
+const buildError = function (message, details) {
       const err = new Error(message);
       err.isFetchError = true;
       if (details) err.details = details;
       return err;
     };
 
-    this.fetchHtml = async function (url) {
+    /**
+ * @param {unknown} url
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} url
+ * @returns {Promise<unknown>}
+ */
+this.fetchHtml = async function (url) {
       if (!url || typeof url !== 'string') {
         throw buildError('Publication URL must be a string.');
       }
@@ -47,7 +75,7 @@ export default class Mindstream_Back_Ingest_Extract_Habr_Fetcher {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Platform_Fetch$': 'Mindstream_Back_Platform_Fetch$',
-  },
+  default: Object.freeze({
+    fetchProvider: 'Mindstream_Back_Platform_Fetch$',
+  }),
 });

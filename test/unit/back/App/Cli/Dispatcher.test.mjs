@@ -22,7 +22,7 @@ test('Mindstream_Back_App_Cli_Dispatcher routes db:schema:create', async () => {
   const logger = createLoggerStub();
   const calls = [];
 
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
   container.register('Mindstream_Back_Cli_Db$', {
     async dispatch(payload) {
       calls.push(payload);
@@ -52,7 +52,7 @@ test('Mindstream_Back_App_Cli_Dispatcher logs and returns error code on unknown 
   const container = await createTestContainer();
   const logger = createLoggerStub();
 
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
   container.register('Mindstream_Back_Cli_Db$', {
     async dispatch() {},
   });
@@ -79,7 +79,7 @@ test('Mindstream_Back_App_Cli_Dispatcher routes process:generate:summaries', asy
   const logger = createLoggerStub();
   const calls = [];
 
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
   container.register('Mindstream_Back_Cli_Db$', {
     async dispatch() {},
   });
@@ -110,7 +110,7 @@ test('Mindstream_Back_App_Cli_Dispatcher routes process:generate:embeddings', as
   const logger = createLoggerStub();
   const calls = [];
 
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
   container.register('Mindstream_Back_Cli_Db$', {
     async dispatch() {},
   });

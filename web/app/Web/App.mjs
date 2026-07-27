@@ -1,14 +1,25 @@
-/** @namespace Mindstream_Web_App */
+// @ts-check
+/** @namespace Mindstream_Web_App  @description DI-managed Mindstream module. */
 export default class Mindstream_Web_App {
-  constructor({ Mindstream_Web_Component_Registry$: registry }) {
-    this.start = function () {
+  /**
+ * @param {object} deps
+ * @param {Mindstream_Web_Component_Registry$} deps.registry
+ */
+constructor({ registry }) {
+    /**
+ * @returns {unknown}
+ */
+this.start = /**
+ * @returns {unknown}
+ */
+function () {
       registry.register();
     };
   }
 }
 
 export const __deps__ = Object.freeze({
-  default: Object.freeze({
-    'Mindstream_Web_Component_Registry$': 'Mindstream_Web_Component_Registry$',
-  }),
+  default: {
+    registry: 'Mindstream_Web_Component_Registry$',
+  },
 });

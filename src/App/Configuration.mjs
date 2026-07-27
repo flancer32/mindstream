@@ -5,28 +5,52 @@
  * @description Backend application configuration singleton built from @teqfw/cfg namespace projections.
  */
 export default class Mindstream_Back_App_Configuration {
-  /**
-   * @param {Object} deps
-   * @param {TeqFw_Cfg_Reader} deps.reader
-   */
-  constructor({ reader }) {
+/**
+ * @param {object} deps
+ * @param {TeqFw_Cfg_Reader$} deps.reader
+ */
+constructor({ reader }) {
     let initialized = false;
     let config = null;
 
     /** @param {unknown} value @returns {string|undefined} */
-    const coerceString = function (value) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const coerceString = function (value) {
       return value === undefined || value === null ? undefined : String(value);
     };
 
     /** @param {unknown} value @returns {number|undefined} */
-    const coercePort = function (value) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const coercePort = function (value) {
       if (value === undefined || value === null || value === '') return undefined;
       const parsed = Number.parseInt(String(value), 10);
       return Number.isFinite(parsed) ? parsed : undefined;
     };
 
-    /** @param {any} value @returns {any} */
-    const freezeConfig = function (value) {
+    /** @param {unknown} value @returns {unknown} */
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const freezeConfig = function (value) {
       Object.freeze(value.server);
       Object.freeze(value.db);
       Object.freeze(value.llm);
@@ -34,7 +58,13 @@ export default class Mindstream_Back_App_Configuration {
     };
 
     /** @returns {Promise<void>} */
-    this.init = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.init = async function () {
       if (initialized) return;
       const server = reader.get('TEQFW_WEB');
       const mindstream = reader.get('MINDSTREAM');
@@ -53,7 +83,13 @@ export default class Mindstream_Back_App_Configuration {
     };
 
     /** @returns {Readonly<any>} */
-    this.get = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+this.get = function () {
       if (!initialized) throw new Error('Mindstream_Back_App_Configuration is not initialized.');
       return config;
     };

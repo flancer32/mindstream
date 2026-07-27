@@ -4,19 +4,41 @@
  * @description Handles /api/attention requests and persists attention events.
  */
 export default class Mindstream_Back_Web_Api_Attention {
-  constructor({
-    Mindstream_Back_Attention_Ingress$: ingress,
-    Mindstream_Shared_Logger$: logger,
-    Fl32_Web_Back_Helper_Respond$: respond,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Attention_Ingress$} deps.ingress
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Fl32_Web_Back_Helper_Respond$} deps.respond
+ */
+constructor({
+    ingress,
+    logger,
+    respond,
   }) {
     const NAMESPACE = 'Mindstream_Back_Web_Api_Attention';
 
-    const ensureError = function (err) {
+    /**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+const ensureError = function (err) {
       if (err instanceof Error) return err;
       return new Error(String(err));
     };
 
-    const readBody = function (req) {
+    /**
+ * @param {unknown} req
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} req
+ * @returns {unknown}
+ */
+const readBody = function (req) {
       return new Promise((resolve, reject) => {
         if (!req || typeof req.on !== 'function') {
           resolve('');
@@ -32,7 +54,15 @@ export default class Mindstream_Back_Web_Api_Attention {
       });
     };
 
-    const respondUnprocessable = function (res) {
+    /**
+ * @param {unknown} res
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} res
+ * @returns {unknown}
+ */
+const respondUnprocessable = function (res) {
       if (!respond?.isWritable || !respond.isWritable(res)) return false;
       if (!res?.writeHead || !res?.end) return false;
       res.writeHead(422);
@@ -40,7 +70,19 @@ export default class Mindstream_Back_Web_Api_Attention {
       return true;
     };
 
-    this.handle = async function ({ req, res }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.req
+ * @param {unknown} deps.res
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.req
+ * @param {unknown} deps.res
+ * @returns {Promise<unknown>}
+ */
+this.handle = async function ({ req, res }) {
       try {
         const raw = await readBody(req);
         let payload;
@@ -82,9 +124,9 @@ export default class Mindstream_Back_Web_Api_Attention {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Attention_Ingress$': 'Mindstream_Back_Attention_Ingress$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Fl32_Web_Back_Helper_Respond$': 'Fl32_Web_Back_Helper_Respond$',
-  },
+  default: Object.freeze({
+    ingress: 'Mindstream_Back_Attention_Ingress$',
+    logger: 'Mindstream_Back_Logger$',
+    respond: 'Fl32_Web_Back_Helper_Respond$',
+  }),
 });

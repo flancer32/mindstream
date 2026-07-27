@@ -4,8 +4,20 @@
  * @description CLI dispatcher for runtime:* commands.
  */
 export default class Mindstream_Back_Cli_Runtime {
-  constructor({ Mindstream_Back_Cli_Runtime_Web$: runtimeWeb }) {
-    const resolveTarget = function (commandParts) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Cli_Runtime_Web$} deps.runtimeWeb
+ */
+constructor({ runtimeWeb }) {
+    /**
+ * @param {unknown} commandParts
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} commandParts
+ * @returns {unknown}
+ */
+const resolveTarget = function (commandParts) {
       const parts = Array.isArray(commandParts) ? commandParts : [];
       const [segment, action, ...rest] = parts;
       if (rest.length) {
@@ -17,7 +29,18 @@ export default class Mindstream_Back_Cli_Runtime {
       return runtimeWeb;
     };
 
-    this.dispatch = async function ({ commandParts, args } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.commandParts
+ * @param {unknown} deps.args
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.dispatch = async function (params = {}) {
+      const { commandParts, args } = params;
       const command = resolveTarget(commandParts);
       if (!command?.execute) {
         throw new Error('Command "runtime:web" is unavailable.');
@@ -28,7 +51,7 @@ export default class Mindstream_Back_Cli_Runtime {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Cli_Runtime_Web$': 'Mindstream_Back_Cli_Runtime_Web$',
-  },
+  default: Object.freeze({
+    runtimeWeb: 'Mindstream_Back_Cli_Runtime_Web$',
+  }),
 });

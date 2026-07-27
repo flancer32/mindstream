@@ -4,8 +4,20 @@
  * @description Handles unknown /api/** requests.
  */
 export default class Mindstream_Back_Web_Api_Fallback {
-  constructor({ Fl32_Web_Back_Helper_Respond$: respond }) {
-    const buildPayload = function (path) {
+/**
+ * @param {object} deps
+ * @param {Fl32_Web_Back_Helper_Respond$} deps.respond
+ */
+constructor({ respond }) {
+    /**
+ * @param {unknown} path
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} path
+ * @returns {unknown}
+ */
+const buildPayload = function (path) {
       return {
         status: 'ok',
         message: 'api is alive',
@@ -13,7 +25,19 @@ export default class Mindstream_Back_Web_Api_Fallback {
       };
     };
 
-    this.handle = async function ({ res, path }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.res
+ * @param {unknown} deps.path
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.res
+ * @param {unknown} deps.path
+ * @returns {Promise<unknown>}
+ */
+this.handle = async function ({ res, path }) {
       respond.code200_Ok({
         res,
         headers: { 'content-type': 'application/json' },
@@ -25,7 +49,7 @@ export default class Mindstream_Back_Web_Api_Fallback {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Fl32_Web_Back_Helper_Respond$': 'Fl32_Web_Back_Helper_Respond$',
-  },
+  default: Object.freeze({
+    respond: 'Fl32_Web_Back_Helper_Respond$',
+  }),
 });

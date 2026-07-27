@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/logging.md`
 - Template Version: `20260619`
-- Changed: `20260725`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -14,7 +14,7 @@ This document belongs only to the `code/` layer and does not introduce architect
 
 ## Logging Status In The MVP
 
-Mindstream uses `@teqfw/log` as its logging implementation. The DI-managed `TeqFw_Log_Provider` returns source-bound loggers; the temporary `Mindstream_Shared_Logger` facade preserves existing call sites while delegating every record to that provider.
+Mindstream uses `@teqfw/log` as its logging implementation. The DI-managed `TeqFw_Log_Provider` is consumed by `Mindstream_Back_Logger` in the backend zone; logging is not part of `Mindstream_Shared_`.
 
 Within the Mindstream MVP:
 
@@ -60,7 +60,7 @@ Absence of a level, arbitrary custom levels, or semantic distortion of levels is
 
 ## The `exception` Method
 
-The compatibility facade exposes `exception` for existing callers. It emits an `error` record with the caught standard `Error` in structured `data.err`.
+`Mindstream_Back_Logger` exposes `exception` for backend callers. It emits an `error` record with the caught standard `Error` in structured `data.err`.
 
 `exception` is intended only for exceptional situations and accepts the standard JavaScript `Error` object. Its delegated `error` record retains the error in `data.err`, so the package writer can safely serialize its message, stack, and optional cause.
 

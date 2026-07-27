@@ -4,8 +4,22 @@
  * @description CLI command to extract markdown from Habr publications.
  */
 export default class Mindstream_Back_Cli_Ingest_Extract_Habr {
-  constructor({ Mindstream_Back_Ingest_Extract_Habr$: extractHabr }) {
-    this.execute = async function ({ args } = {}) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Ingest_Extract_Habr$} deps.extractHabr
+ */
+constructor({ extractHabr }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.args
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.execute = async function (params = {}) {
+      const { args } = params;
       if (Array.isArray(args) && args.length) {
         throw new Error('Command ingest:extract:habr does not accept arguments.');
       }
@@ -15,7 +29,7 @@ export default class Mindstream_Back_Cli_Ingest_Extract_Habr {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Ingest_Extract_Habr$': 'Mindstream_Back_Ingest_Extract_Habr$',
-  },
+  default: Object.freeze({
+    extractHabr: 'Mindstream_Back_Ingest_Extract_Habr$',
+  }),
 });

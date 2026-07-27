@@ -4,10 +4,17 @@
  * @description Source-specific discovery provider for Habr RSS.
  */
 export default class Mindstream_Back_Ingest_Source_Habr {
-  constructor({
-    Mindstream_Back_Ingest_Rss_Client$: rssClient,
-    Mindstream_Back_Ingest_Rss_Parser$: rssParser,
-    Mindstream_Shared_Logger$: logger,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Ingest_Rss_Client$} deps.rssClient
+ * @param {Mindstream_Back_Ingest_Rss_Parser$} deps.rssParser
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {typeof import("node:crypto")} deps.cryptoModule
+ */
+constructor({
+    rssClient,
+    rssParser,
+    logger,
     cryptoModule,
   }) {
     const NAMESPACE = 'Mindstream_Back_Ingest_Source_Habr';
@@ -17,20 +24,44 @@ export default class Mindstream_Back_Ingest_Source_Habr {
 
     const cryptoRef = cryptoModule?.default ?? cryptoModule;
 
-    const hashUrl = function (url) {
+    /**
+ * @param {unknown} url
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} url
+ * @returns {unknown}
+ */
+const hashUrl = function (url) {
       const hasher = cryptoRef.createHash('sha256');
       hasher.update(String(url));
       return hasher.digest('hex');
     };
 
-    const parsePubDate = function (value) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const parsePubDate = function (value) {
       if (!value) return null;
       const parsed = Date.parse(value);
       if (!Number.isFinite(parsed)) return null;
       return new Date(parsed).toISOString();
     };
 
-    const normalizeItem = function (item) {
+    /**
+ * @param {unknown} item
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} item
+ * @returns {unknown}
+ */
+const normalizeItem = function (item) {
       const url = String(item?.link ?? '').trim();
       if (!url) return null;
       return {
@@ -43,11 +74,23 @@ export default class Mindstream_Back_Ingest_Source_Habr {
       };
     };
 
-    this.getSourceId = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+this.getSourceId = function () {
       return SOURCE_ID;
     };
 
-    this.getSourceDescriptor = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+this.getSourceDescriptor = function () {
       return {
         id: SOURCE_ID,
         code: SOURCE_CODE,
@@ -58,7 +101,13 @@ export default class Mindstream_Back_Ingest_Source_Habr {
       };
     };
 
-    this.discover = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.discover = async function () {
       const rssXml = await rssClient.fetch(RSS_URL);
       const parsedItems = rssParser.parseItems(rssXml);
       if (!parsedItems.length) {
@@ -77,10 +126,10 @@ export default class Mindstream_Back_Ingest_Source_Habr {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Ingest_Rss_Client$': 'Mindstream_Back_Ingest_Rss_Client$',
-    'Mindstream_Back_Ingest_Rss_Parser$': 'Mindstream_Back_Ingest_Rss_Parser$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+  default: Object.freeze({
+    rssClient: 'Mindstream_Back_Ingest_Rss_Client$',
+    rssParser: 'Mindstream_Back_Ingest_Rss_Parser$',
+    logger: 'Mindstream_Back_Logger$',
     cryptoModule: 'node:crypto',
-  },
+  }),
 });

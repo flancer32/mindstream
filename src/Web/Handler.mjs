@@ -4,13 +4,22 @@
  * @description API ingress handler for /api/** requests.
  */
 export default class Mindstream_Back_Web_Handler {
-  constructor({
-    Mindstream_Back_Web_Api_Fallback$: fallback,
-    Mindstream_Back_Web_Api_FeedView$: feedView,
-    Mindstream_Back_Web_Api_Attention$: attention,
-    Mindstream_Back_Web_Api_Identity$: identity,
-    Mindstream_Shared_Logger$: logger,
-    Fl32_Web_Back_Enum_Stage$: STAGE,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Web_Api_Fallback$} deps.fallback
+ * @param {Mindstream_Back_Web_Api_FeedView$} deps.feedView
+ * @param {Mindstream_Back_Web_Api_Attention$} deps.attention
+ * @param {Mindstream_Back_Web_Api_Identity$} deps.identity
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Fl32_Web_Back_Enum_Stage$} deps.STAGE
+ */
+constructor({
+    fallback,
+    feedView,
+    attention,
+    identity,
+    logger,
+    STAGE,
   }) {
     const PREFIX = '/api';
     const NAMESPACE = 'Mindstream_Back_Web_Handler';
@@ -20,14 +29,30 @@ export default class Mindstream_Back_Web_Handler {
       ['/identity', identity],
     ]);
 
-    const normalizeUrl = function (url) {
+    /**
+ * @param {unknown} url
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} url
+ * @returns {unknown}
+ */
+const normalizeUrl = function (url) {
       if (!url) return '';
       const raw = String(url);
       const questionIndex = raw.indexOf('?');
       return questionIndex >= 0 ? raw.slice(0, questionIndex) : raw;
     };
 
-    const extractApiPath = function (url) {
+    /**
+ * @param {unknown} url
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} url
+ * @returns {unknown}
+ */
+const extractApiPath = function (url) {
       const normalized = normalizeUrl(url);
       if (!normalized.startsWith(PREFIX)) return null;
       const rest = normalized.slice(PREFIX.length);
@@ -35,7 +60,17 @@ export default class Mindstream_Back_Web_Handler {
       return rest.startsWith('/') ? rest : `/${rest}`;
     };
 
-    const invokeEndpoint = async function (handler, payload) {
+    /**
+ * @param {unknown} handler
+ * @param {unknown} payload
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} handler
+ * @param {unknown} payload
+ * @returns {Promise<unknown>}
+ */
+const invokeEndpoint = async function (handler, payload) {
       if (typeof handler === 'function') {
         return await handler(payload);
       }
@@ -45,7 +80,15 @@ export default class Mindstream_Back_Web_Handler {
       throw new Error('API endpoint handler is invalid.');
     };
 
-    const extractClientIp = function (req) {
+    /**
+ * @param {unknown} req
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} req
+ * @returns {unknown}
+ */
+const extractClientIp = function (req) {
       const forwarded = req?.headers?.['x-forwarded-for'];
       const value = Array.isArray(forwarded) ? forwarded[0] : forwarded;
       if (typeof value === 'string' && value.trim()) {
@@ -54,7 +97,13 @@ export default class Mindstream_Back_Web_Handler {
       return req?.socket?.remoteAddress ?? req?.connection?.remoteAddress ?? null;
     };
 
-    this.getRegistrationInfo = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+this.getRegistrationInfo = function () {
       return Object.freeze({
         name: 'Mindstream_Back_Web_Handler',
         stage: STAGE.PROCESS,
@@ -63,7 +112,15 @@ export default class Mindstream_Back_Web_Handler {
       });
     };
 
-    this.handle = async function (context) {
+    /**
+ * @param {unknown} context
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} context
+ * @returns {Promise<unknown>}
+ */
+this.handle = async function (context) {
       const req = context.request;
       const res = context.response;
       const apiPath = extractApiPath(req?.url);
@@ -85,12 +142,12 @@ export default class Mindstream_Back_Web_Handler {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Web_Api_Fallback$': 'Mindstream_Back_Web_Api_Fallback$',
-    'Mindstream_Back_Web_Api_FeedView$': 'Mindstream_Back_Web_Api_FeedView$',
-    'Mindstream_Back_Web_Api_Attention$': 'Mindstream_Back_Web_Api_Attention$',
-    'Mindstream_Back_Web_Api_Identity$': 'Mindstream_Back_Web_Api_Identity$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Fl32_Web_Back_Enum_Stage$': 'Fl32_Web_Back_Enum_Stage$',
-  },
+  default: Object.freeze({
+    fallback: 'Mindstream_Back_Web_Api_Fallback$',
+    feedView: 'Mindstream_Back_Web_Api_FeedView$',
+    attention: 'Mindstream_Back_Web_Api_Attention$',
+    identity: 'Mindstream_Back_Web_Api_Identity$',
+    logger: 'Mindstream_Back_Logger$',
+    STAGE: 'Fl32_Web_Back_Enum_Stage$',
+  }),
 });

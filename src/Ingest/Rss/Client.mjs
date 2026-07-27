@@ -4,14 +4,30 @@
  * @description Fetches RSS feeds over HTTPS.
  */
 export default class Mindstream_Back_Ingest_Rss_Client {
-  constructor({ httpsModule, urlModule, bufferModule }) {
+/**
+ * @param {object} deps
+ * @param {typeof import("node:https")} deps.httpsModule
+ * @param {typeof import("node:url")} deps.urlModule
+ * @param {typeof import("node:buffer")} deps.bufferModule
+ */
+constructor({ httpsModule, urlModule, bufferModule }) {
     const httpsRef = httpsModule?.default ?? httpsModule;
     const URLRef = (urlModule && urlModule.URL) || URL;
     const BufferRef = (bufferModule && bufferModule.Buffer) || Buffer;
 
     const MAX_REDIRECTS = 5;
 
-    const fetchOnce = function (url, redirectCount) {
+    /**
+ * @param {unknown} url
+ * @param {unknown} redirectCount
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} url
+ * @param {unknown} redirectCount
+ * @returns {unknown}
+ */
+const fetchOnce = function (url, redirectCount) {
       return new Promise((resolve, reject) => {
         const request = httpsRef.get(url, (response) => {
           const status = response.statusCode ?? 0;
@@ -42,7 +58,15 @@ export default class Mindstream_Back_Ingest_Rss_Client {
       });
     };
 
-    this.fetch = async function (url) {
+    /**
+ * @param {unknown} url
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} url
+ * @returns {Promise<unknown>}
+ */
+this.fetch = async function (url) {
       if (!url || typeof url !== 'string') {
         throw new Error('RSS URL must be a string.');
       }

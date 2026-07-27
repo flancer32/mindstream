@@ -4,11 +4,22 @@
  * @description Provides a singleton knex instance for the Storage layer.
  */
 export default class Mindstream_Back_Storage_Knex {
-  constructor({ knexModule, Mindstream_Back_App_Configuration$: config }) {
+/**
+ * @param {object} deps
+ * @param {typeof import("knex")} deps.knexModule
+ * @param {Mindstream_Back_App_Configuration$} deps.config
+ */
+constructor({ knexModule, config }) {
     const knexFactory = knexModule?.default ?? knexModule;
     let knexInstance = null;
 
-    const buildConfig = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const buildConfig = function () {
       const cfg = config.get();
       const db = cfg?.db ?? {};
       return {
@@ -23,18 +34,36 @@ export default class Mindstream_Back_Storage_Knex {
       };
     };
 
-    const ensureInstance = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const ensureInstance = function () {
       if (!knexInstance) {
         knexInstance = knexFactory(buildConfig());
       }
       return knexInstance;
     };
 
-    this.get = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+this.get = function () {
       return ensureInstance();
     };
 
-    this.destroy = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.destroy = async function () {
       if (!knexInstance) return;
       const instance = knexInstance;
       knexInstance = null;
@@ -44,8 +73,8 @@ export default class Mindstream_Back_Storage_Knex {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
+  default: Object.freeze({
     knexModule: 'npm:knex',
-    'Mindstream_Back_App_Configuration$': 'Mindstream_Back_App_Configuration$',
-  },
+    config: 'Mindstream_Back_App_Configuration$',
+  }),
 });

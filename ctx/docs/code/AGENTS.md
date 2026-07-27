@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/AGENTS.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -25,6 +25,7 @@ Documents at this level record code-shaping invariants, implementation constrain
 - `logging.md` — logging invariants, namespace expectations, and observability rules.
 - `overview.md` — compact overview of the code documentation level and its role in the dependency chain.
 - `publication-statuses.md` — normative registry of publication statuses and transitions.
+- `shared-contracts.md` — platform-neutral browser/backend transport-contract rules.
 - `testing.md` — testing constraints, scope expectations, and isolation rules.
 
 ## Level Boundary

@@ -4,8 +4,21 @@
  * @description CLI dispatcher for db:* commands.
  */
 export default class Mindstream_Back_Cli_Db {
-  constructor({ Mindstream_Back_Cli_Db_Schema_Create$: schemaCreate, Mindstream_Back_Cli_Db_Schema_Renew$: schemaRenew }) {
-    const resolveTarget = function (commandParts) {
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Cli_Db_Schema_Create$} deps.schemaCreate
+ * @param {Mindstream_Back_Cli_Db_Schema_Renew$} deps.schemaRenew
+ */
+constructor({ schemaCreate, schemaRenew }) {
+    /**
+ * @param {unknown} commandParts
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} commandParts
+ * @returns {unknown}
+ */
+const resolveTarget = function (commandParts) {
       const parts = Array.isArray(commandParts) ? commandParts : [];
       const [segment, action, ...rest] = parts;
       if (rest.length) {
@@ -18,7 +31,18 @@ export default class Mindstream_Back_Cli_Db {
       return schemaCreate;
     };
 
-    this.dispatch = async function ({ commandParts, args } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.commandParts
+ * @param {unknown} deps.args
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.dispatch = async function (params = {}) {
+      const { commandParts, args } = params;
       const command = resolveTarget(commandParts);
       if (!command?.execute) {
         throw new Error('Command "db:schema:*" is unavailable.');
@@ -29,8 +53,8 @@ export default class Mindstream_Back_Cli_Db {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Cli_Db_Schema_Create$': 'Mindstream_Back_Cli_Db_Schema_Create$',
-    'Mindstream_Back_Cli_Db_Schema_Renew$': 'Mindstream_Back_Cli_Db_Schema_Renew$',
-  },
+  default: Object.freeze({
+    schemaCreate: 'Mindstream_Back_Cli_Db_Schema_Create$',
+    schemaRenew: 'Mindstream_Back_Cli_Db_Schema_Renew$',
+  }),
 });

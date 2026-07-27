@@ -137,7 +137,7 @@ const getApi = async function ({ rows } = {}) {
   const { knex, calls } = createKnexStub({ rows });
 
   container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
-  container.register('Mindstream_Shared_Logger$', buildLogger());
+  container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Fl32_Web_Back_Helper_Respond$', { code200_Ok() {} });
 
   const api = await container.get('Mindstream_Back_Web_Api_FeedView$');

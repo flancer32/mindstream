@@ -4,8 +4,17 @@
  * @description Platform fetch adapter for backend code.
  */
 export default class Mindstream_Back_Platform_Fetch {
-  constructor({}) {
-    this.fetch = async function (...args) {
+/**
+ * @param {unknown} deps
+ */
+constructor({}) {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.fetch = async function (...args) {
       return await fetch(...args);
     };
   }

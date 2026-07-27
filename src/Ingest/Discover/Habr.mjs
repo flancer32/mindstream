@@ -4,19 +4,39 @@
  * @description Orchestrates Habr RSS discovery and storage.
  */
 export default class Mindstream_Back_Ingest_Discover_Habr {
-  constructor({
-    Mindstream_Back_Ingest_Source_Habr$: habrSource,
-    Mindstream_Back_Ingest_Publication_Store$: publicationStore,
-    Mindstream_Shared_Logger$: logger,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Ingest_Source_Habr$} deps.habrSource
+ * @param {Mindstream_Back_Ingest_Publication_Store$} deps.publicationStore
+ * @param {Mindstream_Back_Logger$} deps.logger
+ */
+constructor({
+    habrSource,
+    publicationStore,
+    logger,
   }) {
     const NAMESPACE = 'Mindstream_Back_Ingest_Discover_Habr';
 
-    const ensureError = function (err) {
+    /**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+const ensureError = function (err) {
       if (err instanceof Error) return err;
       return new Error(String(err));
     };
 
-    this.execute = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.execute = async function () {
       try {
         const items = await habrSource.discover();
         await publicationStore.saveDiscovered({
@@ -32,9 +52,9 @@ export default class Mindstream_Back_Ingest_Discover_Habr {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Ingest_Source_Habr$': 'Mindstream_Back_Ingest_Source_Habr$',
-    'Mindstream_Back_Ingest_Publication_Store$': 'Mindstream_Back_Ingest_Publication_Store$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-  },
+  default: Object.freeze({
+    habrSource: 'Mindstream_Back_Ingest_Source_Habr$',
+    publicationStore: 'Mindstream_Back_Ingest_Publication_Store$',
+    logger: 'Mindstream_Back_Logger$',
+  }),
 });

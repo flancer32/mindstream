@@ -39,7 +39,7 @@ const buildLogger = function () {
 test('Mindstream_Back_Web_Handler returns false for non-api path', async () => {
   const container = await createTestContainer();
   const logger = buildLogger();
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
 
   container.register('Mindstream_Back_Web_Api_Attention$', {
     async handle() {
@@ -75,7 +75,7 @@ test('Mindstream_Back_Web_Handler uses fallback for unknown endpoint', async () 
   const calls = [];
   const logger = buildLogger();
 
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
 
   container.register('Mindstream_Back_Web_Api_Attention$', {});
   container.register('Mindstream_Back_Web_Api_Identity$', {});
@@ -109,7 +109,7 @@ test('Mindstream_Back_Web_Handler dispatches to endpoint handler', async () => {
   const calls = [];
   const logger = buildLogger();
 
-  container.register('Mindstream_Shared_Logger$', logger);
+  container.register('Mindstream_Back_Logger$', logger);
 
   const attentionHandler = {
     async handle({ path }) {

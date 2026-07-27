@@ -4,21 +4,45 @@
  * @description Generates overview and annotation for publications without summaries.
  */
 export default class Mindstream_Back_Process_Generate_Summaries {
-  constructor({
-    Mindstream_Shared_Logger$: logger,
-    Mindstream_Back_Integration_OpenAi$: llmClient,
-    Mindstream_Back_Process_Publication_Store$: publicationStore,
-    Mindstream_Back_Process_Publication_SummaryStore$: summaryStore,
-    Mindstream_Back_Process_Publication_Status$: statusCatalog,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Mindstream_Back_Integration_OpenAi$} deps.llmClient
+ * @param {Mindstream_Back_Process_Publication_Store$} deps.publicationStore
+ * @param {Mindstream_Back_Process_Publication_SummaryStore$} deps.summaryStore
+ * @param {Mindstream_Back_Process_Publication_Status$} deps.statusCatalog
+ */
+constructor({
+    logger,
+    llmClient,
+    publicationStore,
+    summaryStore,
+    statusCatalog,
   }) {
     const NAMESPACE = 'Mindstream_Back_Process_Generate_Summaries';
 
-    const ensureError = function (err) {
+    /**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+const ensureError = function (err) {
       if (err instanceof Error) return err;
       return new Error(String(err));
     };
 
-    const buildPrompt = function (markdown) {
+    /**
+ * @param {unknown} markdown
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} markdown
+ * @returns {unknown}
+ */
+const buildPrompt = function (markdown) {
       return [
         'You generate semantic projections for a publication.',
         'Use only the provided markdown text.',
@@ -33,7 +57,15 @@ export default class Mindstream_Back_Process_Generate_Summaries {
       ].join('\n');
     };
 
-    const extractText = function (response) {
+    /**
+ * @param {unknown} response
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} response
+ * @returns {unknown}
+ */
+const extractText = function (response) {
       if (!response) return null;
       if (typeof response.output_text === 'string') return response.output_text;
       if (Array.isArray(response.output)) {
@@ -53,7 +85,15 @@ export default class Mindstream_Back_Process_Generate_Summaries {
       return null;
     };
 
-    const parsePayload = function (text) {
+    /**
+ * @param {unknown} text
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} text
+ * @returns {unknown}
+ */
+const parsePayload = function (text) {
       if (!text || typeof text !== 'string') {
         throw new Error('LLM response text is empty.');
       }
@@ -80,7 +120,15 @@ export default class Mindstream_Back_Process_Generate_Summaries {
       };
     };
 
-    const processPublication = async function (publication) {
+    /**
+ * @param {unknown} publication
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} publication
+ * @returns {Promise<unknown>}
+ */
+const processPublication = async function (publication) {
       const publicationId = publication?.id;
       if (!Number.isFinite(Number(publicationId))) {
         throw new Error('Publication id is missing.');
@@ -112,7 +160,17 @@ export default class Mindstream_Back_Process_Generate_Summaries {
       logger.info(NAMESPACE, `Summaries generated for publication ${publicationId}.`);
     };
 
-    const handleError = async function (publicationId, err) {
+    /**
+ * @param {unknown} publicationId
+ * @param {unknown} err
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} publicationId
+ * @param {unknown} err
+ * @returns {Promise<unknown>}
+ */
+const handleError = async function (publicationId, err) {
       const error = ensureError(err);
       logger.exception(NAMESPACE, error);
       if (Number.isFinite(Number(publicationId)) && statusCatalog?.SUMMARY_FAILED) {
@@ -120,7 +178,13 @@ export default class Mindstream_Back_Process_Generate_Summaries {
       }
     };
 
-    this.execute = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.execute = async function () {
       const limit = 3;
       const batch = await publicationStore.listForSummaries({ limit });
       if (!Array.isArray(batch) || !batch.length) return;
@@ -138,11 +202,11 @@ export default class Mindstream_Back_Process_Generate_Summaries {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Mindstream_Back_Integration_OpenAi$': 'Mindstream_Back_Integration_OpenAi$',
-    'Mindstream_Back_Process_Publication_Store$': 'Mindstream_Back_Process_Publication_Store$',
-    'Mindstream_Back_Process_Publication_SummaryStore$': 'Mindstream_Back_Process_Publication_SummaryStore$',
-    'Mindstream_Back_Process_Publication_Status$': 'Mindstream_Back_Process_Publication_Status$',
-  },
+  default: Object.freeze({
+    logger: 'Mindstream_Back_Logger$',
+    llmClient: 'Mindstream_Back_Integration_OpenAi$',
+    publicationStore: 'Mindstream_Back_Process_Publication_Store$',
+    summaryStore: 'Mindstream_Back_Process_Publication_SummaryStore$',
+    statusCatalog: 'Mindstream_Back_Process_Publication_Status$',
+  }),
 });

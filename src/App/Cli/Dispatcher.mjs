@@ -4,26 +4,58 @@
  * @description Root CLI dispatcher for the backend application.
  */
 export default class Mindstream_Back_App_Cli_Dispatcher {
-  constructor({
-    Mindstream_Shared_Logger$: logger,
-    Mindstream_Back_Cli_Db$: dbDispatcher,
-    Mindstream_Back_Cli_Ingest$: ingestDispatcher,
-    Mindstream_Back_Cli_Process$: processDispatcher,
-    Mindstream_Back_Cli_Runtime$: runtimeDispatcher,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Mindstream_Back_Cli_Db$} deps.dbDispatcher
+ * @param {Mindstream_Back_Cli_Ingest$} deps.ingestDispatcher
+ * @param {Mindstream_Back_Cli_Process$} deps.processDispatcher
+ * @param {Mindstream_Back_Cli_Runtime$} deps.runtimeDispatcher
+ */
+constructor({
+    logger,
+    dbDispatcher,
+    ingestDispatcher,
+    processDispatcher,
+    runtimeDispatcher,
   }) {
     const NAMESPACE = 'Mindstream_Back_App_Cli_Dispatcher';
 
-    const ensureError = function (err) {
+    /**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+const ensureError = function (err) {
       if (err instanceof Error) return err;
       return new Error(String(err));
     };
 
-    const normalizeArgs = function (cliArgs) {
+    /**
+ * @param {unknown} cliArgs
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} cliArgs
+ * @returns {unknown}
+ */
+const normalizeArgs = function (cliArgs) {
       if (!Array.isArray(cliArgs)) return [];
       return cliArgs.filter((value) => value !== undefined && value !== null).map(String);
     };
 
-    const parseCommand = function (cliArgs) {
+    /**
+ * @param {unknown} cliArgs
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} cliArgs
+ * @returns {unknown}
+ */
+const parseCommand = function (cliArgs) {
       const [command, ...args] = normalizeArgs(cliArgs);
       if (!command) {
         throw new Error('CLI command is required.');
@@ -31,14 +63,32 @@ export default class Mindstream_Back_App_Cli_Dispatcher {
       return { command, args };
     };
 
-    const splitCommand = function (command) {
+    /**
+ * @param {unknown} command
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} command
+ * @returns {unknown}
+ */
+const splitCommand = function (command) {
       return String(command)
         .split(':')
         .map((segment) => segment.trim())
         .filter((segment) => segment.length > 0);
     };
 
-    this.dispatch = async function ({ cliArgs } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.cliArgs
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.dispatch = async function (params = {}) {
+      const { cliArgs } = params;
       try {
         const { command, args } = parseCommand(cliArgs);
         const parts = splitCommand(command);
@@ -88,11 +138,11 @@ export default class Mindstream_Back_App_Cli_Dispatcher {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Mindstream_Back_Cli_Db$': 'Mindstream_Back_Cli_Db$',
-    'Mindstream_Back_Cli_Ingest$': 'Mindstream_Back_Cli_Ingest$',
-    'Mindstream_Back_Cli_Process$': 'Mindstream_Back_Cli_Process$',
-    'Mindstream_Back_Cli_Runtime$': 'Mindstream_Back_Cli_Runtime$',
-  },
+  default: Object.freeze({
+    logger: 'Mindstream_Back_Logger$',
+    dbDispatcher: 'Mindstream_Back_Cli_Db$',
+    ingestDispatcher: 'Mindstream_Back_Cli_Ingest$',
+    processDispatcher: 'Mindstream_Back_Cli_Process$',
+    runtimeDispatcher: 'Mindstream_Back_Cli_Runtime$',
+  }),
 });

@@ -4,24 +4,54 @@
  * @description Provides publication selection for summary and embedding generation.
  */
 export default class Mindstream_Back_Process_Publication_Store {
-  constructor({
-    Mindstream_Back_Storage_Knex$: knexProvider,
-    Mindstream_Shared_Logger$: logger,
-    Mindstream_Back_Process_Publication_Status$: statusCatalog,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {Mindstream_Back_Process_Publication_Status$} deps.statusCatalog
+ */
+constructor({
+    knexProvider,
+    logger,
+    statusCatalog,
   }) {
     const NAMESPACE = 'Mindstream_Back_Process_Publication_Store';
 
-    const getKnex = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+const getKnex = function () {
       return knexProvider.get();
     };
 
-    const normalizeLimit = function (value) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const normalizeLimit = function (value) {
       const parsed = Number(value);
       if (Number.isFinite(parsed) && parsed > 0) return parsed;
       return 4;
     };
 
-    const normalizeId = function (value, name) {
+    /**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @param {unknown} name
+ * @returns {unknown}
+ */
+const normalizeId = function (value, name) {
       const num = Number(value);
       if (!Number.isFinite(num)) {
         throw new Error(`${name} must be a number.`);
@@ -29,7 +59,17 @@ export default class Mindstream_Back_Process_Publication_Store {
       return num;
     };
 
-    this.listForSummaries = async function ({ limit } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.limit
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.listForSummaries = async function (params = {}) {
+      const { limit } = params;
       const pageSize = normalizeLimit(limit);
       const knexRef = getKnex();
       const query = knexRef('publications as p')
@@ -52,7 +92,17 @@ export default class Mindstream_Back_Process_Publication_Store {
       return rows ?? [];
     };
 
-    this.listForEmbeddings = async function ({ limit } = {}) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.limit
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} params
+ * @returns {Promise<unknown>}
+ */
+this.listForEmbeddings = async function (params = {}) {
+      const { limit } = params;
       const pageSize = normalizeLimit(limit);
       const knexRef = getKnex();
       const query = knexRef('publications as p')
@@ -83,7 +133,19 @@ export default class Mindstream_Back_Process_Publication_Store {
       return rows ?? [];
     };
 
-    this.updateStatus = async function ({ id, status }) {
+    /**
+ * @param {unknown} deps
+ * @param {unknown} deps.id
+ * @param {unknown} deps.status
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} deps
+ * @param {unknown} deps.id
+ * @param {unknown} deps.status
+ * @returns {Promise<unknown>}
+ */
+this.updateStatus = async function ({ id, status }) {
       const pubId = normalizeId(id, 'Publication id');
       if (!status || typeof status !== 'string') {
         throw new Error('Publication status must be a string.');
@@ -94,9 +156,9 @@ export default class Mindstream_Back_Process_Publication_Store {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Storage_Knex$': 'Mindstream_Back_Storage_Knex$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
-    'Mindstream_Back_Process_Publication_Status$': 'Mindstream_Back_Process_Publication_Status$',
-  },
+  default: Object.freeze({
+    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    logger: 'Mindstream_Back_Logger$',
+    statusCatalog: 'Mindstream_Back_Process_Publication_Status$',
+  }),
 });

@@ -4,20 +4,39 @@
  * @description Extracts markdown from Habr publication HTML.
  */
 export default class Mindstream_Back_Ingest_Extract_Habr_Parser {
-  constructor({}) {
+/**
+ * @param {unknown} deps
+ */
+constructor({}) {
     const CONTAINER_PATTERNS = [
       /<div[^>]*class="[^"]*tm-article-body[^"]*"[^>]*>/i,
       /<div[^>]*class="[^"]*article-formatted-body[^"]*"[^>]*>/i,
       /<div[^>]*class="[^"]*tm-article-presenter__body[^"]*"[^>]*>/i,
     ];
 
-    const buildError = function (message) {
+    /**
+ * @param {unknown} message
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} message
+ * @returns {unknown}
+ */
+const buildError = function (message) {
       const err = new Error(message);
       err.isExtractionError = true;
       return err;
     };
 
-    const decodeEntities = function (value) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const decodeEntities = function (value) {
       if (!value) return '';
       return value
         .replace(/&nbsp;/gi, ' ')
@@ -28,11 +47,27 @@ export default class Mindstream_Back_Ingest_Extract_Habr_Parser {
         .replace(/&#39;/gi, "'");
     };
 
-    const stripTags = function (value) {
+    /**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const stripTags = function (value) {
       return String(value ?? '').replace(/<[^>]+>/g, '');
     };
 
-    const extractContainer = function (html) {
+    /**
+ * @param {unknown} html
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} html
+ * @returns {unknown}
+ */
+const extractContainer = function (html) {
       for (const pattern of CONTAINER_PATTERNS) {
         const match = pattern.exec(html);
         if (!match) continue;
@@ -70,7 +105,15 @@ export default class Mindstream_Back_Ingest_Extract_Habr_Parser {
       return null;
     };
 
-    const normalizeMarkdown = function (text) {
+    /**
+ * @param {unknown} text
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} text
+ * @returns {unknown}
+ */
+const normalizeMarkdown = function (text) {
       return text
         .replace(/\r/g, '')
         .replace(/[ \t]+\n/g, '\n')
@@ -79,7 +122,15 @@ export default class Mindstream_Back_Ingest_Extract_Habr_Parser {
         .trim();
     };
 
-    this.extractMarkdown = function (html) {
+    /**
+ * @param {unknown} html
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} html
+ * @returns {unknown}
+ */
+this.extractMarkdown = function (html) {
       if (!html || typeof html !== 'string') {
         throw buildError('HTML payload must be a string.');
       }

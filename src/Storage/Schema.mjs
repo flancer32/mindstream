@@ -4,7 +4,10 @@
  * @description Declarative DB schema for the Storage layer.
  */
 export default class Mindstream_Back_Storage_Schema {
-  constructor({ }) {
+/**
+ * @param {unknown} deps
+ */
+constructor({ }) {
     const publicationSourcesTable = {
       columns: {
         id: { type: 'bigint', primary: true, autoIncrement: true },
@@ -187,7 +190,13 @@ export default class Mindstream_Back_Storage_Schema {
       },
     };
 
-    this.getDeclaration = function () {
+    /**
+ * @returns {unknown}
+ */
+/**
+ * @returns {unknown}
+ */
+this.getDeclaration = function () {
       return declaration;
     };
   }

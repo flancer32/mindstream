@@ -4,14 +4,25 @@
  * @description Orchestrates extraction of markdown for Habr publications.
  */
 export default class Mindstream_Back_Ingest_Extract_Habr {
-  constructor({
-    Mindstream_Back_Ingest_Source_Habr$: habrSource,
-    Mindstream_Back_Ingest_Publication_Store$: publicationStore,
-    Mindstream_Back_Ingest_Publication_ExtractionStore$: extractionStore,
-    Mindstream_Back_Ingest_Publication_Status$: statusCatalog,
-    Mindstream_Back_Ingest_Extract_Habr_Fetcher$: fetcher,
-    Mindstream_Back_Ingest_Extract_Habr_Parser$: parser,
-    Mindstream_Shared_Logger$: logger,
+/**
+ * @param {object} deps
+ * @param {Mindstream_Back_Ingest_Source_Habr$} deps.habrSource
+ * @param {Mindstream_Back_Ingest_Publication_Store$} deps.publicationStore
+ * @param {Mindstream_Back_Ingest_Publication_ExtractionStore$} deps.extractionStore
+ * @param {Mindstream_Back_Ingest_Publication_Status$} deps.statusCatalog
+ * @param {Mindstream_Back_Ingest_Extract_Habr_Fetcher$} deps.fetcher
+ * @param {Mindstream_Back_Ingest_Extract_Habr_Parser$} deps.parser
+ * @param {Mindstream_Back_Logger$} deps.logger
+ * @param {typeof import("node:timers/promises")} deps.timersModule
+ */
+constructor({
+    habrSource,
+    publicationStore,
+    extractionStore,
+    statusCatalog,
+    fetcher,
+    parser,
+    logger,
     timersModule,
   }) {
     const NAMESPACE = 'Mindstream_Back_Ingest_Extract_Habr';
@@ -20,23 +31,57 @@ export default class Mindstream_Back_Ingest_Extract_Habr {
 
     const setTimeoutRef = timersModule?.setTimeout;
 
-    const ensureError = function (err) {
+    /**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+/**
+ * @param {unknown} err
+ * @returns {unknown}
+ */
+const ensureError = function (err) {
       if (err instanceof Error) return err;
       return new Error(String(err));
     };
 
-    const sleep = async function (ms) {
+    /**
+ * @param {unknown} ms
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} ms
+ * @returns {Promise<unknown>}
+ */
+const sleep = async function (ms) {
       if (typeof setTimeoutRef !== 'function') {
         throw new Error('Timer dependency is unavailable.');
       }
       await setTimeoutRef(ms);
     };
 
-    const updateStatus = async function (publicationId, status) {
+    /**
+ * @param {unknown} publicationId
+ * @param {unknown} status
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} publicationId
+ * @param {unknown} status
+ * @returns {Promise<unknown>}
+ */
+const updateStatus = async function (publicationId, status) {
       await publicationStore.updateStatus({ id: publicationId, status });
     };
 
-    const processPublication = async function (publication) {
+    /**
+ * @param {unknown} publication
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @param {unknown} publication
+ * @returns {Promise<unknown>}
+ */
+const processPublication = async function (publication) {
       const publicationId = publication?.id;
       const sourceUrl = publication?.source_url;
       logger.info(NAMESPACE, `Start extraction for publication ${publicationId}.`);
@@ -82,7 +127,13 @@ export default class Mindstream_Back_Ingest_Extract_Habr {
       }
     };
 
-    this.execute = async function () {
+    /**
+ * @returns {Promise<unknown>}
+ */
+/**
+ * @returns {Promise<unknown>}
+ */
+this.execute = async function () {
       const sourceId = habrSource.getSourceId();
       let batch = await publicationStore.listForExtraction({
         sourceId,
@@ -109,14 +160,14 @@ export default class Mindstream_Back_Ingest_Extract_Habr {
 }
 
 export const __deps__ = Object.freeze({
-  default: {
-    'Mindstream_Back_Ingest_Source_Habr$': 'Mindstream_Back_Ingest_Source_Habr$',
-    'Mindstream_Back_Ingest_Publication_Store$': 'Mindstream_Back_Ingest_Publication_Store$',
-    'Mindstream_Back_Ingest_Publication_ExtractionStore$': 'Mindstream_Back_Ingest_Publication_ExtractionStore$',
-    'Mindstream_Back_Ingest_Publication_Status$': 'Mindstream_Back_Ingest_Publication_Status$',
-    'Mindstream_Back_Ingest_Extract_Habr_Fetcher$': 'Mindstream_Back_Ingest_Extract_Habr_Fetcher$',
-    'Mindstream_Back_Ingest_Extract_Habr_Parser$': 'Mindstream_Back_Ingest_Extract_Habr_Parser$',
-    'Mindstream_Shared_Logger$': 'Mindstream_Shared_Logger$',
+  default: Object.freeze({
+    habrSource: 'Mindstream_Back_Ingest_Source_Habr$',
+    publicationStore: 'Mindstream_Back_Ingest_Publication_Store$',
+    extractionStore: 'Mindstream_Back_Ingest_Publication_ExtractionStore$',
+    statusCatalog: 'Mindstream_Back_Ingest_Publication_Status$',
+    fetcher: 'Mindstream_Back_Ingest_Extract_Habr_Fetcher$',
+    parser: 'Mindstream_Back_Ingest_Extract_Habr_Parser$',
+    logger: 'Mindstream_Back_Logger$',
     timersModule: 'node:timers/promises',
-  },
+  }),
 });
