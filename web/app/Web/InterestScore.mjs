@@ -11,67 +11,38 @@ constructor({ attention }) {
  * @param {unknown} item
  * @returns {unknown}
  */
-const getEmbedding = /**
- * @param {unknown} item
- * @returns {unknown}
- */
-(item) => item?.embeddings?.overview || item?.embeddings?.annotation || null;
+const getEmbedding = (item) => item?.embeddings?.overview || item?.embeddings?.annotation || null;
     /**
  * @param {unknown} item
  * @returns {unknown}
  */
-const ensure = /**
- * @param {unknown} item
- * @returns {unknown}
- */
-(item) => { const value = getEmbedding(item); if (!value) throw new Error(`Missing embedding for publication ${item?.id ?? 'unknown'}.`); return value; };
+const ensure = (item) => { const value = getEmbedding(item); if (!value) throw new Error(`Missing embedding for publication ${item?.id ?? 'unknown'}.`); return value; };
     /**
  * @param {unknown} items
  * @returns {unknown}
  */
-this.initAttention = /**
- * @param {unknown} items
- * @returns {unknown}
- */
-(items) => { if (initialized) return; const sample = items?.find(getEmbedding); if (!sample) throw new Error('Feed payload is missing embeddings.'); attention.init({ dim: ensure(sample).length }); initialized = true; };
+this.initAttention = (items) => { if (initialized) return; const sample = items?.find(getEmbedding); if (!sample) throw new Error('Feed payload is missing embeddings.'); attention.init({ dim: ensure(sample).length }); initialized = true; };
     /**
  * @param {unknown} item
  * @returns {unknown}
  */
-this.scoreItem = /**
- * @param {unknown} item
- * @returns {unknown}
- */
-(item) => attention.scorePublication(ensure(item));
+this.scoreItem = (item) => attention.scorePublication(ensure(item));
     /**
  * @param {unknown} pubId
  * @returns {unknown}
  */
-this.getScore = /**
- * @param {unknown} pubId
- * @returns {unknown}
- */
-(pubId) => attention.getScore(pubId);
+this.getScore = (pubId) => attention.getScore(pubId);
     /**
  * @returns {unknown}
  */
-this.hasInterestProfile = /**
- * @returns {unknown}
- */
-() => attention.hasInterestProfile();
+this.hasInterestProfile = () => attention.hasInterestProfile();
     /**
  * @param {unknown} payload
  * @param {unknown} item
  * @param {unknown} options
  * @returns {unknown}
  */
-this.recordAttention = /**
- * @param {unknown} payload
- * @param {unknown} item
- * @param {unknown} options
- * @returns {unknown}
- */
-(payload, item, options = {}) => {
+this.recordAttention = (payload, item, options = {}) => {
       const { items = [] } = options;
       return attention.recordAttention(payload, ensure(item), { visiblePublications: items.map((entry) => ({ pubId: entry.id ?? entry.pubId, embedding: getEmbedding(entry) })).filter((entry) => entry.pubId !== undefined && entry.embedding) });
     };

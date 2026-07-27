@@ -15,10 +15,7 @@ constructor({
     /**
  * @returns {unknown}
  */
-this.register = /**
- * @returns {unknown}
- */
-function () {
+this.register = function () {
       const registry = browser.getWindow()?.customElements ?? globalThis.customElements;
       if (!registry.get('mindstream-identity-menu')) {
         registry.define('mindstream-identity-menu', IdentityMenu);

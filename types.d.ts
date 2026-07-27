@@ -1,4 +1,39 @@
 declare global {
+  type Mindstream_Shared_Api_Attention_ClientSignal = {
+    identity: string;
+    pubId: number;
+    type: 'overview_open' | 'source_click' | 'source_click_after_overview';
+  };
+  type Mindstream_Shared_Api_Attention_Signal = {
+    attention_type: 'overview_view' | 'link_click' | 'link_click_after_overview';
+    identity: string;
+    publication_id: number;
+  };
+  type Mindstream_Shared_Api_Feed_Cursor = {
+    id: number;
+    publishedAt?: string;
+  };
+  type Mindstream_Shared_Api_Feed_Item = {
+    annotation: string;
+    embeddings: { annotation: readonly number[]; overview: readonly number[] };
+    id: number;
+    overview: string;
+    publishedAt?: string;
+    sourceCode: string;
+    title?: string;
+    url: string;
+  };
+  type Mindstream_Shared_Api_Feed_Response = {
+    cursor?: Mindstream_Shared_Api_Feed_Cursor;
+    items: readonly Mindstream_Shared_Api_Feed_Item[];
+    sources: readonly Mindstream_Shared_Api_Feed_Source[];
+  };
+  type Mindstream_Shared_Api_Feed_Source = {
+    code: string;
+    name: string;
+    url: string;
+  };
+  type Mindstream_Shared_Api_Identity_Registration = { identity: string };
   type Mindstream_Back_App = typeof import("./src/App.mjs").default;
   type Mindstream_Back_App$ = InstanceType<Mindstream_Back_App>;
   type Mindstream_Back_App_Cli_Dispatcher = typeof import("./src/App/Cli/Dispatcher.mjs").default;

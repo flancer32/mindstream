@@ -14,60 +14,35 @@ constructor({ identity, browser }) {
     /**
  * @returns {unknown}
  */
-const storage = /**
- * @returns {unknown}
- */
-() => browser.getStorage();
+const storage = () => browser.getStorage();
     /**
  * @returns {unknown}
  */
-const ensure = /**
- * @returns {unknown}
- */
-() => { if (!dimension || !vector) throw new Error('Attention module is not initialized.'); };
+const ensure = () => { if (!dimension || !vector) throw new Error('Attention module is not initialized.'); };
     /**
  * @returns {unknown}
  */
-const normalize = /**
- * @returns {unknown}
- */
-() => { const norm = Math.hypot(...vector); if (norm) vector.forEach((v, i) => { vector[i] = v / norm; }); };
+const normalize = () => { const norm = Math.hypot(...vector); if (norm) vector.forEach((v, i) => { vector[i] = v / norm; }); };
     /**
  * @param {unknown} value
  * @returns {unknown}
  */
-const embedding = /**
- * @param {unknown} value
- * @returns {unknown}
- */
-(value) => { if (!value || value.length !== dimension || Array.from(value).some((v) => !Number.isFinite(v))) throw new Error('Embedding is invalid.'); };
+const embedding = (value) => { if (!value || value.length !== dimension || Array.from(value).some((v) => !Number.isFinite(v))) throw new Error('Embedding is invalid.'); };
     /**
  * @param {unknown} value
  * @returns {unknown}
  */
-const score = /**
- * @param {unknown} value
- * @returns {unknown}
- */
-(value) => { embedding(value); const norm = Math.hypot(...vector) * Math.hypot(...value); return norm ? Math.max(0, Math.min(1, ((vector.reduce((sum, v, i) => sum + v * value[i], 0) / norm) + 1) / 2)) : 0; };
+const score = (value) => { embedding(value); const norm = Math.hypot(...vector) * Math.hypot(...value); return norm ? Math.max(0, Math.min(1, ((vector.reduce((sum, v, i) => sum + v * value[i], 0) / norm) + 1) / 2)) : 0; };
     /**
  * @returns {unknown}
  */
-const persist = /**
- * @returns {unknown}
- */
-() => { try { storage()?.setItem(VECTOR_KEY, JSON.stringify({ dim: dimension, vector: Array.from(vector) })); storage()?.setItem(HISTORY_KEY, JSON.stringify(history)); } catch {} };
+const persist = () => { try { storage()?.setItem(VECTOR_KEY, JSON.stringify({ dim: dimension, vector: Array.from(vector) })); storage()?.setItem(HISTORY_KEY, JSON.stringify(history)); } catch {} };
     /**
  * @param {unknown} deps
  * @param {unknown} deps.dim
  * @returns {unknown}
  */
-this.init = /**
- * @param {unknown} deps
- * @param {unknown} deps.dim
- * @returns {unknown}
- */
-({ dim }) => {
+this.init = ({ dim }) => {
       if (!Number.isInteger(dim) || dim <= 0) throw new Error('init({ dim }) requires a positive integer dimension.');
       dimension = dim;
       try {
@@ -84,13 +59,7 @@ this.init = /**
  * @param {unknown} options
  * @returns {Promise<unknown>}
  */
-this.recordAttention = /**
- * @param {unknown} payload
- * @param {unknown} itemEmbedding
- * @param {unknown} options
- * @returns {Promise<unknown>}
- */
-async (payload = {}, itemEmbedding, options = {}) => {
+this.recordAttention = async (payload = {}, itemEmbedding, options = {}) => {
       const { type, pubId } = payload;
       const { visiblePublications = [] } = options;
       ensure(); embedding(itemEmbedding);
@@ -105,27 +74,16 @@ async (payload = {}, itemEmbedding, options = {}) => {
  * @param {unknown} value
  * @returns {unknown}
  */
-this.scorePublication = /**
- * @param {unknown} value
- * @returns {unknown}
- */
-(value) => { ensure(); return score(value); };
+this.scorePublication = (value) => { ensure(); return score(value); };
     /**
  * @param {unknown} pubId
  * @returns {unknown}
  */
-this.getScore = /**
- * @param {unknown} pubId
- * @returns {unknown}
- */
-(pubId) => scores.get(pubId) ?? null;
+this.getScore = (pubId) => scores.get(pubId) ?? null;
     /**
  * @returns {unknown}
  */
-this.hasInterestProfile = /**
- * @returns {unknown}
- */
-() => { ensure(); return Array.from(vector).some(Boolean); };
+this.hasInterestProfile = () => { ensure(); return Array.from(vector).some(Boolean); };
   }
 }
 

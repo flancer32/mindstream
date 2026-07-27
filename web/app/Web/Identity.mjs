@@ -17,26 +17,16 @@ constructor({ browser, beacon, attentionContract, identityContract }) {
     /**
  * @returns {unknown}
  */
-const storage = /**
- * @returns {unknown}
- */
-() => browser.getStorage();
+const storage = () => browser.getStorage();
     /**
  * @param {unknown} value
  * @returns {unknown}
  */
-const normalizeIdentity = /**
- * @param {unknown} value
- * @returns {unknown}
- */
-(value) => typeof value === 'string' && UUID_RE.test(value.trim()) ? value.trim() : null;
+const normalizeIdentity = (value) => typeof value === 'string' && UUID_RE.test(value.trim()) ? value.trim() : null;
     /**
  * @returns {unknown}
  */
-const load = /**
- * @returns {unknown}
- */
-() => {
+const load = () => {
       if (!identityLoaded) {
         identityLoaded = true;
         cachedIdentity = normalizeIdentity(storage()?.getItem(STORAGE_IDENTITY_KEY));
@@ -47,11 +37,7 @@ const load = /**
  * @param {unknown} identity
  * @returns {unknown}
  */
-const register = /**
- * @param {unknown} identity
- * @returns {unknown}
- */
-(identity) => {
+const register = (identity) => {
       if (identity && !registeredInSession) {
         registeredInSession = true;
         beacon.sendJson('/api/identity', identityContract.createRegistration({ identity }));
@@ -60,10 +46,7 @@ const register = /**
     /**
  * @returns {unknown}
  */
-const uuid = /**
- * @returns {unknown}
- */
-() => {
+const uuid = () => {
       if (browser.crypto?.randomUUID) return browser.crypto.randomUUID();
       const bytes = new Uint8Array(16);
       browser.crypto?.getRandomValues?.(bytes);
@@ -75,17 +58,11 @@ const uuid = /**
     /**
  * @returns {unknown}
  */
-this.getIdentity = /**
- * @returns {unknown}
- */
-() => load();
+this.getIdentity = () => load();
     /**
  * @returns {unknown}
  */
-this.activateIdentity = /**
- * @returns {unknown}
- */
-() => {
+this.activateIdentity = () => {
       const identity = load() ?? uuid();
       cachedIdentity = identity;
       identityLoaded = true;
@@ -96,19 +73,12 @@ this.activateIdentity = /**
     /**
  * @returns {unknown}
  */
-this.ensureIdentityRegistered = /**
- * @returns {unknown}
- */
-() => { const identity = load(); register(identity); return identity; };
+this.ensureIdentityRegistered = () => { const identity = load(); register(identity); return identity; };
     /**
  * @param {unknown} payload
  * @returns {unknown}
  */
-this.sendAttentionSignal = /**
- * @param {unknown} payload
- * @returns {unknown}
- */
-(payload = {}) => {
+this.sendAttentionSignal = (payload = {}) => {
       const { type, pubId } = payload;
       const identity = load();
       const publicationId = Number(pubId);
@@ -124,21 +94,13 @@ this.sendAttentionSignal = /**
  * @param {unknown} onChange
  * @returns {unknown}
  */
-this.watchIdentity = /**
- * @param {unknown} onChange
- * @returns {unknown}
- */
-(onChange) => {
+this.watchIdentity = (onChange) => {
       if (typeof onChange !== 'function') return () => {};
       /**
  * @param {unknown} event
  * @returns {unknown}
  */
-const handler = /**
- * @param {unknown} event
- * @returns {unknown}
- */
-(event) => {
+const handler = (event) => {
         if (event?.key && event.key !== STORAGE_IDENTITY_KEY) return;
         identityLoaded = false;
         onChange(load());

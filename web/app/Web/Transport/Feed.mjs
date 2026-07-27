@@ -6,17 +6,13 @@
 export default class Mindstream_Web_Transport_Feed {
   /**
    * @param {object} deps
-   * @param {Mindstream_Web_Platform_Browser} deps.browser
-   * @param {Mindstream_Shared_Api_Feed} deps.feed
+   * @param {Mindstream_Web_Platform_Browser$} deps.browser
+   * @param {Mindstream_Shared_Api_Feed$} deps.feed
    */
   constructor({ browser, feed }) {
     /** @param {object} options @returns {Promise<object>} */
-    this.getPage = /**
- * @param {unknown} options
- * @returns {Promise<unknown>}
- */
-async function (options = {}) {
-      const { cursor } = options;
+    this.getPage = async function (options = {}) {
+      const { cursor } = /** @type {{cursor?: unknown}} */ (options);
       const url = new browser.URL('/api/feed', browser.getLocation().origin);
       const normalizedCursor = feed.createCursor(cursor);
       if (normalizedCursor) {

@@ -6,16 +6,11 @@
 export default class Mindstream_Web_Transport_Beacon {
   /**
    * @param {object} deps
-   * @param {Mindstream_Web_Platform_Browser} deps.browser
+   * @param {Mindstream_Web_Platform_Browser$} deps.browser
    */
   constructor({ browser }) {
     /** @param {string} path @param {object} payload @returns {boolean} */
-    this.sendJson = /**
- * @param {unknown} path
- * @param {unknown} payload
- * @returns {unknown}
- */
-function (path, payload) {
+    this.sendJson = function (path, payload) {
       const navigator = browser.getNavigator();
       if (typeof navigator?.sendBeacon !== 'function') return false;
       try {

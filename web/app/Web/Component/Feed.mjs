@@ -15,19 +15,12 @@ constructor({ browser, feedTransport, interestFilter, interestIndicator, interes
     /**
  * @returns {unknown}
  */
-const storage = /**
- * @returns {unknown}
- */
-() => browser.getStorage();
+const storage = () => browser.getStorage();
     /**
  * @param {unknown} value
  * @returns {unknown}
  */
-const normalizeThreshold = /**
- * @param {unknown} value
- * @returns {unknown}
- */
-(value) => value === null || value === '' || !Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 100 ? null : Math.round(Number(value));
+const normalizeThreshold = (value) => value === null || value === '' || !Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 100 ? null : Math.round(Number(value));
     return class Mindstream_Web_Feed extends HTMLElement {
       /**
  */

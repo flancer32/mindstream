@@ -9,10 +9,7 @@ constructor({ registry }) {
     /**
  * @returns {unknown}
  */
-this.start = /**
- * @returns {unknown}
- */
-function () {
+this.start = function () {
       registry.register();
     };
   }

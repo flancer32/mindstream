@@ -14,11 +14,7 @@ constructor({ identity, browser }) {
  * @param {unknown} value
  * @returns {unknown}
  */
-const normalizeThreshold = /**
- * @param {unknown} value
- * @returns {unknown}
- */
-(value) => {
+const normalizeThreshold = (value) => {
       if (value === null || value === '') return null;
       const number = Number(value);
       return Number.isFinite(number) ? Math.min(100, Math.max(0, Math.round(number))) : null;
@@ -29,26 +25,15 @@ const normalizeThreshold = /**
 constructor() { super(); this._connected = false; this._rendered = false; this._filterEnabled = true; this._thresholdPercent = null; /**
  * @returns {unknown}
  */
-this._stopWatchingIdentity = /**
- * @returns {unknown}
- */
-() => {}; /**
+this._stopWatchingIdentity = () => {}; /**
  * @param {unknown} event
  * @returns {unknown}
  */
-this._handleDocumentClick = /**
+this._handleDocumentClick = (event) => { if (!this.contains(event.target)) this.close(); }; /**
  * @param {unknown} event
  * @returns {unknown}
  */
-(event) => { if (!this.contains(event.target)) this.close(); }; /**
- * @param {unknown} event
- * @returns {unknown}
- */
-this._handleDocumentKeydown = /**
- * @param {unknown} event
- * @returns {unknown}
- */
-(event) => { if (event.key === 'Escape') this.close(); }; }
+this._handleDocumentKeydown = (event) => { if (event.key === 'Escape') this.close(); }; }
       /**
  * @returns {unknown}
  */
@@ -59,10 +44,7 @@ connectedCallback() { if (this._connected) return; this._connected = true; this.
 disconnectedCallback() { document.removeEventListener('click', this._handleDocumentClick); document.removeEventListener('keydown', this._handleDocumentKeydown); this._stopWatchingIdentity(); /**
  * @returns {unknown}
  */
-this._stopWatchingIdentity = /**
- * @returns {unknown}
- */
-() => {}; this._connected = false; }
+this._stopWatchingIdentity = () => {}; this._connected = false; }
       /**
  * @returns {unknown}
  */

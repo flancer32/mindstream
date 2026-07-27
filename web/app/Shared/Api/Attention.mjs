@@ -6,7 +6,7 @@
 export default class Mindstream_Shared_Api_Attention {
   /**
    * @param {object} deps
-   * @param {Mindstream_Shared_Api_Identity} deps.identity
+   * @param {Mindstream_Shared_Api_Identity$} deps.identity
    */
   constructor({ identity }) {
     const TYPES = Object.freeze(['overview_view', 'link_click', 'link_click_after_overview']);
@@ -16,12 +16,8 @@ export default class Mindstream_Shared_Api_Attention {
       source_click_after_overview: 'link_click_after_overview',
     });
 
-    /** @param {unknown} value @returns {object} */
-    this.createSignal = /**
- * @param {unknown} value
- * @returns {unknown}
- */
-function (value) {
+    /** @param {Mindstream_Shared_Api_Attention_Signal} value @returns {Mindstream_Shared_Api_Attention_Signal} */
+    this.createSignal = function (value) {
       if (!value || typeof value !== 'object' || Array.isArray(value)) {
         throw new TypeError('Attention signal must be an object.');
       }
@@ -40,12 +36,8 @@ function (value) {
       });
     };
 
-    /** @param {object} value @returns {object} */
-    this.createClientSignal = /**
- * @param {unknown} value
- * @returns {unknown}
- */
-function (value = {}) {
+    /** @param {Mindstream_Shared_Api_Attention_ClientSignal} value @returns {Mindstream_Shared_Api_Attention_Signal} */
+    this.createClientSignal = function (value = /** @type {Mindstream_Shared_Api_Attention_ClientSignal} */ ({})) {
       const { identity: identityValue, pubId, type } = value;
       return this.createSignal({
         identity: identityValue,
