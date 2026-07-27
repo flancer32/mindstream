@@ -12,6 +12,11 @@
         "ext": ".mjs"
       },
       {
+        "prefix": "Mindstream_Web_",
+        "path": "./web/app/Web",
+        "ext": ".mjs"
+      },
+      {
         "prefix": "Mindstream_Shared_",
         "path": "./web/app/Shared",
         "ext": ".mjs"

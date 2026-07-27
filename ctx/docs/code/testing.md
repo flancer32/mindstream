@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/testing.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+ - Changed: `20260727`
 
 ## Purpose
 
@@ -64,7 +64,7 @@ Each test must be idempotent and must not leave traces of execution behind. If a
 
 Frontend code is tested in Node.js. Real browsers and e2e tests are absent in the MVP. Libraries such as `jsdom` and `happy-dom` are not allowed.
 
-DI-managed frontend modules receive manual browser API mocks through DI. Native Web Components under `web/ui/js/` are tested by installing minimal manual platform globals before dynamic import, because the browser platform owns their construction and lifecycle. Such tests must restore changed globals after execution.
+DI-managed frontend modules receive manual browser API mocks through `Mindstream_Web_Platform_Browser$`. Web Component definitions are resolved through the test container, then exercised against minimal manual browser globals. Such tests must restore changed globals after execution.
 
 ## Document Status
 

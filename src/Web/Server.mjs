@@ -11,6 +11,8 @@ export default class Mindstream_Back_Web_Server {
     Fl32_Web_Back_Config_Runtime__Factory$: runtimeConfigFactory,
     Fl32_Web_Back_PipelineEngine$: pipelineEngine,
     Mindstream_Back_Web_Handler$: apiHandler,
+    Fl32_Web_Back_Handler_Static$: staticHandler,
+    Fl32_Web_Back_Dto_Source__Factory$: sourceFactory,
   }) {
     const NAMESPACE = 'Mindstream_Back_Web_Server';
     let started = false;
@@ -27,7 +29,20 @@ export default class Mindstream_Back_Web_Server {
       if (started) {
         throw new Error('Web server is already started.');
       }
+      const webSource = sourceFactory.create({
+        root: './web',
+        prefix: '/',
+        allow: { '.': ['app', 'bootstrap.mjs', 'favicon.ico', 'index.html', 'ui'] },
+        defaults: ['index.html'],
+      });
+      const diSource = sourceFactory.create({
+        root: './node_modules/@teqfw/di/dist',
+        prefix: '/vendor/teqfw-di/',
+        allow: { '.': ['esm.js'] },
+      });
+      await staticHandler.init({ sources: [webSource, diSource] });
       pipelineEngine.addHandler(apiHandler);
+      pipelineEngine.addHandler(staticHandler);
       await server.start(buildServerConfig());
       started = true;
       if (logger?.info) {
@@ -49,5 +64,7 @@ export const __deps__ = Object.freeze({
     'Fl32_Web_Back_Config_Runtime__Factory$': 'Fl32_Web_Back_Config_Runtime__Factory$',
     'Fl32_Web_Back_PipelineEngine$': 'Fl32_Web_Back_PipelineEngine$',
     'Mindstream_Back_Web_Handler$': 'Mindstream_Back_Web_Handler$',
+    'Fl32_Web_Back_Handler_Static$': 'Fl32_Web_Back_Handler_Static$',
+    'Fl32_Web_Back_Dto_Source__Factory$': 'Fl32_Web_Back_Dto_Source__Factory$',
   },
 });

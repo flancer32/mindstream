@@ -158,6 +158,7 @@ export async function createTestContainer() {
   const namespaceRoots = [
     { prefix: 'Mindstream_Back_', target: path.join(projectRoot, 'src'), defaultExt: '.mjs' },
     { prefix: 'Mindstream_Shared_', target: path.join(projectRoot, 'web', 'app', 'Shared'), defaultExt: '.mjs' },
+    { prefix: 'Mindstream_Web_', target: path.join(projectRoot, 'web', 'app', 'Web'), defaultExt: '.mjs' },
     { prefix: 'Fl32_Web_', target: path.join(projectRoot, 'node_modules', '@flancer32', 'teq-web', 'src'), defaultExt: '.mjs' },
     { prefix: 'Teqfw_Di_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'di', 'src'), defaultExt: '.mjs' },
     { prefix: 'TeqFw_Cfg_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'cfg', 'src'), defaultExt: '.mjs' },

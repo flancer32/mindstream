@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/di-compatibility.md`
 - Template Version: `20260619`
-- Changed: `20260725`
+ - Changed: `20260727`
 
 ## Purpose
 
@@ -27,16 +27,17 @@ Code that bypasses the DI model is not part of the correct project codebase.
 The project fixes a **strictly limited set of root namespaces**:
 
 - `Mindstream_Back_`
+- `Mindstream_Web_`
 - `Mindstream_Shared_`
 
 Use of any other root namespace in the MVP is prohibited.
 
-The package declares the active roots in `package.json#teqfw.namespaces`: `Mindstream_Back_` maps to `src/` and `Mindstream_Shared_` maps to `web/app/Shared/`. The composition root builds these rules, together with dependency namespaces, through `TeqFw_Di_Config_NamespaceRegistry` before its first `container.get()` call.
+The package declares the active roots in `package.json#teqfw.namespaces`: `Mindstream_Back_` maps to `src/`, `Mindstream_Web_` maps to `web/app/Web/`, and `Mindstream_Shared_` maps to `web/app/Shared/`. The composition root builds these rules, together with dependency namespaces, through `TeqFw_Di_Config_NamespaceRegistry` before its first `container.get()` call.
 
 ### Zone Semantics
 
 - `Back` means server logic and backend services.
-- `Web` means client logic and frontend execution.
+- `Web` means browser-resident client logic and frontend execution.
 - `Shared` means platform-agnostic code.
 
 `Mindstream_Shared_`:
@@ -44,6 +45,12 @@ The package declares the active roots in `package.json#teqfw.namespaces`: `Minds
 - has no access to platform APIs;
 - does not use `node:*`, DOM, `fetch`, `process`, or similar dependencies;
 - contains DTOs, utilities, and pure business logic.
+
+`Mindstream_Web_`:
+
+- is resolved only by the browser composition root;
+- owns browser-local services, platform adapters, and Web Component definitions;
+- accesses browser APIs only in explicitly injected platform adapter modules or in Custom Element classes created by an injected component definition.
 
 ## Code Import And Binding
 
@@ -168,7 +175,7 @@ Use of suffixes `$` and `$$` is mandatory:
 ## Platform Dependencies
 
 - Dependency IDs with the `node:` prefix are allowed **only in `Mindstream_Back_`**.
-- `Web` and `Shared` do not use platform-specific Dependency IDs.
+- `Web` and `Shared` do not use `node:` or `npm:` Dependency IDs.
 - Any access to the platform happens only through DI.
 
 ## Test Mode

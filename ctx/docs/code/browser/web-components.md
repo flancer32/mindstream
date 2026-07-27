@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/browser/web-components.md`
 - Template Version: `20260726`
-- Changed: `20260726`
+ - Changed: `20260727`
 
 ## Purpose
 
@@ -61,4 +61,4 @@ The element does not calculate scores, resolve the automatic cutoff, hide cards,
 
 ## Technical Conventions
 
-Components use light DOM and documented properties and events for parent-child communication. Each component owns cleanup of observers and document-level listeners created during its connected lifecycle. Native controls retain their accessibility semantics.
+Components use light DOM and documented properties and events for parent-child communication. Each is created by a `Mindstream_Web_Component_*` DI definition and registered only by `Mindstream_Web_Component_Registry$`. Each component owns cleanup of observers and document-level listeners created during its connected lifecycle. Native controls retain their accessibility semantics.

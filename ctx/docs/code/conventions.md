@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/conventions.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+ - Changed: `20260727`
 
 ## Purpose
 
@@ -23,7 +23,7 @@ This document does not describe system architecture, product properties, or the 
 - use of `@teqfw/di` as the DI container.
 - Static imports in server and DI-managed modules are allowed only in the composition root.
 - In all other server and DI-managed code, dependencies are resolved through DI and container-driven dynamic import.
-- Browser-delivered modules under `web/ui/js/` form a native custom-element module graph and may use static imports because the browser, not `@teqfw/di`, owns custom-element construction and lifecycle.
+- Browser-delivered project modules under `web/app/Web/` are DI-managed; only `web/bootstrap.mjs`, the browser composition root, may statically import `@teqfw/di`.
 - CommonJS is allowed only inside third-party dependencies.
 
 ## Code Execution Environment
@@ -84,7 +84,7 @@ This document does not describe system architecture, product properties, or the 
 
 - Module and class names follow Tequila Framework rules.
 - The project root namespace is declared explicitly.
-- Native Web Component classes use the `Mindstream_Web_` namespace and are registered under `mindstream-*` custom-element names.
+- Browser DI modules use the `Mindstream_Web_` namespace. Native Web Component classes returned by their definitions are registered under `mindstream-*` names by the DI-managed component registry.
 - No rigid module-length limit is fixed, but keeping modules within roughly three screens is recommended.
 - “Quick code” without structure is not allowed, including in the MVP.
 - Code duplication is allowed as a temporary measure.
@@ -92,19 +92,9 @@ This document does not describe system architecture, product properties, or the 
 - Whenever a new class is added, the matching class declaration and source-file reference **must** be added to `types.d.ts`.
 - Absence of a new class declaration in `types.d.ts` is an engineering violation of the code layer.
 
-## Browser Web Component Exception
+## Browser Web Component Form
 
-DOM-owning UI modules under `web/ui/js/` are native Web Components governed by `ctx/docs/code/browser/`.
-
-For these modules only:
-
-- extending `HTMLElement` is required rather than prohibited;
-- lifecycle callbacks and other component behavior may be prototype methods because the Custom Elements platform invokes them;
-- `customElements.define(...)` is an allowed top-level registration side effect;
-- constructor dependency injection is not required because the browser constructs registered elements;
-- pure scoring, state, transport, and identity services remain ordinary ES modules and must not be registered as custom elements.
-
-This exception does not apply to server code under `src/` or to explicitly DI-managed shared code such as `web/app/`.
+`Mindstream_Web_Component_*` modules are DI-created definitions. Their constructors receive declared dependencies and return one native class extending the injected `HTMLElement` base. The returned class may use lifecycle callbacks and prototype methods because the Custom Elements platform invokes it without DI arguments. `Mindstream_Web_Component_Registry$` is the sole registration authority; module-scope `customElements.define(...)` is prohibited.
 
 ## Testing
 

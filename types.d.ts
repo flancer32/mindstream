@@ -42,9 +42,16 @@ declare global {
   type Mindstream_Back_Storage_Schema = import("./src/Storage/Schema.mjs").default;
   type Mindstream_Back_Storage_SchemaManager = import("./src/Storage/SchemaManager.mjs").default;
   type Mindstream_Shared_Logger = import("./web/app/Shared/Logger.mjs").default;
-  type Mindstream_Web_Feed = import("./web/ui/js/feed.mjs").default;
-  type Mindstream_Web_IdentityMenu = import("./web/ui/js/identity-menu.mjs").default;
-  type Mindstream_Web_InterestFilter = import("./web/ui/js/interest-filter.mjs").default;
+  type Mindstream_Web_App = import("./web/app/Web/App.mjs").default;
+  type Mindstream_Web_Attention = import("./web/app/Web/Attention.mjs").default;
+  type Mindstream_Web_Identity = import("./web/app/Web/Identity.mjs").default;
+  type Mindstream_Web_InterestFilter = import("./web/app/Web/InterestFilter.mjs").default;
+  type Mindstream_Web_InterestIndicator = import("./web/app/Web/InterestIndicator.mjs").default;
+  type Mindstream_Web_InterestScore = import("./web/app/Web/InterestScore.mjs").default;
+  type Mindstream_Web_Platform_Browser = import("./web/app/Web/Platform/Browser.mjs").default;
+  type Mindstream_Web_Component_Registry = import("./web/app/Web/Component/Registry.mjs").default;
+  type Mindstream_Web_Component_Feed = import("./web/app/Web/Component/Feed.mjs").default;
+  type Mindstream_Web_Component_IdentityMenu = import("./web/app/Web/Component/IdentityMenu.mjs").default;
 }
 
 export {};

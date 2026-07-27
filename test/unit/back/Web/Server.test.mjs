@@ -48,12 +48,20 @@ test('Mindstream_Back_Web_Server registers api handler and starts once', async (
   });
   const apiHandler = { name: 'api-handler' };
   container.register('Mindstream_Back_Web_Handler$', apiHandler);
+  const staticHandler = { init: async (payload) => calls.push({ type: 'static-init', payload }), getRegistrationInfo() { return { name: 'static', stage: 'process' }; } };
+  container.register('Fl32_Web_Back_Handler_Static$', staticHandler);
+  container.register('Fl32_Web_Back_Dto_Source__Factory$', { create: (payload) => payload });
 
   const server = await container.get('Mindstream_Back_Web_Server$');
   await server.start();
 
   assert.deepEqual(calls, [
+    { type: 'static-init', payload: { sources: [
+      { root: './web', prefix: '/', allow: { '.': ['app', 'bootstrap.mjs', 'favicon.ico', 'index.html', 'ui'] }, defaults: ['index.html'] },
+      { root: './node_modules/@teqfw/di/dist', prefix: '/vendor/teqfw-di/', allow: { '.': ['esm.js'] } },
+    ] } },
     { type: 'add', handler: apiHandler },
+    { type: 'add', handler: staticHandler },
     { type: 'configure', payload: { port: 3001, type: 'http2' } },
     { type: 'start', cfg: { port: 3001, type: 'http2' } },
   ]);
@@ -84,6 +92,8 @@ test('Mindstream_Back_Web_Server exposes wait promise', async () => {
     },
   });
   container.register('Mindstream_Back_Web_Handler$', {});
+  container.register('Fl32_Web_Back_Handler_Static$', { async init() {}, getRegistrationInfo() { return { name: 'static', stage: 'process' }; } });
+  container.register('Fl32_Web_Back_Dto_Source__Factory$', { create: (payload) => payload });
 
   const server = await container.get('Mindstream_Back_Web_Server$');
   const waitPromise = server.wait();

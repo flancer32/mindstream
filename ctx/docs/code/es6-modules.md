@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/es6-modules.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+ - Changed: `20260727`
 
 ## Purpose
 
@@ -16,7 +16,7 @@ This document belongs to the `code/` layer and describes engineering implementat
 
 This normative form applies to server modules under `src/` and to other modules explicitly assembled through `@teqfw/di`, currently including `web/app/`.
 
-Native browser UI modules under `web/ui/js/` are governed by `ctx/docs/code/browser/`. A DOM-owning module there may extend `HTMLElement`, use Custom Elements lifecycle methods, import its native browser module graph statically, and register a custom element at module scope. Pure browser services remain ES modules but do not become custom elements.
+Browser modules under `web/app/Web/` are DI-managed. Web Component definition modules may return a native `HTMLElement` subclass from their DI-created default-export class; the returned subclass may use platform lifecycle methods, while its dependencies are captured from the definition's constructor closure.
 
 ## Normative Module Form
 
@@ -109,7 +109,7 @@ The class is **not used** for:
 - extensible hierarchies;
 - behavior reuse through `extends`.
 
-Use of `extends`, `super`, and inheritance chains is a violation of the server and DI-managed normative form. Browser UI under `web/ui/js/` is outside that prohibition; direct `HTMLElement` inheritance is required by its documented native Web Components.
+Use of `extends`, `super`, and inheritance chains is a violation of the server and DI-managed normative form, except for the native `HTMLElement` subclasses returned by documented browser component definitions.
 
 ## Top-Level Module Logic
 
@@ -121,7 +121,7 @@ Top-level code in an ES6 module is allowed only if all of the following are true
 
 Any initialization that affects module behavior must occur inside the constructor.
 
-Documented `customElements.define(...)` calls under `web/ui/js/` are the browser exception: registration may occur at module scope, while visible behavior starts through the platform lifecycle.
+Browser component registration is performed by `Mindstream_Web_Component_Registry$` after definitions have been linked. It is not a module-scope side effect.
 
 ## Constraints And Prohibitions
 
@@ -130,7 +130,7 @@ The following are prohibited for ES6 modules in Mindstream:
 - using factory functions instead of `class`;
 - declaring public methods outside the constructor;
 - modifying the `deps` object;
-- statically importing project code outside the DI composition root, except inside the documented native browser module graph under `web/ui/js/`;
+- statically importing project code outside a DI composition root;
 - using private modifiers as the primary encapsulation mechanism;
 - building OO hierarchies and inheritance.
 
@@ -144,4 +144,4 @@ DI-managed code that violates the fixed ES6 module form:
 - is a codebase defect;
 - is not a permissible style deviation or technical debt.
 
-Native Web Components are valid only within the explicit browser exception and remain defects if their DOM-owning responsibility or custom-element contract is undocumented.
+Native Web Components are valid only as classes returned by documented DI component definitions and remain defects if their DOM-owning responsibility or custom-element contract is undocumented.
