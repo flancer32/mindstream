@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/overview.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -46,7 +46,7 @@ Interaction between the external environment and the system happens through arch
 
 ## Architectural Diagram
 
-![Mindstream architecture contours](../_img/mindstream_arch_conturs.svg)
+![Mindstream architecture contours](../../assets/architecture/mindstream_arch_conturs.svg)
 
 The diagram is explanatory and does not define implementation or technology choices.
 

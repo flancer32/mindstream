@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/overview.md`
 - Template Version: `20260605`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Product Identity
 
@@ -32,7 +32,7 @@ Mindstream is responsible for:
 - Attention signal capture and aggregated attention statistics.
 - Personal feed projection from the shared corpus.
 
-Detailed product meaning is distributed across `domain.md`, `roles.md`, `use-cases.md`, and `glossary.md`.
+Detailed product meaning is distributed across `domain.md`, `roles.md`, `use-cases.md`, and `glossary.md`. Applied user-facing projections are documented in `experience/`, and fixed MVP limits in `constraints/`.
 
 ## Core Lifecycle
 
@@ -78,3 +78,5 @@ The MVP does not aim for full multi-device identity, fine-grained personalizatio
 - Read `roles.md` to understand participants, authority, and ownership boundaries.
 - Read `use-cases.md` to understand user goals, outcomes, and lifecycle positions.
 - Read `glossary.md` to understand stable product terminology.
+- Read `experience/` for applied user-facing projections that refine this product meaning.
+- Read `constraints/mvp-scope.md` for the mandatory MVP boundary.

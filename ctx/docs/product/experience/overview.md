@@ -1,8 +1,8 @@
 # Mindstream — Composition Overview
 
-- Path: `ctx/docs/composition/overview.md`
+- Path: `ctx/docs/product/experience/overview.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260727`
 
 ## Purpose
 

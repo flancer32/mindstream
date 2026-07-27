@@ -25,7 +25,7 @@ The browser surface uses the document DOM as its styling boundary. Global CSS ma
 - Activate the browser-bound profile UUID.
 - Adjust one automatic or manual interest threshold and optionally hide publications below it.
 
-Detailed presentation and action semantics remain in `ctx/docs/composition/`.
+Detailed presentation and action semantics remain in `ctx/docs/product/experience/`.
 
 ## Accessibility Baseline
 

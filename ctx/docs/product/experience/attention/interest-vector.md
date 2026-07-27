@@ -1,8 +1,8 @@
 # Interest Vector Calculation And Use On The Frontend
 
-- Path: `ctx/docs/composition/attention/interest-vector.md`
+- Path: `ctx/docs/product/experience/attention/interest-vector.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -130,7 +130,7 @@ The UI interacts with the attention module **only through publication-scoring re
 
 These results also include the value of the interest indicator and the derived visual rules used to present it on the current page.
 
-Color interpretation of the interest indicator is defined separately in `ctx/docs/composition/attention/interest-indicator-coloring.md` and uses only the locally available range of already calculated publication scores.
+Color interpretation of the interest indicator is defined separately in `ctx/docs/product/experience/attention/interest-indicator-coloring.md` and uses only the locally available range of already calculated publication scores.
 
 ## Persistence
 

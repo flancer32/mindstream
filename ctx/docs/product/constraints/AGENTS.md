@@ -1,16 +1,16 @@
 # Constraints Documentation
 
-- Path: `ctx/docs/constraints/AGENTS.md`
+- Path: `ctx/docs/product/constraints/AGENTS.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260727`
 
 ## Purpose
 
-Defines the project-specific constraint branch under `ctx/docs/`.
+Defines the nested product constraint branch.
 
 ## Level Map
 
-- `AGENTS.md` — level definition for `ctx/docs/constraints/`.
+- `AGENTS.md` — level definition for `ctx/docs/product/constraints/`.
 - `mvp-scope.md` — fixed boundary of what is included and excluded in the MVP.
 - `overview.md` — compact overview of how this branch constrains the project.
 

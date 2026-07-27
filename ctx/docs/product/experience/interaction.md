@@ -1,8 +1,8 @@
 # Mindstream — Composition Interaction
 
-- Path: `ctx/docs/composition/interaction.md`
+- Path: `ctx/docs/product/experience/interaction.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -67,7 +67,7 @@ A positive mark is a separate attention action and may accompany any form of acc
 
 ## Missing Actions
 
-Actions prohibited by `constraints/mvp-scope.md` are absent, including:
+Actions prohibited by `../constraints/mvp-scope.md` are absent, including:
 
 - negative publication ratings;
 - controlling algorithms or personalization parameters beyond the unified local interest threshold and hiding toggle;
@@ -82,4 +82,4 @@ This document does not describe UX sequences or user scenarios, visual mechanics
 
 ## Summary
 
-`composition/interaction.md` defines the permitted user actions of the Mindstream MVP as a bounded set of applied activity facts that form a hierarchy of access-to-attention forms, without moving into mechanics, implementation, or architecture.
+`product/experience/interaction.md` defines the permitted user actions of the Mindstream MVP as a bounded set of applied activity facts that form a hierarchy of access-to-attention forms, without moving into mechanics, implementation, or architecture.

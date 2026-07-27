@@ -1,8 +1,8 @@
 # Mindstream — Composition State
 
-- Path: `ctx/docs/composition/state.md`
+- Path: `ctx/docs/product/experience/state.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -92,7 +92,7 @@ Negative forms of attention and rating are absent.
 
 ## Prohibited And Absent States
 
-States prohibited in `constraints/mvp-scope.md` are absent, including:
+States prohibited in `../constraints/mvp-scope.md` are absent, including:
 
 - repeated publication state in the feed;
 - error state as a separate user-experience form;
@@ -106,4 +106,4 @@ This document does not describe transitions between states, causes of states, ev
 
 ## Summary
 
-`composition/state.md` defines the permitted user-experience states of the Mindstream MVP as stable forms of reading, attention, and presence inside the product, including valid emptiness states and constraints, without moving into mechanics, architecture, or implementation.
+`product/experience/state.md` defines the permitted user-experience states of the Mindstream MVP as stable forms of reading, attention, and presence inside the product, including valid emptiness states and constraints, without moving into mechanics, architecture, or implementation.

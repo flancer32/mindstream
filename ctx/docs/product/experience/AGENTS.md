@@ -1,19 +1,19 @@
 # Composition Documentation
 
-- Path: `ctx/docs/composition/AGENTS.md`
+- Path: `ctx/docs/product/experience/AGENTS.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260727`
 
 ## Purpose
 
-Defines the project-specific documentation branch for applied user-facing composition.
+Defines the nested product documentation branch for applied user-facing experience.
 
 This branch records presentation shape, interaction framing, and user-visible state projections without redefining product meaning or architecture.
 
 ## Level Map
 
 - `attention/` — deeper composition notes for attention-related user-visible projections.
-- `AGENTS.md` — level definition for `ctx/docs/composition/`.
+- `AGENTS.md` — level definition for `ctx/docs/product/experience/`.
 - `interaction.md` — admissible user actions as composition-level facts.
 - `overview.md` — compact overview of the composition branch and its role.
 - `state.md` — user-visible experience states and their composition-level distinctions.
@@ -35,6 +35,6 @@ Does NOT define:
 
 ## Dependency Position
 
-This branch is a project-specific extension under `ctx/docs/`.
+This branch is a project-specific extension under `ctx/docs/product/`.
 
 It must remain consistent with product meaning and must not override architecture, environment, or code constraints.

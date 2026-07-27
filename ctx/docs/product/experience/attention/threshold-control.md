@@ -1,8 +1,8 @@
 # Unified Interest Threshold Control
 
-- Path: `ctx/docs/composition/attention/threshold-control.md`
+- Path: `ctx/docs/product/experience/attention/threshold-control.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Purpose
 

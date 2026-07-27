@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/AGENTS.md`
 - Template Version: `20260605`
-- Changed: `20260619`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -12,11 +12,8 @@ Documents at this level describe the system as a design object, including meanin
 
 ## Level Map
 
-- `_img/` — non-normative diagrams and visual aids used by documentation files in this branch.
 - `architecture/` — structural form of the system, architectural entities, boundaries, and interaction model.
 - `code/` — engineering invariants governing how architecture is expressed in source code.
-- `composition/` — project-specific applied composition documents for user-facing form and interaction shape.
-- `constraints/` — project-specific constraint documents that add hard limits below product meaning and above implementation.
 - `environment/` — runtime environment and infrastructural prerequisites required for system operation.
 - `product/` — system meaning, domain entities, and product-level invariants.
 - `AGENTS.md` — level definition for `ctx/docs/`.
@@ -62,15 +59,9 @@ Lower levels may increase explicitness, constraint, and operational precision, b
 
 They must not add new product capabilities, invariants, authority, or semantic boundaries unless those are first named upstream.
 
-## Project Extensions
+## Project-Specific Nested Structure
 
-This project currently keeps additional documentation branches beyond the minimal baseline:
-
-- `composition/` captures applied user-facing composition and presentation structure.
-- `constraints/` captures project-local hard limits that complement architecture and environment constraints.
-- `_img/` stores non-normative diagrams referenced by documents in this branch.
-
-These branches may refine the documentation landscape of this project, but they remain subordinate to the baseline dependency order rooted in `product`.
+Project-specific documents remain nested inside their applicable ADSM level. Product-facing experience and MVP constraints therefore belong under `product/`; non-normative diagrams belong under `ctx/assets/`.
 
 ## Documentation As A Cognitive Interface
 

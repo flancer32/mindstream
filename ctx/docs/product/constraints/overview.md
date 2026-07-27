@@ -1,8 +1,8 @@
 # Mindstream — Constraints Overview
 
-- Path: `ctx/docs/constraints/overview.md`
+- Path: `ctx/docs/product/constraints/overview.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260727`
 
 ## Purpose
 

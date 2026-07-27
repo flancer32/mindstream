@@ -1,8 +1,8 @@
 # Feed Hiding Control
 
-- Path: `ctx/docs/composition/attention/feed-filter-control.md`
+- Path: `ctx/docs/product/experience/attention/feed-filter-control.md`
 - Template Version: `20260725`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Purpose
 

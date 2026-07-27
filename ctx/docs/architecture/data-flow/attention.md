@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/data-flow/attention.md`
 - Template Version: `20260619`
-- Changed: `20260726`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -35,7 +35,7 @@ Attention signals record facts of interaction between the browser context and re
 
 Signals are accumulated as statistical observations without interpretation of order, causality, or intent; sequencing and composition of attention forms belong to the application and UI levels.
 
-![Attention Signal Data Flows](../../_img/mindstream_arch_data_flow_attention.svg)
+![Attention Signal Data Flows](../../../assets/architecture/mindstream_arch_data_flow_attention.svg)
 
 Diagram: Attention flows.
 

@@ -1,6 +1,6 @@
 # Mindstream — Composition UI
 
-- Path: `ctx/docs/composition/ui.md`
+- Path: `ctx/docs/product/experience/ui.md`
 - Template Version: `20260619`
 - Changed: `20260727`
 
@@ -22,7 +22,7 @@ Each publication is shown in the feed with a title, meta information, and visual
 
 The feed has no controls for sorting. It provides one interest-threshold control and one narrow local hiding toggle for already loaded publications.
 
-The settings panel contains one numeric interest threshold used by both interest-indicator highlighting and optional local feed hiding. Their shared rule is defined in `ctx/docs/composition/attention/threshold-control.md`; hiding behavior is refined in `ctx/docs/composition/attention/feed-filter-control.md`.
+The settings panel contains one numeric interest threshold used by both interest-indicator highlighting and optional local feed hiding. Their shared rule is defined in `ctx/docs/product/experience/attention/threshold-control.md`; hiding behavior is refined in `ctx/docs/product/experience/attention/feed-filter-control.md`.
 
 ## Forms Of Publication Presence
 
@@ -59,7 +59,7 @@ The interest indicator visualizes results of local publication scoring and is no
 
 Relative color interpretation of the interest indicator is allowed within the current feed page, where green highlights the upper local range of publications with the strongest match to user interests.
 
-The rule for computing that range is defined in `ctx/docs/composition/attention/interest-indicator-coloring.md`.
+The rule for computing that range is defined in `ctx/docs/product/experience/attention/interest-indicator-coloring.md`.
 
 ## Access Mode
 
@@ -77,7 +77,7 @@ Repeated publications in the feed are not allowed and are not treated as a valid
 
 ## Absent Forms As Invariants
 
-Visual applied forms prohibited by `constraints/mvp-scope.md` are absent, including personalization settings, filters and sorting controls beyond the unified interest threshold and narrow local hiding toggle, feed-formation explanations, negative ratings, social elements, and error messages as a separate class of UI entities.
+Visual applied forms prohibited by `../constraints/mvp-scope.md` are absent, including personalization settings, filters and sorting controls beyond the unified interest threshold and narrow local hiding toggle, feed-formation explanations, negative ratings, social elements, and error messages as a separate class of UI entities.
 
 ## Document Boundary
 
@@ -85,4 +85,4 @@ This document does not describe feed-formation or interest-profile algorithms, e
 
 ## Summary
 
-`composition/ui.md` defines the Mindstream MVP as a single reading surface in which publications are presented through title, annotation, overview, and transition to the original, with explicit visualization of user attention and access mode, and without control mechanisms, explainability, or reactive behavior.
+`product/experience/ui.md` defines the Mindstream MVP as a single reading surface in which publications are presented through title, annotation, overview, and transition to the original, with explicit visualization of user attention and access mode, and without control mechanisms, explainability, or reactive behavior.

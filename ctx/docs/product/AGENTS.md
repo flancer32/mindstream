@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/AGENTS.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260727`
 
 ## Purpose
 
@@ -10,6 +10,8 @@ Defines the product documentation level as the semantic root of the project docu
 
 ## Level Map
 
+- `constraints/` — hard MVP scope constraints that narrow the permitted product space.
+- `experience/` — applied user-facing experience, state, interaction, and presentation projections.
 - `AGENTS.md` — level definition for `ctx/docs/product/`.
 - `domain.md` — product world model, core domain areas, entities, and domain invariants.
 - `glossary.md` — stable project terminology and naming boundaries.
@@ -29,7 +31,7 @@ Does NOT define:
 
 - Architecture structure, internal flows, or state authority.
 - Runtime environment prerequisites or implementation-level engineering rules.
-- Agent operations, workflow routing, or task procedures.
+- UI implementation mechanics, agent operations, workflow routing, or task procedures.
 
 ## Dependency Role
 
