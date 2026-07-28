@@ -14,12 +14,8 @@ constructor({
     generateEmbeddings,
   }) {
     /**
- * @param {unknown} commandParts
- * @returns {unknown}
- */
-/**
- * @param {unknown} commandParts
- * @returns {unknown}
+ * @param {string[]} commandParts
+ * @returns {object}
  */
 const resolveTarget = function (commandParts) {
       const parts = Array.isArray(commandParts) ? commandParts : [];
@@ -28,6 +24,7 @@ const resolveTarget = function (commandParts) {
         throw new Error(`Unknown process command "process:${parts.join(':')}".`);
       }
       const key = `${segment}:${action}`;
+      /** @type {Record<string, Mindstream_Back_Cli_Process_Generate_Embeddings$|Mindstream_Back_Cli_Process_Generate_Summaries$>} */
       const map = {
         'generate:embeddings': generateEmbeddings,
         'generate:summaries': generateSummaries,
@@ -39,18 +36,12 @@ const resolveTarget = function (commandParts) {
     };
 
     /**
- * @param {unknown} deps
- * @param {unknown} deps.commandParts
- * @param {unknown} deps.args
- * @returns {Promise<unknown>}
- */
-/**
- * @param {unknown} params
- * @returns {Promise<unknown>}
+ * @param {object} params
+ * @returns {Promise<void>}
  */
 this.dispatch = async function (params = {}) {
-      const { commandParts, args } = params;
-      const { command, name } = resolveTarget(commandParts);
+      const { commandParts, args } = /** @type {{commandParts: string[], args: string[]}} */ (params);
+      const { command, name } = /** @type {{command: Mindstream_Back_Cli_Process_Generate_Embeddings$|Mindstream_Back_Cli_Process_Generate_Summaries$, name: string}} */ (resolveTarget(commandParts));
       if (!command?.execute) {
         throw new Error(`Command "${name}" is unavailable.`);
       }

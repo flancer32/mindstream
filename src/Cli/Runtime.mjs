@@ -10,12 +10,8 @@ export default class Mindstream_Back_Cli_Runtime {
  */
 constructor({ runtimeWeb }) {
     /**
- * @param {unknown} commandParts
- * @returns {unknown}
- */
-/**
- * @param {unknown} commandParts
- * @returns {unknown}
+ * @param {string[]} commandParts
+ * @returns {object}
  */
 const resolveTarget = function (commandParts) {
       const parts = Array.isArray(commandParts) ? commandParts : [];
@@ -30,18 +26,12 @@ const resolveTarget = function (commandParts) {
     };
 
     /**
- * @param {unknown} deps
- * @param {unknown} deps.commandParts
- * @param {unknown} deps.args
- * @returns {Promise<unknown>}
- */
-/**
- * @param {unknown} params
- * @returns {Promise<unknown>}
+ * @param {object} params
+ * @returns {Promise<void>}
  */
 this.dispatch = async function (params = {}) {
-      const { commandParts, args } = params;
-      const command = resolveTarget(commandParts);
+      const { commandParts, args } = /** @type {{commandParts: string[], args: string[]}} */ (params);
+      const command = /** @type {Mindstream_Back_Cli_Runtime_Web$} */ (resolveTarget(commandParts));
       if (!command?.execute) {
         throw new Error('Command "runtime:web" is unavailable.');
       }

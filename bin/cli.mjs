@@ -17,7 +17,7 @@ for (const entry of await namespaceRegistry.build()) {
   container.addNamespaceRoot(entry.prefix, entry.dirAbs, entry.ext);
 }
 
-/** @type {Mindstream_Back_App} */
+/** @type {Mindstream_Back_App$} */
 const app = await container.get('Mindstream_Back_App$');
 const cliArgs = process.argv.slice(2);
 let stopping = false;
@@ -56,7 +56,7 @@ process.once('SIGTERM', () => { void shutdown(0); });
 
 try {
   await loadConfiguration();
-  process.exitCode = await app.run({ projectRoot, cliArgs });
+  process.exitCode = await app.run({ cliArgs });
 } catch (error) {
   console.error(error);
   process.exitCode = 1;

@@ -9,6 +9,7 @@
     "target": "ESNext"
   },
   "include": [
+    "bin",
     "src",
     "web/app",
     "test",

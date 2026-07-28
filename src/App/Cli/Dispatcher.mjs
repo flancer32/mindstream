@@ -23,11 +23,7 @@ constructor({
 
     /**
  * @param {unknown} err
- * @returns {unknown}
- */
-/**
- * @param {unknown} err
- * @returns {unknown}
+ * @returns {Error}
  */
 const ensureError = function (err) {
       if (err instanceof Error) return err;
@@ -36,11 +32,7 @@ const ensureError = function (err) {
 
     /**
  * @param {unknown} cliArgs
- * @returns {unknown}
- */
-/**
- * @param {unknown} cliArgs
- * @returns {unknown}
+ * @returns {string[]}
  */
 const normalizeArgs = function (cliArgs) {
       if (!Array.isArray(cliArgs)) return [];
@@ -49,11 +41,7 @@ const normalizeArgs = function (cliArgs) {
 
     /**
  * @param {unknown} cliArgs
- * @returns {unknown}
- */
-/**
- * @param {unknown} cliArgs
- * @returns {unknown}
+ * @returns {object}
  */
 const parseCommand = function (cliArgs) {
       const [command, ...args] = normalizeArgs(cliArgs);
@@ -65,11 +53,7 @@ const parseCommand = function (cliArgs) {
 
     /**
  * @param {unknown} command
- * @returns {unknown}
- */
-/**
- * @param {unknown} command
- * @returns {unknown}
+ * @returns {string[]}
  */
 const splitCommand = function (command) {
       return String(command)
@@ -79,18 +63,13 @@ const splitCommand = function (command) {
     };
 
     /**
- * @param {unknown} deps
- * @param {unknown} deps.cliArgs
- * @returns {Promise<unknown>}
- */
-/**
- * @param {unknown} params
- * @returns {Promise<unknown>}
+ * @param {object} params
+ * @returns {Promise<number>}
  */
 this.dispatch = async function (params = {}) {
-      const { cliArgs } = params;
+      const { cliArgs } = /** @type {{cliArgs: string[]}} */ (params);
       try {
-        const { command, args } = parseCommand(cliArgs);
+        const { command, args } = /** @type {{command: string, args: string[]}} */ (parseCommand(cliArgs));
         const parts = splitCommand(command);
         if (!parts.length) {
           throw new Error('CLI command is required.');

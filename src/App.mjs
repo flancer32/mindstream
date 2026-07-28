@@ -16,18 +16,12 @@ constructor({
     knexProvider,
   }) {
     /**
- * @param {unknown} deps
- * @param {unknown} deps.projectRoot
- * @param {unknown} deps.cliArgs
- * @returns {Promise<unknown>}
- */
-/**
- * @param {unknown} params
- * @returns {Promise<unknown>}
+ * @param {object} params
+ * @returns {Promise<number>}
  */
 this.run = async function (params = {}) {
-      const { projectRoot, cliArgs } = params;
-      await config.init(projectRoot);
+      const { cliArgs } = /** @type {{cliArgs: string[]}} */ (params);
+      await config.init();
       if (!cliDispatcher?.dispatch) {
         throw new Error('CLI dispatcher is not available.');
       }
@@ -35,10 +29,7 @@ this.run = async function (params = {}) {
     };
 
     /**
- * @returns {Promise<unknown>}
- */
-/**
- * @returns {Promise<unknown>}
+ * @returns {Promise<void>}
  */
 this.stop = async function () {
       if (knexProvider?.destroy) {

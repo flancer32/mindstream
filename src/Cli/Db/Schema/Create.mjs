@@ -10,16 +10,11 @@ export default class Mindstream_Back_Cli_Db_Schema_Create {
  */
 constructor({ schemaManager }) {
     /**
- * @param {unknown} deps
- * @param {unknown} deps.args
- * @returns {Promise<unknown>}
- */
-/**
- * @param {unknown} params
- * @returns {Promise<unknown>}
+ * @param {object} params
+ * @returns {Promise<void>}
  */
 this.execute = async function (params = {}) {
-      const { args } = params;
+      const { args } = /** @type {{args: string[]}} */ (params);
       if (Array.isArray(args) && args.length) {
         throw new Error('Command db:schema:create does not accept arguments.');
       }
