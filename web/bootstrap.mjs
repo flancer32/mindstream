@@ -1,4 +1,4 @@
-import Container from '/vendor/teqfw-di/esm.js';
+import Container from '/vendor/teqfw-di/Container.mjs';
 
 const container = new Container();
 container.addNamespaceRoot('Mindstream_Web_', '/app/Web', '.mjs');

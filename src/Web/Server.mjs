@@ -59,9 +59,9 @@ this.start = async function () {
         defaults: ['index.html'],
       });
       const diSource = sourceFactory.create({
-        root: './node_modules/@teqfw/di/dist',
+        root: './node_modules/@teqfw/di/src',
         prefix: '/vendor/teqfw-di/',
-        allow: { '.': ['esm.js'] },
+        allow: { '.': ['.'] },
       });
       await staticHandler.init({ sources: [webSource, diSource] });
       pipelineEngine.addHandler(apiHandler);

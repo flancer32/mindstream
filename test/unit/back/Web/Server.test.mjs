@@ -58,7 +58,7 @@ test('Mindstream_Back_Web_Server registers api handler and starts once', async (
   assert.deepEqual(calls, [
     { type: 'static-init', payload: { sources: [
       { root: './web', prefix: '/', allow: { '.': ['app', 'bootstrap.mjs', 'favicon.ico', 'index.html', 'ui'] }, defaults: ['index.html'] },
-      { root: './node_modules/@teqfw/di/dist', prefix: '/vendor/teqfw-di/', allow: { '.': ['esm.js'] } },
+      { root: './node_modules/@teqfw/di/src', prefix: '/vendor/teqfw-di/', allow: { '.': ['.'] } },
     ] } },
     { type: 'add', handler: apiHandler },
     { type: 'add', handler: staticHandler },
