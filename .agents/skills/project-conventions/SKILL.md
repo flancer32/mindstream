@@ -1,42 +1,42 @@
 ---
 name: project-conventions
-description: Project-wide conventions that must be loaded for every agent session in this repository.
+description: Project-specific conventions. Use for every task in this repository.
 ---
 
 # Project Conventions
 
-Apply the following rules in order of priority. If a rule conflicts with an applicable `AGENTS.md` instruction, follow `AGENTS.md`.
+`AGENTS.md` overrides this file.
 
-## 1. Repository topology
+## Repositories
 
-- Treat the project root and `ctx/` as parts of one Git repository.
-- Treat `ctx/` as the cognitive-context directory within this repository.
-- Run Git status checks, commits, and pushes from the project root; changes under `ctx/` belong to the same working tree.
+- The root and `ctx/` are one Git repository; include `ctx/` in root Git operations.
+- `ctx/` is the cognitive-context directory.
 
-## 2. Git workflow
+## Workflow
 
-Work directly on `main` unless the task explicitly specifies another branch. Do not create working branches.
+- Work on `main` unless the task specifies another branch; do not create branches.
+- Before work, fetch and ensure the current branch matches its upstream.
 
-Before starting work, fetch the repository and ensure the local branch in use matches its upstream version.
+## Communication
 
-## 3. Communication
+- User: Russian unless requested otherwise; code, comments, docs, commits, identifiers: English.
+- Report changes, verification, and remaining risks.
 
-- Communicate with the user in Russian unless the user explicitly requests another language.
-- Write source code, comments, documentation, commit messages, and identifiers in English.
-- Report the changes made, the verification performed, and remaining risks.
-- Create a GitHub issue in `flancer32/ai-memo` when a problem requires the user's attention.
+## Shared memory
 
-## 4. Validation
+- `flancer32/ai-memo` is the shared cross-project issue tracker and memory.
+- May create issues: source `flancer32/mindstream`; name the project or projects expected to resolve them.
+- Notes: `project/flancer32/mindstream/`.
 
-- Do not use the `teqfw-esm-validator` skill for this package.
+## Validation
 
-## 5. TeqFW platform rules
+- Do not use `teqfw-esm-validator`.
 
-- Use the `teqfw-platform` skill only for tasks on the `@teqfw/di` package. Do not apply it to other TeqFW packages without an explicit package-local adaptation.
+## TeqFW platform
 
-## 6. File editing fallback
+- Use `teqfw-platform` only for `@teqfw/di` tasks; otherwise require package-local adaptation.
 
-- Use `apply_patch` for local edits by default.
-- If `apply_patch` fails because the sandbox cannot initialize `bwrap` or a network namespace, use `git apply` with a scoped unified diff.
-- Do not use shell redirection, `cat`, or broad rewrite commands as an editing fallback.
-- After applying a fallback patch, run `git diff --check` from the project root.
+## Editing fallback
+
+- Use `apply_patch`; on `bwrap` or network-namespace failure, use scoped `git apply`.
+- Do not use shell redirection, `cat`, or broad rewrites; after fallback, run `git diff --check` from the root.
