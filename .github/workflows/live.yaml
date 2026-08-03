@@ -96,12 +96,11 @@ jobs:
               cp -a prod.old/var/. prod/var/ || true
             fi
 
-            # Start runtime:web in PM2 cluster mode (4 workers)
+            # Start the default fl32:web:start command in PM2 cluster mode (4 workers)
             cd "${{ env.APP_DIR }}/prod"
-            pm2 start bin/cli.mjs \
+            pm2 start ./node_modules/.bin/teq \
               --name mindstream-web \
-              -i 4 \
-              -- runtime:web
+              -i 4
 
             pm2 save
             

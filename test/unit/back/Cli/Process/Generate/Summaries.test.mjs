@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { createTestContainer } from '../../../../di-node.mjs';
 
-test('Mindstream_Back_Cli_Process_Generate_Summaries calls generator', async () => {
+test('Mindstream_Back_Cli_Process_Generate_Summaries is a finite Teq command product', async () => {
   const container = await createTestContainer();
   let called = 0;
 
@@ -14,18 +14,9 @@ test('Mindstream_Back_Cli_Process_Generate_Summaries calls generator', async () 
   });
 
   const command = await container.get('Mindstream_Back_Cli_Process_Generate_Summaries$');
-  await command.execute({ args: [] });
+  assert.equal(command.id, 'process:generate:summaries');
+  assert.equal(command.lifetime, 'finite');
+  await command.execute({ args: {}, options: {} });
 
   assert.equal(called, 1);
-});
-
-test('Mindstream_Back_Cli_Process_Generate_Summaries rejects arguments', async () => {
-  const container = await createTestContainer();
-
-  container.register('Mindstream_Back_Process_Generate_Summaries$', {
-    async execute() {},
-  });
-
-  const command = await container.get('Mindstream_Back_Cli_Process_Generate_Summaries$');
-  await assert.rejects(command.execute({ args: ['extra'] }), /does not accept arguments/);
 });

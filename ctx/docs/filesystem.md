@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/filesystem.md`
 - Template Version: `20260605`
-- Changed: `20260619`
+- Changed: `20260803`
 
 ## Purpose
 
@@ -15,7 +15,7 @@ Defines the declarative structure of the repository at the top level only, listi
 - `.github/` — repository-level automation and workflows.
 - `.git/` — repository metadata managed by Git and outside the product model.
 - `.vscode/` — editor-local workspace settings.
-- `bin/` — executable entry points and bootstrap scripts.
+- `bin/` — retained development helper scripts outside the backend executable path.
 - `ctx/` — cognitive context containing declarative documentation.
 - `node_modules/` — installed external dependencies outside project control.
 - `src/` — source code of the application.

@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/cli/overview.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260803`
 
 ## Purpose
 
@@ -28,7 +28,7 @@ The CLI is used only as the mechanism for choosing the execution mode of the bac
 
 ## Entry Point
 
-The backend application has a single entry point.
+The backend application uses the `teq` executable provided by `@teqfw/cli` as its single entry point.
 
 All backend code starts through it and differs only by the selected CLI command.
 
@@ -106,11 +106,11 @@ The following invariants are fixed for the CLI layer in the MVP:
 
 ---
 
-## Relation To Bootstrap And Runtime
+## Relation To Host And Runtime
 
-The CLI is not the bootstrap layer.
+The CLI is not the container composition layer.
 
-Bootstrap hands control to the backend application, and the CLI determines the execution mode after control is transferred. When control returns, bootstrap shuts down the application and releases managed resources.
+The host configures the Container before first resolution, starts lifecycle plugins, selects a descriptor by its complete `id`, and owns status and signal handling. `Mindstream_Back_App_Plugin` prepares shared application state and releases Knex resources during host shutdown. Command products implement only their selected action.
 
 Runtime code does not depend on the CLI and contains no startup-mode selection logic.
 
@@ -120,8 +120,8 @@ Runtime code does not depend on the CLI and contains no startup-mode selection l
 
 This document does not describe:
 
-- the CLI tree structure;
-- the dispatcher model;
+- a command-tree implementation;
+- host-library internals;
 - argument parsing;
 - error semantics and exit codes;
 - concrete MVP commands;

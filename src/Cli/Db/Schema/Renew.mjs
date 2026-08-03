@@ -8,16 +8,17 @@ export default class Mindstream_Back_Cli_Db_Schema_Renew {
  * @param {object} deps
  * @param {Mindstream_Back_Storage_SchemaManager$} deps.schemaManager
  */
-constructor({ schemaManager }) {
+  constructor({ schemaManager }) {
+    this.id = 'db:schema:renew';
+    this.summary = 'Recreate the database schema while preserving data where possible.';
+    this.lifetime = 'finite';
+    this.arguments = [];
+    this.options = [];
     /**
  * @param {object} params
  * @returns {Promise<void>}
  */
-this.execute = async function (params = {}) {
-      const { args } = /** @type {{args: string[]}} */ (params);
-      if (Array.isArray(args) && args.length) {
-        throw new Error('Command db:schema:renew does not accept arguments.');
-      }
+    this.execute = async function () {
       await schemaManager.renewSchema();
     };
   }

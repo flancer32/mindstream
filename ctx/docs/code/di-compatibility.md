@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/di-compatibility.md`
 - Template Version: `20260619`
- - Changed: `20260727`
+ - Changed: `20260803`
 
 ## Purpose
 
@@ -32,7 +32,7 @@ The project fixes a **strictly limited set of root namespaces**:
 
 Use of any other root namespace in the MVP is prohibited.
 
-The package declares the active roots in `package.json#teqfw.namespaces`: `Mindstream_Back_` maps to `src/`, `Mindstream_Web_` maps to `web/app/Web/`, and `Mindstream_Shared_` maps to `web/app/Shared/`. The composition root builds these rules, together with dependency namespaces, through `TeqFw_Di_Config_NamespaceRegistry` before its first `container.get()` call.
+The package declares the active roots in `package.json#teqfw.fw.di.namespaces`: `Mindstream_Back_` maps to `src/`, `Mindstream_Web_` maps to `web/app/Web/`, and `Mindstream_Shared_` maps to `web/app/Shared/`. The Teq host applies these rules, together with dependency namespaces and optional host configurator extensions, before its first `container.get()` call.
 
 ### Zone Semantics
 
@@ -47,7 +47,7 @@ The package declares the active roots in `package.json#teqfw.namespaces`: `Minds
 - contains DTOs, utilities, and pure business logic;
 - owns cross-platform transport validation, but not HTTP serialization or transport execution.
 
-`Mindstream_Shared_` must be mapped by every composition root that consumes its contracts. The browser composition root maps it to `/app/Shared`; the backend resolver maps it through `package.json#teqfw.namespaces`.
+`Mindstream_Shared_` must be mapped by every composition root that consumes its contracts. The browser composition root maps it to `/app/Shared`; the backend resolver maps it through `package.json#teqfw.fw.di.namespaces`.
 
 `Mindstream_Web_`:
 

@@ -1,14 +1,11 @@
 #!/usr/bin/env sh
 set -e
 
-# Абсолютный путь к каталогу, где лежит этот скрипт (bin/)
+# Absolute path to the directory containing this script.
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Корень проекта
+# Project root.
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
-NODE_BIN="node"
-APP_BIN="$SCRIPT_DIR/cli.mjs"
 
 echo "== Mindstream data update started =="
 echo "Project root: $PROJECT_ROOT"
@@ -19,7 +16,10 @@ step () {
 }
 
 run () {
-  "$NODE_BIN" "$APP_BIN" "$@"
+  (
+    cd "$PROJECT_ROOT"
+    npm exec -- teq "$@"
+  )
 }
 
 step "Ingest: discover publications (Habr RSS)"

@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { createTestContainer } from '../../../../di-node.mjs';
 
-test('Mindstream_Back_Cli_Db_Schema_Create calls schema manager', async () => {
+test('Mindstream_Back_Cli_Db_Schema_Create is a finite Teq command product', async () => {
   const container = await createTestContainer();
   let called = 0;
 
@@ -14,18 +14,11 @@ test('Mindstream_Back_Cli_Db_Schema_Create calls schema manager', async () => {
   });
 
   const command = await container.get('Mindstream_Back_Cli_Db_Schema_Create$');
-  await command.execute({ args: [] });
+  assert.equal(command.id, 'db:schema:create');
+  assert.equal(command.lifetime, 'finite');
+  assert.deepEqual(command.arguments, []);
+  assert.deepEqual(command.options, []);
+  await command.execute({ args: {}, options: {} });
 
   assert.equal(called, 1);
-});
-
-test('Mindstream_Back_Cli_Db_Schema_Create rejects arguments', async () => {
-  const container = await createTestContainer();
-
-  container.register('Mindstream_Back_Storage_SchemaManager$', {
-    async createSchema() {},
-  });
-
-  const command = await container.get('Mindstream_Back_Cli_Db_Schema_Create$');
-  await assert.rejects(command.execute({ args: ['extra'] }), /does not accept arguments/);
 });

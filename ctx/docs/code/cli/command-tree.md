@@ -2,13 +2,13 @@
 
 - Path: `ctx/docs/code/cli/command-tree.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260803`
 
 ## Purpose
 
 This document defines the canonical space of allowed CLI commands for the Mindstream backend application. It specifies command hierarchy, purpose, and input form. It is normative, and CLI code must match this registry.
 
-## Command Hierarchy
+## Command Registry
 
 ```text
 db:schema:create
@@ -17,7 +17,7 @@ ingest:discover:habr
 ingest:extract:habr
 process:generate:embeddings
 process:generate:summaries
-runtime:web
+fl32:web:start
 ```
 
 Commands absent from this hierarchy are invalid.
@@ -133,11 +133,11 @@ Constraints:
 - the command does not start embeddings, runtime, or other later stages;
 - the command is non-interactive and accepts no input parameters.
 
-### `runtime:web`
+### `fl32:web:start`
 
 Contour: runtime.
 
-Purpose: start the backend application in web-server runtime mode.
+Purpose: start the backend application in web-server runtime mode through the dependency-owned Teq Web command.
 
 Parameters: none.
 
@@ -148,6 +148,8 @@ Constraints:
 - is not used in the maintenance contour.
 
 ## General CLI Command Invariants
+
+Command selection uses the complete colon-delimited `id` as its sole public name. No command path, tree traversal, or space-separated command form exists.
 
 For all application CLI commands:
 

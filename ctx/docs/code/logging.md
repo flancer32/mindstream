@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/logging.md`
 - Template Version: `20260619`
-- Changed: `20260727`
+- Changed: `20260803`
 
 ## Purpose
 
@@ -101,7 +101,7 @@ The exact serialization format is not fixed byte-by-byte, but these components a
 
 ## Platform Neutrality
 
-`TeqFw_Log_Provider` is the DI root for logging. Each record is bound to a stable TeqFW component source such as `Mindstream_Back_Web_Server`; platform-specific output is owned by `@teqfw/log`.
+`TeqFw_Log_Provider` is the DI root for logging. Each record is bound to a stable TeqFW component source such as `Mindstream_Back_App_Plugin`; platform-specific output is owned by `@teqfw/log`.
 
 - the logger does not use platform APIs directly;
 - output goes through the console mechanism provided by the runtime;

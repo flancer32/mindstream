@@ -54,13 +54,13 @@ Mindstream не является рекомендательным сервисо
 CREATE EXTENSION vector;
 ```
 
-3. Создайте схему в пустой базе: `node ./bin/cli.mjs db:schema:create`.
-4. При необходимости пересоздать схему с переносом данных используйте: `node ./bin/cli.mjs db:schema:renew` (операция разрушительная).
-5. Обнаружьте публикации из RSS Хабра: `node ./bin/cli.mjs ingest:discover:habr`.
-6. Извлеките тексты публикаций: `node ./bin/cli.mjs ingest:extract:habr`.
-7. Сформируйте обзор и аннотацию: `node ./bin/cli.mjs process:generate:summaries`.
-8. Сформируйте эмбеддинги: `node ./bin/cli.mjs process:generate:embeddings`.
-9. Запустите сервер: `npm start`.
+3. Создайте схему в пустой базе: `npm exec -- teq db:schema:create`.
+4. При необходимости пересоздать схему с переносом данных используйте: `npm exec -- teq db:schema:renew` (операция разрушительная).
+5. Обнаружьте публикации из RSS Хабра: `npm exec -- teq ingest:discover:habr`.
+6. Извлеките тексты публикаций: `npm exec -- teq ingest:extract:habr`.
+7. Сформируйте обзор и аннотацию: `npm exec -- teq process:generate:summaries`.
+8. Сформируйте эмбеддинги: `npm exec -- teq process:generate:embeddings`.
+9. Запустите сервер: `npm start` (это запускает команду `fl32:web:start` по умолчанию).
 
 Шаги 7–8 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
 После запуска откройте `http://localhost:3000`.

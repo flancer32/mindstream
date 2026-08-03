@@ -8,16 +8,17 @@ export default class Mindstream_Back_Cli_Ingest_Extract_Habr {
  * @param {object} deps
  * @param {Mindstream_Back_Ingest_Extract_Habr$} deps.extractHabr
  */
-constructor({ extractHabr }) {
+  constructor({ extractHabr }) {
+    this.id = 'ingest:extract:habr';
+    this.summary = 'Extract Habr publication text.';
+    this.lifetime = 'finite';
+    this.arguments = [];
+    this.options = [];
     /**
  * @param {object} params
  * @returns {Promise<void>}
  */
-this.execute = async function (params = {}) {
-      const { args } = /** @type {{args: string[]}} */ (params);
-      if (Array.isArray(args) && args.length) {
-        throw new Error('Command ingest:extract:habr does not accept arguments.');
-      }
+    this.execute = async function () {
       await extractHabr.execute();
     };
   }

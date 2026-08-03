@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/conventions.md`
 - Template Version: `20260619`
- - Changed: `20260727`
+ - Changed: `20260803`
 
 ## Purpose
 
@@ -37,7 +37,7 @@ This document does not describe system architecture, product properties, or the 
 
 - Environment configuration is read from `process.env`.
 - `.env` support is implemented **natively** through platform means such as `fs`, without third-party libraries.
-- `.env` loading is performed explicitly in the **composition root**, either the application entry point or CLI.
+- `.env` loading is performed explicitly by the backend CLI lifecycle plugin before command selection.
 - Values from `.env` must not overwrite already defined environment variables.
 - Packages such as `dotenv`, `env`, and similar are **not allowed by default** and require explicit human approval.
 - `process.env` is treated as an allowed form of platform-provided global state.

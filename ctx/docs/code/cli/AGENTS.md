@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/cli/AGENTS.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260803`
 
 ## Purpose
 
@@ -12,7 +12,7 @@ Defines the local code documentation level for the command-line surface.
 
 - `AGENTS.md` — level definition for `ctx/docs/code/cli/`.
 - `command-tree.md` — normative command-tree structure and admissible command branches.
-- `dispatcher.md` — dispatcher model for command routing and termination semantics.
+- `dispatcher.md` — Teq host model for command routing and termination semantics.
 - `overview.md` — compact overview of the CLI role and its engineering boundaries.
 
 ## Level Boundary

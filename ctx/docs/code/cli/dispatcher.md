@@ -1,160 +1,35 @@
-# Code CLI — Dispatcher Model
+# Code CLI — Teq Host Model
 
 - Path: `ctx/docs/code/cli/dispatcher.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260803`
 
 ## Purpose
 
-This document defines the normative CLI dispatch model in the Mindstream MVP.
+Defines the Mindstream integration model for the `@teqfw/cli` host.
 
-It specifies:
+## Host Composition
 
-- the CLI tree model;
-- how the role of a CLI module is determined;
-- dispatcher responsibility boundaries;
-- the command-execution model;
-- error semantics;
-- process-termination and resource-release rules.
+`node_modules/.bin/teq` is the only backend executable. The Mindstream package declares its DI namespace roots under `package.json#teqfw.fw.di.namespaces`, commands under `teqfw.fw.cli.commands`, and the default command under `teqfw.fw.cli.command.default`.
 
-This document builds on `code/cli/overview.md`. Any deviation is an implementation defect.
+The complete colon-delimited command `id` is the sole public command name. The host selects it from the first command-line token; application code does not split, route, or otherwise interpret a command name.
 
-## CLI Model
+## Distinct Responsibilities
 
-The Mindstream CLI is implemented as a tree of CLI modules.
+- `Mindstream_Back_App_Plugin` is a DI lifecycle component. On startup it loads configuration, initializes the typed configuration, configures Teq Web runtime settings, and registers Mindstream HTTP handlers. On shutdown it releases Knex resources.
+- Mindstream command products are finite DI components. They expose Teq command metadata and `async execute(context)`; they neither select commands nor control process status.
+- `fl32:web:start` is the dependency-owned long-running command. It freezes the prepared runtime configuration, starts the server, and stops it after a host signal.
 
-- the tree root is the root application dispatcher;
-- internal nodes are dispatchers;
-- leaf nodes are executable commands.
+Plugins start before command selection, including help and engineering commands. Their startup and shutdown must therefore be safe for every invocation.
 
-Flat command registries and centralized routing tables are not used.
+## Process Semantics
 
-## Root Dispatcher
+The Teq host owns command parsing, help, error reporting, signal handling, and process statuses. It returns `0` for success, `2` for usage errors such as an unknown command, and signal statuses for graceful interruption. Project code does not set an exit status or subscribe to process signals.
 
-The root CLI dispatcher is:
+## Command Products
 
-`Mindstream_Back_App_Cli_Dispatcher`
+Command descriptors in package metadata are static discovery data. A descriptor names the DI command component and declares its inputs. The host resolves a command product only after selection. A finite product has `lifetime: 'finite'` and an async `execute(context)` method; `context.args` and `context.options` are already parsed objects.
 
-It:
+## Boundary
 
-- belongs to the backend application;
-- initiates CLI dispatch;
-- contains no command application logic;
-- works only through the DI contour;
-- is the only point that interprets command-execution results.
-
-## Role Of A CLI Module
-
-A CLI module may have one of two roles:
-
-- dispatcher;
-- command.
-
-The role is determined only by its position in the CLI tree and by directory structure.
-
-Class naming, inheritance, suffixes, and code markers are not used to determine role.
-
-## Role-Determination Rule
-
-For a directory `src/Cli/<Path>/`:
-
-1. If the directory contains subdirectories, the module `<Path>.mjs` is a dispatcher and must delegate execution into one of the subdirectories.
-2. If the directory contains no subdirectories, all modules in that directory are commands and are treated as CLI tree leaves.
-
-## Dispatcher Responsibility
-
-A dispatcher:
-
-- selects the next CLI tree node;
-- delegates execution;
-- catches and normalizes errors.
-
-A dispatcher does not:
-
-- parse arguments;
-- validate parameters;
-- run application logic;
-- manage infrastructure;
-- manage resource lifecycle;
-- terminate the process.
-
-## DI And The CLI Space
-
-All CLI modules:
-
-- are provided through the DI container;
-- are not created manually;
-- are not registered dynamically.
-
-The space of available CLI commands is determined by the combination of `src/Cli` directory structure and the set of objects available through DI.
-
-## Executable Commands
-
-A command is a leaf module of the CLI tree.
-
-A command:
-
-- receives dependencies through DI;
-- parses CLI arguments on its own;
-- implements a single execution method `execute`;
-- does not manage application lifecycle;
-- does not terminate the process directly.
-
-A command is treated as a pure operation with side effects and without formalized internal state.
-
-## Errors And Termination
-
-### Error Signaling
-
-A command signals failure by throwing an exception.
-
-Dispatchers catch errors and pass them upward through the tree to the root dispatcher.
-
-### Exit Semantics
-
-Exit semantics are centralized and interpreted **only by the root dispatcher and the application bootstrap layer**.
-
-- `0` means successful completion of an engineering CLI command;
-- a non-zero value means command-execution failure.
-
-An exit code describes the **result of command execution**, not the lifecycle of resources.
-
-### Runtime Commands
-
-Runtime commands are leaf nodes that start application runtime mode and do not imply normal completion. Returning control from a runtime command is abnormal.
-
-### Application Shutdown And Resource Release
-
-Releasing backend-application resources is the responsibility of the bootstrap layer, not CLI commands or dispatchers.
-
-Normative rules:
-
-- CLI commands and dispatchers do not release resources directly.
-- Completion of a CLI command returns control to bootstrap.
-- After control returns, bootstrap stops the application through `app.stop()` or an equivalent, releases all managed resources, and only then terminates the process.
-
-For runtime commands, normal return does not exist, so `app.stop()` is called only on abnormal return or external process termination such as `SIGINT` or `SIGTERM`.
-
-Any attempt to manage process termination or resources from a CLI command is an architectural defect.
-
-## Logging
-
-- a command may log its own errors;
-- intermediate dispatchers may catch errors and pass them upward;
-- the root dispatcher must log every error not handled below.
-
-Absence of logs on abnormal CLI termination is a defect.
-
-## CLI Invariants In The MVP
-
-All CLI commands have these fixed properties:
-
-- determinism;
-- non-idempotency by default;
-- strict non-interactivity;
-- execution in a trusted contour;
-- no application-lifecycle management at command level.
-
-## Document Boundary
-
-This document does not describe CLI syntax, argument format, help and usage, CLI generation, the list of MVP commands, code implementation, or OS signal handling.
+This document does not define command business logic, input values, HTTP handler behavior, or Teq package internals. A host Container configurator is not declared while package metadata supplies all required namespace roots.

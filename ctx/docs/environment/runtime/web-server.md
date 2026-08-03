@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/environment/runtime/web-server.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20260803`
 
 ## Purpose
 
@@ -33,10 +33,10 @@ Mindstream is a CLI-started backend application.
 The application enters web-server mode through the explicit CLI command:
 
 ```
-runtime:web
+fl32:web:start
 ```
 
-Only when this command is executed:
+`Mindstream_Back_App_Plugin` prepares configuration and registers handlers before command selection. Only when `fl32:web:start` is executed:
 
 - the HTTP server is initialized;
 - application HTTP handlers are registered;
@@ -61,7 +61,7 @@ Horizontal scaling is done **externally** through PM2 by running multiple proces
 
 The HTTP server:
 
-- starts when `runtime:web` is executed;
+- starts when `fl32:web:start` is executed;
 - lives for the lifetime of the process;
 - does not terminate the process on its own.
 

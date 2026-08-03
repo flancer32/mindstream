@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/configuration.md`
 - Template Version: `20260619`
-- Changed: `20260725`
+ - Changed: `20260803`
 
 ## Purpose
 
@@ -48,19 +48,19 @@ Creating additional configuration objects, configuration duplicates, or alternat
 
 ## Value Sources
 
-The bootstrap explicitly loads the optional project-root `.env` Source followed by the explicit `process.env` Source. `@teqfw/cfg` therefore gives `process.env` higher precedence for each complete key. No module reads `process.env` directly. `MINDSTREAM` is the product configuration namespace; `TEQFW_WEB` is reserved for the `@flancer32/teq-web` runtime configuration.
+`Mindstream_Back_App_Plugin` explicitly loads the optional project-root `.env` Source followed by the explicit `process.env` Source. `@teqfw/cfg` therefore gives `process.env` higher precedence for each complete key. No module reads `process.env` directly. `MINDSTREAM` is the product configuration namespace; `TEQFW_WEB` is reserved for the `@flancer32/teq-web` runtime configuration.
 
 ---
 
 ## Loading The `.env` File
 
-The bootstrap creates a dotenv Source only when `.env` exists; absence is not an error. Loading is one-shot and completes before `Mindstream_Back_App_Configuration.init()` reads the snapshot.
+The lifecycle plugin creates a dotenv Source only when `.env` exists; absence is not an error. Loading is one-shot and completes before `Mindstream_Back_App_Configuration.init()` reads the snapshot.
 
 ---
 
 ## Access To Environment Parameters
 
-Reading `process.env` is allowed only in the bootstrap when it creates `TeqFw_Cfg_Source_ProcessEnv`. Application code reads detached namespace projections through `TeqFw_Cfg_Reader`.
+Reading `process.env` is allowed only in the lifecycle plugin when it creates `TeqFw_Cfg_Source_ProcessEnv`. Application code reads detached namespace projections through `TeqFw_Cfg_Reader`.
 
 ---
 
