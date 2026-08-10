@@ -144,6 +144,18 @@ Normative rules:
 - rebuild evidence remains unaccepted until the human or an external operational authority evaluates it;
 - the order of recreate-with-preserve operations is derived by `@teqfw/db` from the compiled model.
 
+## Legacy In-Place Migration
+
+The restored pre-DEM schema is migrated through the dedicated `db:schema:migrate-v2` engineering command.
+
+The transition:
+
+- operates on one configured PostgreSQL database without a second database or namespace;
+- preserves existing table identities, row counts, vector values, and timestamp-with-time-zone semantics;
+- adds the explicit attention-type check constraint missing from the restored catalog;
+- records the compiled DEM v2 fingerprint only in the same transaction as the schema transition;
+- is idempotent and never treats migration evidence as automatic cutover acceptance.
+
 ## DBMS Independence
 
 The declarative schema separates portable logical types from explicit PostgreSQL storage bindings.

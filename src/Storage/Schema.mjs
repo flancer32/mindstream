@@ -9,7 +9,7 @@ export default class Mindstream_Back_Storage_Schema {
     /** @param {number} length @param {boolean} nullable */
     const string = (length, nullable = false) => ({ nullable, type: { id: 'core.string', params: { length } } });
     const text = (nullable = false) => ({ nullable, type: { id: 'core.text', params: {} } });
-    const datetime = (nullable = false) => ({ nullable, type: { id: 'core.datetime', params: { timezone: false } } });
+    const datetime = (nullable = false) => ({ nullable, type: { id: 'core.datetime', params: { timezone: true } } });
     /** @param {'primary'|'unique'} kind @param {...string} attrs */
     const key = (kind, ...attrs) => ({ include: [], keys: attrs.map((attr) => ({ attr })), kind, options: {}, phase: 'table' });
     /** @param {...string} attrs */

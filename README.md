@@ -55,12 +55,13 @@ CREATE EXTENSION vector;
 ```
 
 3. Создайте схему в пустой базе: `npm exec -- teq db:schema:create`.
-4. При необходимости пересоздать схему с переносом данных используйте: `npm exec -- teq db:schema:renew` (операция разрушительная).
-5. Обнаружьте публикации из RSS Хабра: `npm exec -- teq ingest:discover:habr`.
-6. Извлеките тексты публикаций: `npm exec -- teq ingest:extract:habr`.
-7. Сформируйте обзор и аннотацию: `npm exec -- teq process:generate:summaries`.
-8. Сформируйте эмбеддинги: `npm exec -- teq process:generate:embeddings`.
-9. Запустите сервер: `npm start` (это запускает команду `fl32:web:start` по умолчанию).
+4. Для восстановленной legacy-схемы выполните атомарную in-place миграцию: `npm run db:migrate-v2`.
+5. При необходимости полностью пересоздать уже совместимую схему с переносом данных используйте: `npm exec -- teq db:schema:renew` (операция разрушительная).
+6. Обнаружьте публикации из RSS Хабра: `npm exec -- teq ingest:discover:habr`.
+7. Извлеките тексты публикаций: `npm exec -- teq ingest:extract:habr`.
+8. Сформируйте обзор и аннотацию: `npm exec -- teq process:generate:summaries`.
+9. Сформируйте эмбеддинги: `npm exec -- teq process:generate:embeddings`.
+10. Запустите сервер: `npm start` (это запускает команду `fl32:web:start` по умолчанию).
 
 Шаги 7–8 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
 После запуска откройте `http://localhost:3000`.

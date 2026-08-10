@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/cli/command-tree.md`
 - Template Version: `20260619`
-- Changed: `20260803`
+- Changed: `20260810`
 
 ## Purpose
 
@@ -12,6 +12,7 @@ This document defines the canonical space of allowed CLI commands for the Mindst
 
 ```text
 db:schema:create
+db:schema:migrate-v2
 db:schema:renew
 ingest:discover:habr
 ingest:extract:habr
@@ -39,6 +40,24 @@ Constraints:
 - is not idempotent;
 - does not run migrations;
 - is not used in runtime.
+
+### `db:schema:migrate-v2`
+
+Contour: maintenance.
+
+Purpose: migrate the restored legacy Mindstream schema to the canonical DEM v2 contract in the configured database.
+
+Parameters: none.
+
+Constraints:
+
+- operates in exactly one configured PostgreSQL database;
+- acquires a transaction-scoped advisory lock and performs the transition atomically;
+- validates the legacy table set, data values, pgvector dimensions, constraints, and row counts before recording success;
+- adds only the explicitly specified missing constraint and does not infer renames, conversions, or deletions;
+- records the compiled DEM v2 declaration and fingerprint in `schema_version` only after validation;
+- is idempotent and leaves no partial migration state on failure;
+- does not authorize a production cutover.
 
 ### `db:schema:renew`
 
