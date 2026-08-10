@@ -17,7 +17,7 @@ export default class Mindstream_Back_App_Plugin {
    * @param {Mindstream_Back_Web_Handler$} deps.apiHandler
    * @param {Fl32_Web_Back_Handler_Static$} deps.staticHandler
    * @param {Fl32_Web_Back_Dto_Source__Factory$} deps.sourceFactory
-   * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+   * @param {Mindstream_Back_Storage_Database$} deps.database
    */
   constructor({
     loader,
@@ -31,7 +31,7 @@ export default class Mindstream_Back_App_Plugin {
     apiHandler,
     staticHandler,
     sourceFactory,
-    knexProvider,
+    database,
   }) {
     let started = false;
 
@@ -49,6 +49,7 @@ export default class Mindstream_Back_App_Plugin {
         ...(dotenv ? [dotenv] : []),
         processEnvSource.create(process.env),
       ]);
+      await database.init();
       await config.init();
 
       const cfg = config.get();
@@ -71,7 +72,7 @@ export default class Mindstream_Back_App_Plugin {
     };
 
     this.onShutdown = async function () {
-      await knexProvider.destroy();
+      await database.destroy();
     };
   }
 }
@@ -89,6 +90,6 @@ export const __deps__ = Object.freeze({
     apiHandler: 'Mindstream_Back_Web_Handler$',
     staticHandler: 'Fl32_Web_Back_Handler_Static$',
     sourceFactory: 'Fl32_Web_Back_Dto_Source__Factory$',
-    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    database: 'Mindstream_Back_Storage_Database$',
   }),
 });

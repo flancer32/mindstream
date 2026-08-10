@@ -42,7 +42,6 @@ const parseCdc = (cdc) => {
   if (exportDelim !== -1) {
     moduleName = core.slice(0, exportDelim);
     exportName = core.slice(exportDelim + 2);
-    hasFactory = true;
   } else if (hasFactory) {
     exportName = 'default';
   }
@@ -162,6 +161,7 @@ export async function createTestContainer() {
     { prefix: 'Fl32_Web_', target: path.join(projectRoot, 'node_modules', '@flancer32', 'teq-web', 'src'), defaultExt: '.mjs' },
     { prefix: 'Teqfw_Di_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'di', 'src'), defaultExt: '.mjs' },
     { prefix: 'TeqFw_Cfg_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'cfg', 'src'), defaultExt: '.mjs' },
+    { prefix: 'TeqFw_Db_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'db', 'src'), defaultExt: '.mjs' },
     { prefix: 'TeqFw_Log_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'log', 'src'), defaultExt: '.mjs' },
   ];
   const mocks = new Map();

@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/configuration/structure.md`
 - Template Version: `20260619`
-- Changed: `20260725`
+- Changed: `20260810`
 
 ## Purpose
 
@@ -20,14 +20,13 @@ It **does not describe values**, loading sources, parameter semantics, or the lo
 
 ## General Configuration Form
 
-`@teqfw/cfg` addresses values as `NAMESPACE__PARAMETER`. The application uses `TEQFW_WEB` for the `@flancer32/teq-web` transport runtime and uses `MINDSTREAM` for product-owned settings. The product parameters are `MINDSTREAM__DB_*` and `MINDSTREAM__LLM_*`. `Mindstream_Back_App_Configuration` maps them to the object below.
+`@teqfw/cfg` addresses values as `NAMESPACE__PARAMETER`. The application uses `TEQFW_WEB` for web transport, `TEQFW_DB` for package-owned database settings, and `MINDSTREAM` for product-owned LLM settings. `Mindstream_Back_App_Configuration` maps only the application-owned settings below; `@teqfw/db` owns its immutable typed database projection.
 
 The backend configuration is represented as a single object with these top-level sections:
 
 ```
 configuration:
     server
-    db
     llm
 ```
 
@@ -48,24 +47,6 @@ server:
 ```
 
 ---
-
-## `db` Section
-
-The `db` section contains DBAL (`knex`) connection and configuration parameters.
-
-The normative MVP parameter set is:
-
-```
-db:
-    client
-    host
-    port
-    database
-    user
-    password
-```
-
-Nested grouping is allowed if it does not change the set of parameters.
 
 ---
 

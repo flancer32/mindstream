@@ -1,203 +1,65 @@
 // @ts-check
-/**
- * @namespace Mindstream_Back_Storage_Schema
- * @description Declarative DB schema for the Storage layer.
- */
+
+/** @namespace Mindstream_Back_Storage_Schema */
 export default class Mindstream_Back_Storage_Schema {
-/**
- * @param {unknown} deps
- */
-constructor({ }) {
-    const publicationSourcesTable = {
-      columns: {
-        id: { type: 'bigint', primary: true, autoIncrement: true },
-        code: { type: 'string', notNull: true, length: 64 },
-        url: { type: 'string', notNull: true, length: 255 },
-        name: { type: 'string', notNull: true, length: 255 },
-        description: { type: 'text' },
-        is_active: { type: 'boolean', notNull: true },
-        created_at: { type: 'timestamp', notNull: true },
-        updated_at: { type: 'timestamp', notNull: true },
-      },
-      foreignKeys: [],
-      indexes: [
-        { columns: ['code'], unique: true },
-        { columns: ['url'], unique: true },
-      ],
-    };
-
-    const schemaVersionTable = {
-      columns: {
-        id: { type: 'bigint', primary: true, autoIncrement: true },
-        schema_version: { type: 'integer', notNull: true },
-        schema_json: { type: 'text', notNull: true },
-        applied_at: { type: 'timestamp', notNull: true },
-      },
-      foreignKeys: [],
-      indexes: [],
-    };
-
-    const publicationsTable = {
-      columns: {
-        id: { type: 'bigint', primary: true, autoIncrement: true },
-        source_id: { type: 'bigint', notNull: true },
-        source_item_hash: { type: 'string', notNull: true, length: 64 },
-        source_url: { type: 'string', notNull: true, length: 1024 },
-        rss_title: { type: 'string', length: 512 },
-        rss_guid: { type: 'string', length: 255 },
-        rss_published_at: { type: 'timestamp' },
-        discovered_at: { type: 'timestamp', notNull: true },
-        status: { type: 'string', notNull: true, length: 32, default: 'extract_pending' },
-      },
-      foreignKeys: [
-        {
-          columns: ['source_id'],
-          references: { table: 'publication_sources', columns: ['id'] },
-          onDelete: 'restrict',
-          onUpdate: 'cascade',
-        },
-      ],
-      indexes: [
-        { columns: ['source_id', 'source_item_hash'], unique: true },
-        { columns: ['source_id'] },
-      ],
-    };
-
-    const publicationExtractionsTable = {
-      columns: {
-        publication_id: { type: 'bigint', notNull: true, primary: true },
-        html: { type: 'text' },
-        md_text: { type: 'text' },
-        created_at: { type: 'timestamp', notNull: true },
-      },
-      foreignKeys: [
-        {
-          columns: ['publication_id'],
-          references: { table: 'publications', columns: ['id'] },
-          onDelete: 'cascade',
-          onUpdate: 'cascade',
-        },
-      ],
-      indexes: [],
-    };
-
-    const publicationSummariesTable = {
-      columns: {
-        publication_id: { type: 'bigint', notNull: true, primary: true },
-        overview: { type: 'text', notNull: true },
-        annotation: { type: 'text', notNull: true },
-        created_at: { type: 'timestamp', notNull: true },
-      },
-      foreignKeys: [
-        {
-          columns: ['publication_id'],
-          references: { table: 'publications', columns: ['id'] },
-          onDelete: 'cascade',
-          onUpdate: 'cascade',
-        },
-      ],
-      indexes: [],
-    };
-
-    const publicationEmbeddingsTable = {
-      columns: {
-        publication_id: { type: 'bigint', notNull: true, primary: true },
-
-        overview_embedding: {
-          type: 'vector',
-          dimension: 1536,
-          notNull: true,
-        },
-
-        annotation_embedding: {
-          type: 'vector',
-          dimension: 1536,
-          notNull: true,
-        },
-
-        created_at: { type: 'timestamp', notNull: true },
-      },
-      foreignKeys: [
-        {
-          columns: ['publication_id'],
-          references: { table: 'publications', columns: ['id'] },
-          onDelete: 'cascade',
-          onUpdate: 'cascade',
-        },
-      ],
-      indexes: [],
-    };
-
-    const anonymousIdentitiesTable = {
-      columns: {
-        id: { type: 'bigint', primary: true, autoIncrement: true },
-        identity_uuid: { type: 'string', notNull: true, length: 36 },
-        registered_at: { type: 'timestamp', notNull: true },
-      },
-      foreignKeys: [],
-      indexes: [
-        { columns: ['identity_uuid'], unique: true },
-        { columns: ['registered_at'] },
-      ],
-    };
-
-    const attentionStatesTable = {
-      columns: {
-        identity_id: { type: 'bigint', notNull: true },
-        publication_id: { type: 'bigint', notNull: true },
-        attention_type: { type: 'string', notNull: true, length: 64 },
-        created_at: { type: 'timestamp', notNull: true },
-      },
-      primaryKey: ['identity_id', 'publication_id', 'attention_type'],
-      foreignKeys: [
-        {
-          columns: ['identity_id'],
-          references: { table: 'anonymous_identities', columns: ['id'] },
-          onDelete: 'cascade',
-          onUpdate: 'cascade',
-        },
-        {
-          columns: ['publication_id'],
-          references: { table: 'publications', columns: ['id'] },
-          onDelete: 'cascade',
-          onUpdate: 'cascade',
-        },
-      ],
-      checks: [
-        {
-          name: 'attention_states_attention_type_check',
-          columns: ['attention_type'],
-          operator: 'in',
-          values: ['overview_view', 'link_click', 'link_click_after_overview'],
-        },
-      ],
-      indexes: [
-        { columns: ['created_at'] },
-      ],
-    };
-
+  constructor({}) {
+    /** @param {number} bits */
+    const integer = (bits = 64) => ({ type: { id: 'core.integer', params: { bits, unsigned: false } } });
+    const identity = () => ({ ...integer(), generation: { kind: 'core.identity', params: { mode: 'byDefault' } } });
+    /** @param {number} length @param {boolean} nullable */
+    const string = (length, nullable = false) => ({ nullable, type: { id: 'core.string', params: { length } } });
+    const text = (nullable = false) => ({ nullable, type: { id: 'core.text', params: {} } });
+    const datetime = (nullable = false) => ({ nullable, type: { id: 'core.datetime', params: { timezone: false } } });
+    /** @param {'primary'|'unique'} kind @param {...string} attrs */
+    const key = (kind, ...attrs) => ({ include: [], keys: attrs.map((attr) => ({ attr })), kind, options: {}, phase: 'table' });
+    /** @param {...string} attrs */
+    const index = (...attrs) => ({ include: [], keys: attrs.map((attr) => ({ attr })), kind: 'index', method: 'core.btree', options: {}, phase: 'afterRelations' });
+    /** @param {string[]} attrs @param {string} path @param {'restrict'|'cascade'} onDelete */
+    const relation = (attrs, path, onDelete = 'restrict') => ({ action: { delete: onDelete, update: 'cascade' }, attrs, deferrable: 'notDeferrable', ref: { attrs: ['id'], path } });
     const declaration = {
-      schemaVersion: 8,
-      tables: {
-        schema_version: schemaVersionTable,
-        publication_sources: publicationSourcesTable,
-        publications: publicationsTable,
-        publication_extractions: publicationExtractionsTable,
-        publication_summaries: publicationSummariesTable,
-        publication_embeddings: publicationEmbeddingsTable,
-        anonymous_identities: anonymousIdentitiesTable,
-        attention_states: attentionStatesTable,
+      version: 2, requires: ['postgresql.core', 'postgresql.extension.vector'], package: {}, refs: {}, entity: {
+        schema_version: {
+          comment: 'Derived schema audit record; DEM v2 is authoritative.',
+          attr: { id: identity(), schema_version: integer(32), schema_json: text(), applied_at: datetime() },
+          index: { pk: key('primary', 'id') }, relation: {},
+        },
+        publication_sources: {
+          attr: { id: identity(), code: string(64), url: string(255), name: string(255), description: text(true), is_active: { type: { id: 'core.boolean', params: {} } }, created_at: datetime(), updated_at: datetime() },
+          index: { pk: key('primary', 'id'), code_unique: key('unique', 'code'), url_unique: key('unique', 'url') }, relation: {},
+        },
+        publications: {
+          attr: { id: identity(), source_id: integer(), source_item_hash: string(64), source_url: string(1024), rss_title: string(512, true), rss_guid: string(255, true), rss_published_at: datetime(true), discovered_at: datetime(), status: { ...string(32), default: { kind: 'literal', value: 'extract_pending' } } },
+          index: { pk: key('primary', 'id'), source_hash_unique: key('unique', 'source_id', 'source_item_hash'), source: index('source_id') },
+          relation: { source: relation(['source_id'], '/publication_sources') },
+        },
+        publication_extractions: {
+          attr: { publication_id: integer(), html: text(true), md_text: text(true), created_at: datetime() }, index: { pk: key('primary', 'publication_id') }, relation: { publication: relation(['publication_id'], '/publications', 'cascade') },
+        },
+        publication_summaries: {
+          attr: { publication_id: integer(), overview: text(), annotation: text(), created_at: datetime() }, index: { pk: key('primary', 'publication_id') }, relation: { publication: relation(['publication_id'], '/publications', 'cascade') },
+        },
+        publication_embeddings: {
+          attr: {
+            publication_id: integer(),
+            overview_embedding: { type: { id: 'core.vector', params: { dimensions: 1536, element: 'float', sparse: false } }, storage: { postgresql: { type: 'vector', params: {} } } },
+            annotation_embedding: { type: { id: 'core.vector', params: { dimensions: 1536, element: 'float', sparse: false } }, storage: { postgresql: { type: 'vector', params: {} } } },
+            created_at: datetime(),
+          },
+          index: { pk: key('primary', 'publication_id') }, relation: { publication: relation(['publication_id'], '/publications', 'cascade') },
+        },
+        anonymous_identities: {
+          attr: { id: identity(), identity_uuid: string(36), registered_at: datetime() }, index: { pk: key('primary', 'id'), identity_uuid_unique: key('unique', 'identity_uuid'), registered_at: index('registered_at') }, relation: {},
+        },
+        attention_states: {
+          attr: { identity_id: integer(), publication_id: integer(), attention_type: { type: { id: 'core.enum', params: { values: ['overview_view', 'link_click', 'link_click_after_overview'] } } }, created_at: datetime() },
+          index: { pk: key('primary', 'identity_id', 'publication_id', 'attention_type'), created_at: index('created_at') },
+          relation: { identity: relation(['identity_id'], '/anonymous_identities', 'cascade'), publication: relation(['publication_id'], '/publications', 'cascade') },
+        },
       },
     };
-
-    /**
- * @returns {unknown}
- */
-/**
- * @returns {unknown}
- */
-this.getDeclaration = function () {
-      return declaration;
-    };
+    const map = { version: 2, namespace: '', ref: {}, deprecated: {} };
+    this.getDeclaration = () => declaration;
+    this.getFragmentEnvelope = () => ({ declaration, filename: 'mindstream://storage/dem-v2', fragmentId: '@flancer32/mindstream', packageName: '@flancer32/mindstream' });
+    this.getMapEnvelope = () => ({ declaration: map, filename: 'mindstream://storage/dem-map-v2', mapId: '@flancer32/mindstream:map', packageName: '@flancer32/mindstream' });
   }
 }

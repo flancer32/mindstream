@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/storage/schema.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260810`
 
 ## Purpose
 
@@ -32,14 +32,14 @@ Manual modification of the schema without reflecting it in the declarative form 
 
 ## Format Of Declarative Description
 
-The schema is described as a **pure declarative JSON structure** without executable code.
+The schema is described as a **DEM v2 declarative object** compatible with `@teqfw/db` 2.x.
 
 Requirements:
 
-- the declaration contains no executable logic;
-- conditions, loops, and computations are not allowed;
-- the declaration is data, not code;
-- schema application such as DDL is performed by the DB layer, not by the declaration itself.
+- the resulting declaration contains only closed data accepted by the DEM v2 compiler;
+- constructor-local helpers may remove repetition but must not branch on runtime state or mutate the resulting model;
+- the declaration is authoritative data rather than schema-application behavior;
+- schema application such as DDL is performed by `@teqfw/db` compilation, planning, and execution components, not by the declaration itself.
 
 ## Schema Composition
 
@@ -123,13 +123,13 @@ Requirements:
 
 ## Schema Versioning
 
-The data schema in the MVP has an **explicit version**.
+The data schema in the MVP has an explicit DEM version and deterministic compilation fingerprint.
 
 Requirements:
 
-- the schema version is fixed declaratively;
-- the version is also stored in the database in a separate service table;
-- the DB layer uses the schema version to control database state.
+- the declaration uses `version: 2`;
+- successful compilation produces the authoritative physical plan and fingerprint;
+- the service table stores a derived audit copy of the declaration and fingerprint and is not a second schema authority.
 
 The storage form of the version is defined by the schema declaration.
 
@@ -139,21 +139,22 @@ The DB layer must support schema recreation with data preservation.
 
 Normative rules:
 
-- data absent from the new schema version is **dropped** during restoration;
-- data restoration is limited to structures present in the declaration;
-- the order of recreate-with-preserve operations is not described in the declaration and belongs to the DB layer.
+- rebuild uses an explicit readable snapshot before an in-place mutation;
+- entity additions, removals, renames, and conversions are never inferred;
+- rebuild evidence remains unaccepted until the human or an external operational authority evaluates it;
+- the order of recreate-with-preserve operations is derived by `@teqfw/db` from the compiled model.
 
 ## DBMS Independence
 
-The declarative schema must use **only portable constructs** supported by `knex`.
+The declarative schema separates portable logical types from explicit PostgreSQL storage bindings.
 
 The following are prohibited:
 
-- DBMS-specific extensions;
-- conditional branches for concrete DBMSs;
-- declarations that depend on runtime environment.
+- raw SQL types or unchecked Knex method names;
+- implicit provisioning of PostgreSQL extensions;
+- runtime-dependent mutation of the declaration.
 
-The schema must be applicable to any DBMS supported by `knex`.
+The selected PostgreSQL adapter must compile the declaration and preflight PostgreSQL and pgvector capabilities before mutation.
 
 ## Minimal Declaration Example
 
@@ -161,18 +162,21 @@ The example below illustrates **form**, not the normative structure of a real ta
 
 ```json
 {
-  "tables": {
+  "version": 2,
+  "requires": ["postgresql.core"],
+  "entity": {
     "example_table": {
-      "columns": {
-        "id": { "type": "bigint", "primary": true },
-        "uuid": { "type": "uuid", "unique": true, "notNull": true },
-        "created_at": { "type": "timestamp", "notNull": true }
+      "attr": {
+        "id": {"type": {"id": "core.integer", "params": {"bits": 64, "unsigned": false}}}
       },
-      "foreignKeys": [],
-      "indexes": [{ "columns": ["uuid"], "unique": true }]
+      "index": {
+        "pk": {"kind": "primary", "keys": [{"attr": "id"}], "phase": "table", "include": [], "options": {}}
+      },
+      "relation": {}
     }
   },
-  "schemaVersion": 1
+  "package": {},
+  "refs": {}
 }
 ```
 

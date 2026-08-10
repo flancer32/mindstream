@@ -40,7 +40,7 @@ Mindstream не является рекомендательным сервисо
 
 - `TEQFW_WEB__PORT`
 - `TEQFW_WEB__TYPE`
-- `MINDSTREAM__DB_CLIENT`, `MINDSTREAM__DB_HOST`, `MINDSTREAM__DB_PORT`, `MINDSTREAM__DB_DATABASE`, `MINDSTREAM__DB_USER`, `MINDSTREAM__DB_PASSWORD`
+- `TEQFW_DB__CLIENT`, `TEQFW_DB__HOST`, `TEQFW_DB__PORT`, `TEQFW_DB__DATABASE`, `TEQFW_DB__USER`, `TEQFW_DB__PASSWORD`
 - `MINDSTREAM__LLM_API_KEY`, `MINDSTREAM__LLM_BASE_URL`, `MINDSTREAM__LLM_GENERATION_MODEL`, `MINDSTREAM__LLM_EMBEDDING_MODEL`
 
 Конфигурация загружается один раз в bootstrap через `@teqfw/cfg`: значения из `process.env` имеют приоритет над необязательным `.env`. Логи создаются через `@teqfw/log` с источником, соответствующим TeqFW-адресу компонента.

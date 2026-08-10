@@ -110,7 +110,7 @@ The following invariants are fixed for the CLI layer in the MVP:
 
 The CLI is not the container composition layer.
 
-The host configures the Container before first resolution, starts lifecycle plugins, selects a descriptor by its complete `id`, and owns status and signal handling. `Mindstream_Back_App_Plugin` prepares shared application state and releases Knex resources during host shutdown. Command products implement only their selected action.
+The host configures the Container before first resolution, starts lifecycle plugins, selects a descriptor by its complete `id`, and owns status and signal handling. `Mindstream_Back_App_Plugin` loads configuration, initializes the `@teqfw/db` connection, prepares shared application state, and disconnects the database during host shutdown. Command products implement only their selected action.
 
 Runtime code does not depend on the CLI and contains no startup-mode selection logic.
 

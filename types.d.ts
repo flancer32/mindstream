@@ -90,8 +90,8 @@ declare global {
   type Mindstream_Back_Process_Publication_Store$ = InstanceType<Mindstream_Back_Process_Publication_Store>;
   type Mindstream_Back_Process_Publication_SummaryStore = typeof import("./src/Process/Publication/SummaryStore.mjs").default;
   type Mindstream_Back_Process_Publication_SummaryStore$ = InstanceType<Mindstream_Back_Process_Publication_SummaryStore>;
-  type Mindstream_Back_Storage_Knex = typeof import("./src/Storage/Knex.mjs").default;
-  type Mindstream_Back_Storage_Knex$ = InstanceType<Mindstream_Back_Storage_Knex>;
+  type Mindstream_Back_Storage_Database = typeof import("./src/Storage/Database.mjs").default;
+  type Mindstream_Back_Storage_Database$ = InstanceType<Mindstream_Back_Storage_Database>;
   type Mindstream_Back_Storage_Schema = typeof import("./src/Storage/Schema.mjs").default;
   type Mindstream_Back_Storage_Schema$ = InstanceType<Mindstream_Back_Storage_Schema>;
   type Mindstream_Back_Storage_SchemaManager = typeof import("./src/Storage/SchemaManager.mjs").default;

@@ -91,7 +91,7 @@ const getHandler = async function () {
   const container = await createTestContainer();
   const { knex, inserted } = createKnexStub();
 
-  container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
   container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Fl32_Web_Back_Helper_Respond$', createRespondStub());
 

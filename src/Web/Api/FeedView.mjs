@@ -6,13 +6,13 @@
 export default class Mindstream_Back_Web_Api_FeedView {
 /**
  * @param {object} deps
- * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Storage_Database$} deps.database
  * @param {Mindstream_Back_Logger$} deps.logger
  * @param {Mindstream_Shared_Api_Feed$} deps.feed
  * @param {Fl32_Web_Back_Helper_Respond$} deps.respond
  */
 constructor({
-    knexProvider,
+    database,
     logger,
     feed,
     respond,
@@ -27,7 +27,7 @@ constructor({
  * @returns {unknown}
  */
 const getKnex = function () {
-      return knexProvider.get();
+      return database.get();
     };
 
     /**
@@ -424,7 +424,7 @@ this.handle = async function ({ req, res }) {
 
 export const __deps__ = Object.freeze({
   default: Object.freeze({
-    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    database: 'Mindstream_Back_Storage_Database$',
     logger: 'Mindstream_Back_Logger$',
     feed: 'Mindstream_Shared_Api_Feed$',
     respond: 'Fl32_Web_Back_Helper_Respond$',

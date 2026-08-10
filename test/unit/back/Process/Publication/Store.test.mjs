@@ -108,7 +108,7 @@ test('Mindstream_Back_Process_Publication_Store selects publications without sum
     rows: [{ id: 1, md_text: 'Text', status: 'extracted' }],
   });
 
-  container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
   container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
@@ -131,7 +131,7 @@ test('Mindstream_Back_Process_Publication_Store selects publications for embeddi
     rows: [{ id: 2, overview: 'Overview', annotation: 'Annotation', status: 'summary_ready' }],
   });
 
-  container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
   container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 
@@ -152,7 +152,7 @@ test('Mindstream_Back_Process_Publication_Store updates status', async () => {
   const container = await createTestContainer();
   const { knex, updates } = createKnexStub();
 
-  container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
   container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('Mindstream_Back_Process_Publication_Status$', buildStatusCatalog());
 

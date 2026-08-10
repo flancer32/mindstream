@@ -14,7 +14,6 @@ test('Mindstream_Back_App_Configuration normalizes @teqfw/cfg namespace projecti
   container.register('TeqFw_Cfg_Reader$', createReader({
     TEQFW_WEB: { PORT: '8081', TYPE: 'http2' },
     MINDSTREAM: {
-      DB_CLIENT: 'pg', DB_HOST: 'db.local', DB_PORT: '5432', DB_DATABASE: 'mindstream', DB_USER: 'app', DB_PASSWORD: 'secret',
       LLM_API_KEY: 'key', LLM_BASE_URL: 'https://example.test/v1', LLM_GENERATION_MODEL: 'gen-x', LLM_EMBEDDING_MODEL: 'embed-x',
     },
   }));
@@ -25,7 +24,6 @@ test('Mindstream_Back_App_Configuration normalizes @teqfw/cfg namespace projecti
 
   assert.deepEqual(value, {
     server: { port: 8081, type: 'http2' },
-    db: { client: 'pg', host: 'db.local', port: 5432, database: 'mindstream', user: 'app', password: 'secret' },
     llm: { apiKey: 'key', baseUrl: 'https://example.test/v1', generationModel: 'gen-x', embeddingModel: 'embed-x' },
   });
   assert.ok(Object.isFrozen(value));
@@ -41,7 +39,6 @@ test('Mindstream_Back_App_Configuration exposes the fixed structure for absent n
   await config.init();
   assert.deepEqual(config.get(), {
     server: { port: undefined, type: undefined },
-    db: { client: undefined, host: undefined, port: undefined, database: undefined, user: undefined, password: undefined },
     llm: { apiKey: undefined, baseUrl: undefined, generationModel: undefined, embeddingModel: undefined },
   });
 });

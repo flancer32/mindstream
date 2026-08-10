@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { createTestContainer } from '../../di-node.mjs';
 
-test('Mindstream_Back_App_Plugin prepares shared application state and releases Knex', async () => {
+test('Mindstream_Back_App_Plugin initializes and releases the @teqfw/db connection', async () => {
   const container = await createTestContainer();
   const calls = [];
   container.register('node:fs/promises', {
@@ -31,15 +31,18 @@ test('Mindstream_Back_App_Plugin prepares shared application state and releases 
   container.register('Fl32_Web_Back_Handler_Static$', staticHandler);
   container.register('Fl32_Web_Back_Dto_Source__Factory$', { create: (value) => value });
   container.register('Fl32_Web_Back_PipelineEngine$', { addHandler: (value) => calls.push({ type: 'add-handler', value }) });
-  container.register('Mindstream_Back_Storage_Knex$', { async destroy() { calls.push({ type: 'destroy' }); } });
+  container.register('Mindstream_Back_Storage_Database$', {
+    async init() { calls.push({ type: 'database-init' }); },
+    async destroy() { calls.push({ type: 'destroy' }); },
+  });
 
   const plugin = await container.get('Mindstream_Back_App_Plugin$');
   await plugin.onStartup();
   await plugin.onStartup();
   await plugin.onShutdown();
 
-  assert.deepEqual(calls.map((item) => item.type), ['load', 'config-init', 'configure', 'static-init', 'add-handler', 'add-handler', 'destroy']);
-  assert.deepEqual(calls[2].value, { port: 3001, type: 'http' });
-  assert.deepEqual(calls[4].value, apiHandler);
-  assert.deepEqual(calls[5].value, staticHandler);
+  assert.deepEqual(calls.map((item) => item.type), ['load', 'database-init', 'config-init', 'configure', 'static-init', 'add-handler', 'add-handler', 'destroy']);
+  assert.deepEqual(calls[3].value, { port: 3001, type: 'http' });
+  assert.deepEqual(calls[5].value, apiHandler);
+  assert.deepEqual(calls[6].value, staticHandler);
 });

@@ -6,10 +6,10 @@
 export default class Mindstream_Back_Ingest_Publication_ExtractionStore {
 /**
  * @param {object} deps
- * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Storage_Database$} deps.database
  * @param {Mindstream_Back_Logger$} deps.logger
  */
-constructor({ knexProvider, logger }) {
+constructor({ database, logger }) {
     const NAMESPACE = 'Mindstream_Back_Ingest_Publication_ExtractionStore';
 
     /**
@@ -19,7 +19,7 @@ constructor({ knexProvider, logger }) {
  * @returns {unknown}
  */
 const getKnex = function () {
-      return knexProvider.get();
+      return database.get();
     };
 
     /**
@@ -134,7 +134,7 @@ this.saveMarkdown = async function ({ publicationId, markdown }) {
 
 export const __deps__ = Object.freeze({
   default: Object.freeze({
-    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    database: 'Mindstream_Back_Storage_Database$',
     logger: 'Mindstream_Back_Logger$',
   }),
 });

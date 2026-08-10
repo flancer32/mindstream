@@ -3,334 +3,59 @@ import test from 'node:test';
 
 import { createTestContainer } from '../../di-node.mjs';
 
-const buildSchema = function () {
-  return {
-    schemaVersion: 1,
-    tables: {
-      schema_version: {
-        columns: {
-          id: { type: 'integer', autoIncrement: true },
-          schema_version: { type: 'integer', notNull: true },
-          schema_json: { type: 'text', notNull: true },
-          applied_at: { type: 'timestamp', notNull: true },
-        },
-        indexes: [],
-        foreignKeys: [],
-      },
-      items: {
-        columns: {
-          id: { type: 'integer', autoIncrement: true },
-          name: { type: 'string' },
-        },
-        indexes: [],
-        foreignKeys: [],
-      },
-    },
-  };
-};
-
-const createColumnStub = function () {
-  return {
-    notNullable() {
-      return this;
-    },
-    defaultTo() {
-      return this;
-    },
-  };
-};
-
-const createTableStub = function ({ specificTypeCalls }) {
-  return {
-    bigIncrements() {
-      return createColumnStub();
-    },
-    bigInteger() {
-      return createColumnStub();
-    },
-    increments() {
-      return createColumnStub();
-    },
-    integer() {
-      return createColumnStub();
-    },
-    string() {
-      return createColumnStub();
-    },
-    text() {
-      return createColumnStub();
-    },
-    boolean() {
-      return createColumnStub();
-    },
-    timestamp() {
-      return createColumnStub();
-    },
-    json() {
-      return createColumnStub();
-    },
-    specificType(name, type) {
-      specificTypeCalls.push({ name, type });
-      return createColumnStub();
-    },
-    primary() {},
-    unique() {},
-    index() {},
-    foreign() {
-      return {
-        references() {
-          return {
-            inTable() {
-              return {
-                onDelete() {},
-                onUpdate() {},
-              };
-            },
-          };
-        },
-      };
-    },
-  };
-};
-
-const createKnexStub = function ({ client, dumpTables, schema }) {
-  const rawCalls = [];
-  const specificTypeCalls = [];
-  const tableStub = createTableStub({ specificTypeCalls });
-  const schemaState = {
-    schema_version: schema.schemaVersion,
-    schema_json: JSON.stringify(schema),
-  };
-
-  const knex = function () {
-    return {
-      del: async () => {},
-      insert: async () => {},
-      orderBy: () => ({
-        first: async () => schemaState,
-      }),
-    };
-  };
-
-  knex.schema = {
-    hasTable: async () => true,
-    dropTable: async () => {},
-    createTable: async (name, handler) => {
-      if (handler) handler(tableStub);
-    },
-    alterTable: async (name, handler) => {
-      if (handler) handler(tableStub);
-    },
-    renameTable: async () => {},
-  };
-
-  knex.select = () => ({
-    from: async (tableName) => dumpTables[tableName] ?? [],
-  });
-
-  knex.raw = async (sql, bindings) => {
-    rawCalls.push({ sql, bindings });
-  };
-
-  knex.transaction = async (handler) => {
-    await handler(knex);
-  };
-
-  knex.client = { config: { client } };
-
-  return { knex, rawCalls, specificTypeCalls };
-};
-
-const createFsStub = function () {
-  const files = new Map();
-  return {
-    files,
-    fs: {
-      mkdir: async () => {},
-      writeFile: async (filePath, content) => {
-        files.set(filePath, content);
-      },
-      readFile: async (filePath) => {
-        return files.get(filePath);
-      },
-    },
-  };
-};
-
-const createLoggerStub = function () {
-  return {
-    debug() {},
-    info() {},
-    warn() {},
-    error() {},
-    exception() {},
-  };
-};
-
-test('Mindstream_Back_Storage_SchemaManager resolves with knex stub', async () => {
+const setup = async function ({ rebuildError } = {}) {
   const container = await createTestContainer();
-  const knexStub = { schema: {} };
-
-  container.register('Mindstream_Back_Storage_Knex$', {
-    get() {
-      return knexStub;
+  const calls = [];
+  const compilation = { fingerprint: 'dem-fingerprint', physical: { tables: [{ entity: '/items', name: 'items' }] } };
+  const rows = [{ id: 1, name: 'alpha' }];
+  const query = () => ({ del: async () => calls.push('audit-delete'), insert: async () => calls.push('audit-insert'), orderBy: () => ({ first: async () => null }), select: async () => rows });
+  query.schema = { hasTable: async () => true };
+  const connection = { getDialectAdapter: () => ({ id: 'postgresql' }) };
+  container.register('Mindstream_Back_Storage_Database$', { get: () => query, getConnection: () => connection });
+  container.register('Mindstream_Back_Storage_Schema$', {
+    getDeclaration: () => ({ version: 2 }), getFragmentEnvelope: () => ({ id: 'fragment' }), getMapEnvelope: () => ({ id: 'map' }),
+  });
+  container.register('TeqFw_Db_Back_Dem_Compile$', {
+    async exec(args) { calls.push({ type: 'compile', args }); return compilation; },
+    assertResult({ value }) { assert.equal(value, compilation); },
+  });
+  container.register('TeqFw_Db_Back_RDb_Schema_A_Plan$', { exec: (args) => ({ args }) });
+  container.register('TeqFw_Db_Back_RDb_Schema_A_Builder$', { async exec(args) { calls.push({ type: 'build', args }); return { status: 'complete' }; } });
+  container.register('TeqFw_Db_Back_RDb_Rebuild$', {
+    async exec(args) {
+      calls.push({ type: 'rebuild', args });
+      if (rebuildError) throw rebuildError;
+      assert.deepEqual(await args.snapshot.readTable({ entity: '/items' }), rows);
+      return { accepted: false, status: 'complete' };
     },
   });
+  container.register('Mindstream_Back_Logger$', { info() {} });
+  return { calls, manager: await container.get('Mindstream_Back_Storage_SchemaManager$') };
+};
 
-  const manager = await container.get('Mindstream_Back_Storage_SchemaManager$');
-  assert.ok(manager);
-  assert.equal(typeof manager.applySchema, 'function');
-  assert.equal(typeof manager.recreateWithPreserve, 'function');
-  assert.equal(typeof manager.createSchema, 'function');
+test('SchemaManager creates schema from an asserted DEM plan', async () => {
+  const { calls, manager } = await setup();
+  const evidence = await manager.createSchema();
+  assert.equal(evidence.status, 'complete');
+  assert.ok(calls.some((item) => item.type === 'compile'));
+  assert.ok(calls.some((item) => item.type === 'build' && item.args.plan.args.operation === 'create'));
+  assert.ok(calls.includes('audit-insert'));
 });
 
-test('Mindstream_Back_Storage_SchemaManager syncs pg sequences after renew', async () => {
-  const container = await createTestContainer();
-  const schema = buildSchema();
-  const { fs, files } = createFsStub();
-  const { knex, rawCalls } = createKnexStub({
-    client: 'pg',
-    dumpTables: {
-      items: [{ id: 7, name: 'alpha' }],
-    },
-    schema,
-  });
-
-  container.register('Mindstream_Back_Storage_Schema$', {
-    getDeclaration() {
-      return schema;
-    },
-  });
-  container.register('Mindstream_Back_Storage_Knex$', {
-    get() {
-      return knex;
-    },
-  });
-  container.register('Mindstream_Back_Logger$', createLoggerStub());
-  container.register('node:fs/promises', fs);
-  container.register('node:path', await import('node:path'));
-  container.register('node:process', {
-    cwd() {
-      return '/tmp';
-    },
-  });
-
-  const manager = await container.get('Mindstream_Back_Storage_SchemaManager$');
-  await manager.renewSchema();
-
-  assert.ok(files.size > 0);
-  const setvalCall = rawCalls.find(
-    (call) => call.sql.includes('setval') && call.sql.includes('pg_get_serial_sequence')
-  );
-  assert.ok(setvalCall);
-  assert.deepEqual(setvalCall.bindings, ['items', 'id', 'id', 'id', 'items']);
+test('SchemaManager renews only through an in-place rebuild with readable snapshot evidence', async () => {
+  const { calls, manager } = await setup();
+  const evidence = await manager.renewSchema();
+  assert.equal(evidence.accepted, false);
+  const call = calls.find((item) => item.type === 'rebuild');
+  assert.equal(call.args.mode, 'inPlace');
+  assert.equal(call.args.source, call.args.target);
+  assert.equal(call.args.sourceId, call.args.targetId);
+  assert.equal(call.args.authorizeDiscard, undefined);
 });
 
-test('Mindstream_Back_Storage_SchemaManager initializes pg sequences for empty tables', async () => {
-  const container = await createTestContainer();
-  const schema = buildSchema();
-  const { fs } = createFsStub();
-  const { knex, rawCalls } = createKnexStub({
-    client: 'pg',
-    dumpTables: {
-      items: [],
-    },
-    schema,
-  });
-
-  container.register('Mindstream_Back_Storage_Schema$', {
-    getDeclaration() {
-      return schema;
-    },
-  });
-  container.register('Mindstream_Back_Storage_Knex$', {
-    get() {
-      return knex;
-    },
-  });
-  container.register('Mindstream_Back_Logger$', createLoggerStub());
-  container.register('node:fs/promises', fs);
-  container.register('node:path', await import('node:path'));
-  container.register('node:process', {
-    cwd() {
-      return '/tmp';
-    },
-  });
-
-  const manager = await container.get('Mindstream_Back_Storage_SchemaManager$');
-  await manager.renewSchema();
-
-  const setvalCall = rawCalls.find(
-    (call) => call.sql.includes('setval') && call.sql.includes('pg_get_serial_sequence')
-  );
-  assert.ok(setvalCall);
-  assert.ok(setvalCall.sql.includes('COALESCE(MAX'));
-  assert.ok(setvalCall.sql.includes('1'));
-  assert.ok(setvalCall.sql.includes('IS NOT NULL'));
-});
-
-test('Mindstream_Back_Storage_SchemaManager skips sequence sync for non-pg client', async () => {
-  const container = await createTestContainer();
-  const schema = buildSchema();
-  const { fs } = createFsStub();
-  const { knex, rawCalls } = createKnexStub({
-    client: 'mssql',
-    dumpTables: {
-      items: [{ id: 3, name: 'beta' }],
-    },
-    schema,
-  });
-
-  container.register('Mindstream_Back_Storage_Schema$', {
-    getDeclaration() {
-      return schema;
-    },
-  });
-  container.register('Mindstream_Back_Storage_Knex$', {
-    get() {
-      return knex;
-    },
-  });
-  container.register('Mindstream_Back_Logger$', createLoggerStub());
-  container.register('node:fs/promises', fs);
-  container.register('node:path', await import('node:path'));
-  container.register('node:process', {
-    cwd() {
-      return '/tmp';
-    },
-  });
-
-  const manager = await container.get('Mindstream_Back_Storage_SchemaManager$');
-  await manager.renewSchema();
-
-  assert.equal(rawCalls.length, 0);
-});
-
-test('Mindstream_Back_Storage_SchemaManager creates vector columns and extension', async () => {
-  const container = await createTestContainer();
-  const schema = buildSchema();
-  schema.tables.items.columns.embedding = { type: 'vector', dimension: 1536 };
-  const { knex, rawCalls, specificTypeCalls } = createKnexStub({
-    client: 'pg',
-    dumpTables: { items: [] },
-    schema,
-  });
-
-  container.register('Mindstream_Back_Storage_Schema$', {
-    getDeclaration() {
-      return schema;
-    },
-  });
-  container.register('Mindstream_Back_Storage_Knex$', {
-    get() {
-      return knex;
-    },
-  });
-  container.register('Mindstream_Back_Logger$', createLoggerStub());
-
-  const manager = await container.get('Mindstream_Back_Storage_SchemaManager$');
-  await manager.createSchema();
-
-  assert.ok(rawCalls.some((call) => call.sql.includes('CREATE EXTENSION IF NOT EXISTS vector')));
-  assert.ok(specificTypeCalls.some((call) => call.name === 'embedding' && call.type === 'vector(1536)'));
+test('SchemaManager propagates rebuild failure without writing acceptance audit', async () => {
+  const failure = new Error('rebuild failed');
+  const { calls, manager } = await setup({ rebuildError: failure });
+  await assert.rejects(manager.renewSchema(), failure);
+  assert.ok(!calls.includes('audit-insert'));
 });

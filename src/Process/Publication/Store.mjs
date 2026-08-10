@@ -6,12 +6,12 @@
 export default class Mindstream_Back_Process_Publication_Store {
 /**
  * @param {object} deps
- * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Storage_Database$} deps.database
  * @param {Mindstream_Back_Logger$} deps.logger
  * @param {Mindstream_Back_Process_Publication_Status$} deps.statusCatalog
  */
 constructor({
-    knexProvider,
+    database,
     logger,
     statusCatalog,
   }) {
@@ -24,7 +24,7 @@ constructor({
  * @returns {unknown}
  */
 const getKnex = function () {
-      return knexProvider.get();
+      return database.get();
     };
 
     /**
@@ -157,7 +157,7 @@ this.updateStatus = async function ({ id, status }) {
 
 export const __deps__ = Object.freeze({
   default: Object.freeze({
-    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    database: 'Mindstream_Back_Storage_Database$',
     logger: 'Mindstream_Back_Logger$',
     statusCatalog: 'Mindstream_Back_Process_Publication_Status$',
   }),

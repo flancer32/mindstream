@@ -6,10 +6,10 @@
 export default class Mindstream_Back_Attention_Ingress {
 /**
  * @param {object} deps
- * @param {Mindstream_Back_Storage_Knex$} deps.knexProvider
+ * @param {Mindstream_Back_Storage_Database$} deps.database
  * @param {Mindstream_Shared_Api_Attention$} deps.attentionContract
  */
-constructor({ knexProvider, attentionContract }) {
+constructor({ database, attentionContract }) {
 
     /**
  * @returns {unknown}
@@ -18,7 +18,7 @@ constructor({ knexProvider, attentionContract }) {
  * @returns {unknown}
  */
 const getKnex = function () {
-      return knexProvider.get();
+      return database.get();
     };
 
     /**
@@ -118,7 +118,7 @@ this.accept = async function (payload) {
 
 export const __deps__ = Object.freeze({
   default: Object.freeze({
-    knexProvider: 'Mindstream_Back_Storage_Knex$',
+    database: 'Mindstream_Back_Storage_Database$',
     attentionContract: 'Mindstream_Shared_Api_Attention$',
   }),
 });

@@ -52,7 +52,6 @@ const coercePort = function (value) {
  */
 const freezeConfig = function (value) {
       Object.freeze(value.server);
-      Object.freeze(value.db);
       Object.freeze(value.llm);
       return Object.freeze(value);
     };
@@ -70,10 +69,6 @@ this.init = async function () {
       const mindstream = reader.get('MINDSTREAM');
       config = freezeConfig({
         server: { port: coercePort(server.PORT), type: coerceString(server.TYPE) },
-        db: {
-          client: coerceString(mindstream.DB_CLIENT), host: coerceString(mindstream.DB_HOST), port: coercePort(mindstream.DB_PORT),
-          database: coerceString(mindstream.DB_DATABASE), user: coerceString(mindstream.DB_USER), password: coerceString(mindstream.DB_PASSWORD),
-        },
         llm: {
           apiKey: coerceString(mindstream.LLM_API_KEY), baseUrl: coerceString(mindstream.LLM_BASE_URL),
           generationModel: coerceString(mindstream.LLM_GENERATION_MODEL), embeddingModel: coerceString(mindstream.LLM_EMBEDDING_MODEL),

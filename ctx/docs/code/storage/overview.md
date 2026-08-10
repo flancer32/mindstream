@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/storage/overview.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20260810`
 
 ## Purpose
 
@@ -39,9 +39,11 @@ The DB layer contains no product logic, does not interpret attention signals, an
 
 In the Mindstream MVP:
 
-- `knex` is the **only DBAL**;
-- direct SQL use outside `knex` is prohibited;
-- the DB layer remains isolated from low-level SQL details but is implemented for **PostgreSQL 16+ with mandatory `pgvector`**, as fixed in the `environment/` layer.
+- `@teqfw/db` v2+ is the relational persistence and schema-lifecycle package;
+- Knex remains its execution substrate and may be exposed by the application-owned connection adapter to existing domain-specific storage modules;
+- direct construction of Knex connections and direct SQL outside the package-supported Knex boundary are prohibited;
+- the host installs the PostgreSQL driver, loads `@teqfw/cfg`, initializes the default `@teqfw/db` connection, and disconnects it during shutdown;
+- the DB layer is implemented for **PostgreSQL 16+ with mandatory `pgvector`**, as fixed in the `environment/` layer.
 
 The choice of PostgreSQL with `pgvector` is not an interchangeable option but part of the fixed runtime environment.
 
@@ -97,7 +99,7 @@ Each storage module:
 
 - is responsible for one concrete entity;
 - implements only the operations required for that entity;
-- uses `knex` directly in its implementation.
+- uses the Knex execution object obtained from the initialized `@teqfw/db` connection adapter.
 
 ## Testability
 

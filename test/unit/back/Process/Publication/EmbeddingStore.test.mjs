@@ -49,7 +49,7 @@ test('Mindstream_Back_Process_Publication_EmbeddingStore saves embeddings', asyn
   const container = await createTestContainer();
   const { knex, rawCalls } = createKnexStub();
 
-  container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
   container.register('Mindstream_Back_Logger$', buildLogger());
 
   const store = await container.get('Mindstream_Back_Process_Publication_EmbeddingStore$');
@@ -72,7 +72,7 @@ test('Mindstream_Back_Process_Publication_EmbeddingStore detects existing embedd
     existing: { overview_embedding: [1], annotation_embedding: [2] },
   });
 
-  container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
   container.register('Mindstream_Back_Logger$', buildLogger());
 
   const store = await container.get('Mindstream_Back_Process_Publication_EmbeddingStore$');
@@ -92,7 +92,7 @@ test('Mindstream_Back_Process_Publication_EmbeddingStore rejects incomplete row'
     existing: { overview_embedding: [1], annotation_embedding: null },
   });
 
-  container.register('Mindstream_Back_Storage_Knex$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
   container.register('Mindstream_Back_Logger$', buildLogger());
 
   const store = await container.get('Mindstream_Back_Process_Publication_EmbeddingStore$');

@@ -9,21 +9,21 @@
     "fw": {
       "di": {
         "namespaces": [
-      {
-        "prefix": "Mindstream_Back_",
-        "path": "./src",
-        "ext": ".mjs"
-      },
-      {
-        "prefix": "Mindstream_Web_",
-        "path": "./web/app/Web",
-        "ext": ".mjs"
-      },
-      {
-        "prefix": "Mindstream_Shared_",
-        "path": "./web/app/Shared",
-        "ext": ".mjs"
-      }
+          {
+            "prefix": "Mindstream_Back_",
+            "path": "./src",
+            "ext": ".mjs"
+          },
+          {
+            "prefix": "Mindstream_Web_",
+            "path": "./web/app/Web",
+            "ext": ".mjs"
+          },
+          {
+            "prefix": "Mindstream_Shared_",
+            "path": "./web/app/Shared",
+            "ext": ".mjs"
+          }
         ]
       },
       "cli": {
@@ -32,12 +32,48 @@
           "default": "fl32:web:start"
         },
         "commands": [
-          { "id": "db:schema:create", "summary": "Create the database schema.", "arguments": [], "options": [], "component": "Mindstream_Back_Cli_Db_Schema_Create$" },
-          { "id": "db:schema:renew", "summary": "Recreate the database schema while preserving data where possible.", "arguments": [], "options": [], "component": "Mindstream_Back_Cli_Db_Schema_Renew$" },
-          { "id": "ingest:discover:habr", "summary": "Discover Habr publications through RSS.", "arguments": [], "options": [], "component": "Mindstream_Back_Cli_Ingest_Discover_Habr$" },
-          { "id": "ingest:extract:habr", "summary": "Extract Habr publication text.", "arguments": [], "options": [], "component": "Mindstream_Back_Cli_Ingest_Extract_Habr$" },
-          { "id": "process:generate:embeddings", "summary": "Generate publication embeddings.", "arguments": [], "options": [], "component": "Mindstream_Back_Cli_Process_Generate_Embeddings$" },
-          { "id": "process:generate:summaries", "summary": "Generate publication summaries.", "arguments": [], "options": [], "component": "Mindstream_Back_Cli_Process_Generate_Summaries$" }
+          {
+            "id": "db:schema:create",
+            "summary": "Create the database schema.",
+            "arguments": [],
+            "options": [],
+            "component": "Mindstream_Back_Cli_Db_Schema_Create$"
+          },
+          {
+            "id": "db:schema:renew",
+            "summary": "Recreate the database schema while preserving data where possible.",
+            "arguments": [],
+            "options": [],
+            "component": "Mindstream_Back_Cli_Db_Schema_Renew$"
+          },
+          {
+            "id": "ingest:discover:habr",
+            "summary": "Discover Habr publications through RSS.",
+            "arguments": [],
+            "options": [],
+            "component": "Mindstream_Back_Cli_Ingest_Discover_Habr$"
+          },
+          {
+            "id": "ingest:extract:habr",
+            "summary": "Extract Habr publication text.",
+            "arguments": [],
+            "options": [],
+            "component": "Mindstream_Back_Cli_Ingest_Extract_Habr$"
+          },
+          {
+            "id": "process:generate:embeddings",
+            "summary": "Generate publication embeddings.",
+            "arguments": [],
+            "options": [],
+            "component": "Mindstream_Back_Cli_Process_Generate_Embeddings$"
+          },
+          {
+            "id": "process:generate:summaries",
+            "summary": "Generate publication summaries.",
+            "arguments": [],
+            "options": [],
+            "component": "Mindstream_Back_Cli_Process_Generate_Summaries$"
+          }
         ]
       }
     }
@@ -50,9 +86,9 @@
     "@flancer32/teq-web": "github:flancer32/teq-web#main",
     "@teqfw/cfg": "github:teqfw/cfg#main",
     "@teqfw/cli": "github:teqfw/cli#main",
+    "@teqfw/db": "github:teqfw/db#main",
     "@teqfw/di": "github:teqfw/di#main",
     "@teqfw/log": "github:teqfw/log#main",
-    "knex": "^3.2.10",
     "pg": "^8.22.0"
   },
   "devDependencies": {
