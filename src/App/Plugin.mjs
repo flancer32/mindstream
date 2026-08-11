@@ -12,11 +12,11 @@ export default class Mindstream_Back_App_Plugin {
    * @param {TeqFw_Cli_Node_Fs} deps.fs
    * @param {TeqFw_Cli_Node_Path} deps.path
    * @param {Mindstream_Back_App_Configuration$} deps.config
-   * @param {Fl32_Web_Back_Config_Runtime__Factory$} deps.runtimeConfigFactory
-   * @param {Fl32_Web_Back_PipelineEngine$} deps.pipelineEngine
+   * @param {TeqFw_Web_Back_Config_Runtime__Factory$} deps.runtimeConfigFactory
+   * @param {TeqFw_Web_Back_PipelineEngine$} deps.pipelineEngine
    * @param {Mindstream_Back_Web_Handler$} deps.apiHandler
-   * @param {Fl32_Web_Back_Handler_Static$} deps.staticHandler
-   * @param {Fl32_Web_Back_Dto_Source__Factory$} deps.sourceFactory
+   * @param {TeqFw_Web_Back_Handler_Static$} deps.staticHandler
+   * @param {TeqFw_Web_Back_Dto_Source__Factory$} deps.sourceFactory
    * @param {Mindstream_Back_Storage_Database$} deps.database
    */
   constructor({
@@ -85,11 +85,11 @@ export const __deps__ = Object.freeze({
     fs: 'node:fs/promises',
     path: 'node:path',
     config: 'Mindstream_Back_App_Configuration$',
-    runtimeConfigFactory: 'Fl32_Web_Back_Config_Runtime__Factory$',
-    pipelineEngine: 'Fl32_Web_Back_PipelineEngine$',
+    runtimeConfigFactory: 'TeqFw_Web_Back_Config_Runtime__Factory$',
+    pipelineEngine: 'TeqFw_Web_Back_PipelineEngine$',
     apiHandler: 'Mindstream_Back_Web_Handler$',
-    staticHandler: 'Fl32_Web_Back_Handler_Static$',
-    sourceFactory: 'Fl32_Web_Back_Dto_Source__Factory$',
+    staticHandler: 'TeqFw_Web_Back_Handler_Static$',
+    sourceFactory: 'TeqFw_Web_Back_Dto_Source__Factory$',
     database: 'Mindstream_Back_Storage_Database$',
   }),
 });

@@ -32,7 +32,7 @@ The following inbound invariants are fixed for the MVP:
 
 1. **Apache is a mandatory component of the runtime contour.** All external HTTP requests reach the system through Apache.
 2. **Direct external access to the Node application is not allowed.** The Node application is not exposed directly to the external network. Direct access is allowed only in dev or test contours.
-3. **HTTP Ingress is canonically implemented through `@flancer32/teq-web`.** The `@flancer32/teq-web` dispatcher model (`pre / process / post`) is part of the architectural invariant of the MVP. Alternative HTTP entry mechanisms or libraries are not provided.
+3. **HTTP Ingress is canonically implemented through `@teqfw/web`.** The `@teqfw/web` dispatcher model (`pre / process / post`) is part of the architectural invariant of the MVP. Alternative HTTP entry mechanisms or libraries are not provided.
 
 ## Read/Write Boundary
 

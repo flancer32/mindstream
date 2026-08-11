@@ -156,7 +156,7 @@ const getHandler = async function ({ identities = [], publications = [] } = {}) 
 
   container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
   container.register('Mindstream_Back_Logger$', buildLogger());
-  container.register('Fl32_Web_Back_Helper_Respond$', createRespondStub());
+  container.register('TeqFw_Web_Back_Helper_Respond$', createRespondStub());
 
   const handler = await container.get('Mindstream_Back_Web_Api_Attention$');
   return { handler, inserted };

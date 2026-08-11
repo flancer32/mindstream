@@ -24,13 +24,13 @@ test('Mindstream_Back_App_Plugin initializes and releases the @teqfw/db connecti
     async init() { calls.push({ type: 'config-init' }); },
     get() { return { server: { port: 3001, type: 'http' } }; },
   });
-  container.register('Fl32_Web_Back_Config_Runtime__Factory$', { configure: (value) => calls.push({ type: 'configure', value }) });
+  container.register('TeqFw_Web_Back_Config_Runtime__Factory$', { configure: (value) => calls.push({ type: 'configure', value }) });
   const apiHandler = { name: 'api' };
   const staticHandler = { init: async (value) => calls.push({ type: 'static-init', value }) };
   container.register('Mindstream_Back_Web_Handler$', apiHandler);
-  container.register('Fl32_Web_Back_Handler_Static$', staticHandler);
-  container.register('Fl32_Web_Back_Dto_Source__Factory$', { create: (value) => value });
-  container.register('Fl32_Web_Back_PipelineEngine$', { addHandler: (value) => calls.push({ type: 'add-handler', value }) });
+  container.register('TeqFw_Web_Back_Handler_Static$', staticHandler);
+  container.register('TeqFw_Web_Back_Dto_Source__Factory$', { create: (value) => value });
+  container.register('TeqFw_Web_Back_PipelineEngine$', { addHandler: (value) => calls.push({ type: 'add-handler', value }) });
   container.register('Mindstream_Back_Storage_Database$', {
     async init() { calls.push({ type: 'database-init' }); },
     async destroy() { calls.push({ type: 'destroy' }); },

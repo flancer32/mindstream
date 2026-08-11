@@ -18,7 +18,7 @@ ingest:discover:habr
 ingest:extract:habr
 process:generate:embeddings
 process:generate:summaries
-fl32:web:start
+web:start
 ```
 
 Commands absent from this hierarchy are invalid.
@@ -152,7 +152,7 @@ Constraints:
 - the command does not start embeddings, runtime, or other later stages;
 - the command is non-interactive and accepts no input parameters.
 
-### `fl32:web:start`
+### `web:start`
 
 Contour: runtime.
 

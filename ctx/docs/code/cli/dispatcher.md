@@ -18,7 +18,7 @@ The complete colon-delimited command `id` is the sole public command name. The h
 
 - `Mindstream_Back_App_Plugin` is a DI lifecycle component. On startup it loads configuration, initializes the `@teqfw/db` connection and application configuration, configures Teq Web runtime settings, and registers Mindstream HTTP handlers. On shutdown it disconnects the database connection.
 - Mindstream command products are finite DI components. They expose Teq command metadata and `async execute(context)`; they neither select commands nor control process status.
-- `fl32:web:start` is the dependency-owned long-running command. It freezes the prepared runtime configuration, starts the server, and stops it after a host signal.
+- `web:start` is the dependency-owned long-running command. It freezes the prepared runtime configuration, starts the server, and stops it after a host signal.
 
 Plugins start before command selection, including help and engineering commands. Their startup and shutdown must therefore be safe for every invocation.
 

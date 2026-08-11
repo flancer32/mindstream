@@ -61,7 +61,7 @@ CREATE EXTENSION vector;
 7. Извлеките тексты публикаций: `npm exec -- teq ingest:extract:habr`.
 8. Сформируйте обзор и аннотацию: `npm exec -- teq process:generate:summaries`.
 9. Сформируйте эмбеддинги: `npm exec -- teq process:generate:embeddings`.
-10. Запустите сервер: `npm start` (это запускает команду `fl32:web:start` по умолчанию).
+10. Запустите сервер: `npm start` (это запускает команду `web:start` по умолчанию).
 
 Шаги 7–8 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
 После запуска откройте `http://localhost:3000`.

@@ -11,7 +11,7 @@ export default class Mindstream_Back_Web_Handler {
  * @param {Mindstream_Back_Web_Api_Attention$} deps.attention
  * @param {Mindstream_Back_Web_Api_Identity$} deps.identity
  * @param {Mindstream_Back_Logger$} deps.logger
- * @param {Fl32_Web_Back_Enum_Stage$} deps.STAGE
+ * @param {TeqFw_Web_Back_Enum_Stage$} deps.STAGE
  */
 constructor({
     fallback,
@@ -148,6 +148,6 @@ export const __deps__ = Object.freeze({
     attention: 'Mindstream_Back_Web_Api_Attention$',
     identity: 'Mindstream_Back_Web_Api_Identity$',
     logger: 'Mindstream_Back_Logger$',
-    STAGE: 'Fl32_Web_Back_Enum_Stage$',
+    STAGE: 'TeqFw_Web_Back_Enum_Stage$',
   }),
 });

@@ -16,7 +16,7 @@ This document does not describe the domain or application logic of Mindstream.
 
 The HTTP server in Mindstream is an **infrastructure transport layer**.
 
-The server is implemented using `@flancer32/teq-web`, which:
+The server is implemented using `@teqfw/web`, which:
 
 - is not part of the domain model;
 - does not participate in composition of application subsystems;
@@ -33,10 +33,10 @@ Mindstream is a CLI-started backend application.
 The application enters web-server mode through the explicit CLI command:
 
 ```
-fl32:web:start
+web:start
 ```
 
-`Mindstream_Back_App_Plugin` prepares configuration and registers handlers before command selection. Only when `fl32:web:start` is executed:
+`Mindstream_Back_App_Plugin` prepares configuration and registers handlers before command selection. Only when `web:start` is executed:
 
 - the HTTP server is initialized;
 - application HTTP handlers are registered;
@@ -61,7 +61,7 @@ Horizontal scaling is done **externally** through PM2 by running multiple proces
 
 The HTTP server:
 
-- starts when `fl32:web:start` is executed;
+- starts when `web:start` is executed;
 - lives for the lifetime of the process;
 - does not terminate the process on its own.
 
@@ -109,7 +109,7 @@ The HTTP server serves only a **backend JSON API**.
 HTTP handlers:
 
 - belong to the Mindstream application;
-- are registered in the server through the `@flancer32/teq-web` infrastructure mechanism;
+- are registered in the server through the `@teqfw/web` infrastructure mechanism;
 - act as adapters between HTTP requests and internal application operations.
 
 HTTP handlers may:

@@ -62,4 +62,4 @@ CLI code does not:
 
 `src/Cli/AGENTS.md` serves as a **form anchor**, not as a behavior description.
 
-The dependency-owned `fl32:web:start` command starts the web server. Application setup belongs to `Mindstream_Back_App_Plugin`, not command products.
+The dependency-owned `web:start` command starts the web server. Application setup belongs to `Mindstream_Back_App_Plugin`, not command products.

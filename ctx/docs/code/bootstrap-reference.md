@@ -17,7 +17,7 @@ npm exec -- teq --help
 npm start
 ```
 
-`npm start` invokes `teq` without an explicit command. The host selects the root package default `fl32:web:start`.
+`npm start` invokes `teq web:start` explicitly.
 
 Before the first DI resolution, the Teq executable discovers `teqfw.fw.di.namespaces` metadata. The host then starts declared lifecycle plugins, selects a command by its full `id`, and performs one orderly shutdown. Mindstream does not declare a Container configurator because package metadata supplies all required namespace roots.
 

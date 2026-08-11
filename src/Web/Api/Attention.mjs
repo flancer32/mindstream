@@ -8,7 +8,7 @@ export default class Mindstream_Back_Web_Api_Attention {
  * @param {object} deps
  * @param {Mindstream_Back_Attention_Ingress$} deps.ingress
  * @param {Mindstream_Back_Logger$} deps.logger
- * @param {Fl32_Web_Back_Helper_Respond$} deps.respond
+ * @param {TeqFw_Web_Back_Helper_Respond$} deps.respond
  */
 constructor({
     ingress,
@@ -127,6 +127,6 @@ export const __deps__ = Object.freeze({
   default: Object.freeze({
     ingress: 'Mindstream_Back_Attention_Ingress$',
     logger: 'Mindstream_Back_Logger$',
-    respond: 'Fl32_Web_Back_Helper_Respond$',
+    respond: 'TeqFw_Web_Back_Helper_Respond$',
   }),
 });

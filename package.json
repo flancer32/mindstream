@@ -29,7 +29,7 @@
       "cli": {
         "plugin": "Mindstream_Back_App_Plugin$",
         "command": {
-          "default": "fl32:web:start"
+          "default": "web:start"
         },
         "commands": [
           {
@@ -87,16 +87,16 @@
   },
   "scripts": {
     "db:migrate-v2": "teq db:schema:migrate-v2",
-    "start": "teq",
+    "start": "teq web:start",
     "test:unit": "node --test \"test/unit/**/*.test.mjs\""
   },
   "dependencies": {
-    "@flancer32/teq-web": "github:flancer32/teq-web#main",
     "@teqfw/cfg": "github:teqfw/cfg#main",
     "@teqfw/cli": "github:teqfw/cli#main",
     "@teqfw/db": "github:teqfw/db#main",
     "@teqfw/di": "github:teqfw/di#main",
     "@teqfw/log": "github:teqfw/log#main",
+    "@teqfw/web": "^2.0.0",
     "pg": "^8.22.0"
   },
   "devDependencies": {

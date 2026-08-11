@@ -6,7 +6,7 @@
 export default class Mindstream_Back_Web_Api_Fallback {
 /**
  * @param {object} deps
- * @param {Fl32_Web_Back_Helper_Respond$} deps.respond
+ * @param {TeqFw_Web_Back_Helper_Respond$} deps.respond
  */
 constructor({ respond }) {
     /**
@@ -50,6 +50,6 @@ this.handle = async function ({ res, path }) {
 
 export const __deps__ = Object.freeze({
   default: Object.freeze({
-    respond: 'Fl32_Web_Back_Helper_Respond$',
+    respond: 'TeqFw_Web_Back_Helper_Respond$',
   }),
 });
