@@ -185,7 +185,7 @@ const handleError = async function (publicationId, err) {
  * @returns {Promise<unknown>}
  */
 this.execute = async function () {
-      const limit = 3;
+      const limit = 5;
       const batch = await publicationStore.listForSummaries({ limit });
       if (!Array.isArray(batch) || !batch.length) return;
 

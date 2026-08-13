@@ -29,7 +29,7 @@ test('Mindstream_Back_Process_Generate_Summaries generates summaries for pending
 
   container.register('Mindstream_Back_Process_Publication_Store$', {
     async listForSummaries({ limit } = {}) {
-      assert.equal(limit, 3);
+      assert.equal(limit, 5);
       calls.list += 1;
       return [{ id: 11, md_text: 'Hello world', status: 'extracted' }];
     },
@@ -75,7 +75,7 @@ test('Mindstream_Back_Process_Generate_Summaries skips publications with summari
   let listCalls = 0;
   container.register('Mindstream_Back_Process_Publication_Store$', {
     async listForSummaries({ limit } = {}) {
-      assert.equal(limit, 3);
+      assert.equal(limit, 5);
       listCalls += 1;
       return [{ id: 22, md_text: 'Already done', status: 'summary_ready' }];
     },
@@ -112,7 +112,7 @@ test('Mindstream_Back_Process_Generate_Summaries marks failures and continues', 
   let listCalls = 0;
   container.register('Mindstream_Back_Process_Publication_Store$', {
     async listForSummaries({ limit } = {}) {
-      assert.equal(limit, 3);
+      assert.equal(limit, 5);
       listCalls += 1;
       return [
         { id: 31, md_text: 'Bad text', status: 'extracted' },

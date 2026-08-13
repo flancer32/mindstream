@@ -170,7 +170,7 @@ const handleError = async function (publicationId, err) {
  */
 this.execute = async function () {
       logger.info(NAMESPACE, 'Embedding generation started.');
-      const limit = 3;
+      const limit = 5;
       const batch = await publicationStore.listForEmbeddings({ limit });
       if (!Array.isArray(batch) || !batch.length) {
         logger.info(NAMESPACE, 'Embedding generation finished with no work.');

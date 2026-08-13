@@ -30,7 +30,7 @@ test('Mindstream_Back_Process_Generate_Embeddings generates embeddings for pendi
 
   container.register('Mindstream_Back_Process_Publication_Store$', {
     async listForEmbeddings({ limit } = {}) {
-      assert.equal(limit, 3);
+      assert.equal(limit, 5);
       calls.list += 1;
       return [{ id: 41, overview: 'Overview', annotation: 'Annotation', status: 'summary_ready' }];
     },
