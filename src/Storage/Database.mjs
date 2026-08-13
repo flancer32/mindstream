@@ -18,7 +18,7 @@ export default class Mindstream_Back_Storage_Database {
       if (!initialized) throw new Error('Mindstream database connection is not initialized.');
       return connection;
     };
-    this.get = function () { return this.getConnection().getKnex(); };
+    this.get = function () { return this.getConnection().getClient(); };
     this.destroy = async function () {
       if (!initialized) return;
       initialized = false;

@@ -9,7 +9,7 @@ test('Database owns initialization and shutdown of the @teqfw/db connection', as
   const knex = {};
   container.register('TeqFw_Db_Back_Config$', { get: () => ({ client: 'pg' }) });
   container.register('TeqFw_Db_Back_RDb_Connect$', {
-    async init(config) { calls.push({ type: 'init', config }); }, getKnex: () => knex,
+    async init(config) { calls.push({ type: 'init', config }); }, getClient: () => knex,
     async disconnect() { calls.push({ type: 'disconnect' }); },
   });
   const database = await container.get('Mindstream_Back_Storage_Database$');

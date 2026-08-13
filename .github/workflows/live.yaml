@@ -72,6 +72,47 @@ jobs:
 
             TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 
+            # Create and validate a PostgreSQL backup before stopping the old runtime.
+            # The first deployment has no previous .env and therefore has no database
+            # configuration available on the server yet.
+            BACKUP_DIR="${{ env.APP_DIR }}/var/backups/postgresql"
+            BACKUP_ENV="${{ env.APP_DIR }}/prod/.env"
+            if [ -d "${{ env.APP_DIR }}/prod" ]; then
+              if [ ! -f "$BACKUP_ENV" ]; then
+                echo "Cannot create a database backup: deployed .env is missing."
+                exit 1
+              fi
+
+              command -v pg_dump >/dev/null
+              command -v pg_restore >/dev/null
+
+              set -a
+              . "$BACKUP_ENV"
+              set +a
+
+              : "${TEQFW_DB__DATABASE:?TEQFW_DB__DATABASE is required for deployment backup}"
+              : "${TEQFW_DB__USER:?TEQFW_DB__USER is required for deployment backup}"
+
+              mkdir -p "$BACKUP_DIR"
+              chmod 700 "$BACKUP_DIR"
+              BACKUP_FILE="$BACKUP_DIR/${{ env.PRJ }}_${TIMESTAMP}.dump"
+
+              PGPASSWORD="${TEQFW_DB__PASSWORD:-}" pg_dump \
+                --format=custom \
+                --host="${TEQFW_DB__HOST:-localhost}" \
+                --port="${TEQFW_DB__PORT:-5432}" \
+                --username="$TEQFW_DB__USER" \
+                --file="$BACKUP_FILE" \
+                "$TEQFW_DB__DATABASE"
+              pg_restore --list "$BACKUP_FILE" >/dev/null
+
+              # Keep the most recent 30 days of deployment backups.
+              find "$BACKUP_DIR" -type f -name '${{ env.PRJ }}_*.dump' -mtime +30 -delete
+              echo "PostgreSQL backup created and validated: $BACKUP_FILE"
+            else
+              echo "No previous deployment found; PostgreSQL backup is not required."
+            fi
+
             # Stop previous runtime if exists
             pm2 stop "${{ env.PM2_APP }}" || true
             pm2 delete "${{ env.PM2_APP }}" || true

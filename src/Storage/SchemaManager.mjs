@@ -7,12 +7,11 @@ export default class Mindstream_Back_Storage_SchemaManager {
    * @param {Mindstream_Back_Storage_Schema$} deps.schemaProvider
    * @param {Mindstream_Back_Storage_Database$} deps.database
    * @param {TeqFw_Db_Back_Dem_Compile} deps.compile
-   * @param {TeqFw_Db_Back_RDb_Schema_A_Plan} deps.planner
-   * @param {TeqFw_Db_Back_RDb_Schema_A_Builder} deps.builder
+   * @param {TeqFw_Db_Back_RDb_Schema} deps.schema
    * @param {TeqFw_Db_Back_RDb_Rebuild} deps.rebuild
    * @param {Mindstream_Back_Logger$} deps.logger
    */
-  constructor({ schemaProvider, database, compile, planner, builder, rebuild, logger }) {
+  constructor({ schemaProvider, database, compile, schema, rebuild, logger }) {
     const compileSchema = async function () {
       const connection = database.getConnection();
       const result = await compile.exec({
@@ -38,8 +37,8 @@ export default class Mindstream_Back_Storage_SchemaManager {
     this.createSchema = async function () {
       const connection = database.getConnection();
       const compilation = await compileSchema();
-      const plan = planner.exec({ compilation, operation: 'create' });
-      const evidence = await builder.exec({ adapter: connection.getDialectAdapter(), connection, plan });
+      schema.setCompilation({ compilation });
+      const evidence = await schema.createAllTables({ conn: connection });
       await writeAudit(compilation);
       logger.info('Mindstream_Back_Storage_SchemaManager', 'DEM v2 schema created.', { fingerprint: compilation.fingerprint });
       return evidence;
@@ -88,8 +87,8 @@ export default class Mindstream_Back_Storage_SchemaManager {
 export const __deps__ = Object.freeze({
   default: Object.freeze({
     schemaProvider: 'Mindstream_Back_Storage_Schema$', database: 'Mindstream_Back_Storage_Database$',
-    compile: 'TeqFw_Db_Back_Dem_Compile$', planner: 'TeqFw_Db_Back_RDb_Schema_A_Plan$',
-    builder: 'TeqFw_Db_Back_RDb_Schema_A_Builder$', rebuild: 'TeqFw_Db_Back_RDb_Rebuild$',
+    compile: 'TeqFw_Db_Back_Dem_Compile$', schema: 'TeqFw_Db_Back_RDb_Schema$',
+    rebuild: 'TeqFw_Db_Back_RDb_Rebuild$',
     logger: 'Mindstream_Back_Logger$',
   }),
 });

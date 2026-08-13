@@ -19,8 +19,10 @@ const setup = async function ({ rebuildError } = {}) {
     async exec(args) { calls.push({ type: 'compile', args }); return compilation; },
     assertResult({ value }) { assert.equal(value, compilation); },
   });
-  container.register('TeqFw_Db_Back_RDb_Schema_A_Plan$', { exec: (args) => ({ args }) });
-  container.register('TeqFw_Db_Back_RDb_Schema_A_Builder$', { async exec(args) { calls.push({ type: 'build', args }); return { status: 'complete' }; } });
+  container.register('TeqFw_Db_Back_RDb_Schema$', {
+    setCompilation(args) { calls.push({ type: 'set-compilation', args }); },
+    async createAllTables(args) { calls.push({ type: 'build', args }); return { status: 'complete' }; },
+  });
   container.register('TeqFw_Db_Back_RDb_Rebuild$', {
     async exec(args) {
       calls.push({ type: 'rebuild', args });
@@ -38,7 +40,8 @@ test('SchemaManager creates schema from an asserted DEM plan', async () => {
   const evidence = await manager.createSchema();
   assert.equal(evidence.status, 'complete');
   assert.ok(calls.some((item) => item.type === 'compile'));
-  assert.ok(calls.some((item) => item.type === 'build' && item.args.plan.args.operation === 'create'));
+  assert.ok(calls.some((item) => item.type === 'set-compilation'));
+  assert.ok(calls.some((item) => item.type === 'build' && item.args.conn?.getDialectAdapter));
   assert.ok(calls.includes('audit-insert'));
 });
 

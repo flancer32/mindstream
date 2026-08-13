@@ -6,25 +6,13 @@ import { createTestContainer } from '../../di-node.mjs';
 test('Mindstream_Back_App_Plugin initializes and releases the @teqfw/db connection', async () => {
   const container = await createTestContainer();
   const calls = [];
-  container.register('node:fs/promises', {
-    async access() {
-      const error = new Error('Missing dotenv file');
-      error.code = 'ENOENT';
-      throw error;
-    },
-  });
-  container.register('TeqFw_Cfg_Loader$', {
-    async load(sources) {
-      calls.push({ type: 'load', sources });
-    },
-  });
-  container.register('TeqFw_Cfg_Source_ProcessEnv$', { create: (value) => ({ id: 'process-env', value }) });
-  container.register('TeqFw_Cfg_Source_DotenvFile$', { create: (value) => ({ id: 'dotenv', value }) });
+  container.register('TeqFw_Cli_Config$', { applicationRoot: '/application', cwd: '/other', argv: [], dotenvPath: undefined, dotenvExplicit: false });
   container.register('Mindstream_Back_App_Configuration$', {
     async init() { calls.push({ type: 'config-init' }); },
     get() { return { server: { port: 3001, type: 'http' } }; },
   });
   container.register('TeqFw_Web_Back_Config_Runtime__Factory$', { configure: (value) => calls.push({ type: 'configure', value }) });
+  container.register('node:path', { join: (...parts) => parts.join('/') });
   const apiHandler = { name: 'api' };
   const staticHandler = { init: async (value) => calls.push({ type: 'static-init', value }) };
   container.register('Mindstream_Back_Web_Handler$', apiHandler);
@@ -41,8 +29,10 @@ test('Mindstream_Back_App_Plugin initializes and releases the @teqfw/db connecti
   await plugin.onStartup();
   await plugin.onShutdown();
 
-  assert.deepEqual(calls.map((item) => item.type), ['load', 'database-init', 'config-init', 'configure', 'static-init', 'add-handler', 'add-handler', 'destroy']);
-  assert.deepEqual(calls[3].value, { port: 3001, type: 'http' });
-  assert.deepEqual(calls[5].value, apiHandler);
-  assert.deepEqual(calls[6].value, staticHandler);
+  assert.deepEqual(calls.map((item) => item.type), ['database-init', 'config-init', 'configure', 'static-init', 'add-handler', 'add-handler', 'destroy']);
+  assert.deepEqual(calls[2].value, { port: 3001, type: 'http' });
+  assert.deepEqual(calls[4].value, apiHandler);
+  assert.deepEqual(calls[5].value, staticHandler);
+  assert.equal(calls[3].value.sources[0].root, '/application/web');
+  assert.equal(calls[3].value.sources[1].root, '/application/node_modules/@teqfw/di/src');
 });

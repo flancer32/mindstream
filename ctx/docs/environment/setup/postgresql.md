@@ -116,6 +116,13 @@ Embeddings are stored in columns of type `vector(N)`.
 
 ## 8. Database Backup
 
+The live deployment workflow creates a validated custom-format backup before
+stopping the previous PM2 runtime. Backups are stored on the deployment host
+under `var/backups/postgresql/`, retained for 30 days, and are not included in
+the application archive.
+
+The manual equivalent is:
+
 ```sh
 sudo -u postgres pg_dump \
   --format=custom \
