@@ -1,7 +1,6 @@
 {
   "name": "@flancer32/mindstream",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.0",
   "type": "module",
   "types": "types.d.ts",
   "license": "Apache-2.0",
