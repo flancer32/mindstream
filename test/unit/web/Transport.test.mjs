@@ -46,6 +46,19 @@ test('Mindstream_Web_Transport_Feed requests a cursor page and validates its DTO
   assert.match(browser.calls[0].url, /publishedAt=2026-07-27T00%3A00%3A00.000Z/u);
 });
 
+test('Mindstream_Web_Transport_Feed requests one publication by its permalink id', async () => {
+  const browser = createBrowser({ response: { ok: true, json: async () => feedResponse } });
+  const container = await createTestContainer();
+  container.register('Mindstream_Web_Platform_Browser$', browser);
+  const transport = await container.get('Mindstream_Web_Transport_Feed$');
+
+  const result = await transport.getPublication(4);
+
+  assert.equal(result.items[0].id, 4);
+  assert.match(browser.calls[0].url, /publication=4/u);
+  await assert.rejects(() => transport.getPublication(0), /positive integer/u);
+});
+
 test('Mindstream_Web_Transport_Beacon sends only a transport payload', async () => {
   const browser = createBrowser();
   const container = await createTestContainer();

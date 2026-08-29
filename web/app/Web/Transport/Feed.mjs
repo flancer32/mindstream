@@ -23,6 +23,18 @@ export default class Mindstream_Web_Transport_Feed {
       if (!response.ok) throw new Error(`Feed request failed with HTTP ${response.status}.`);
       return feed.createResponse(await response.json());
     };
+
+    /** @param {number} id @returns {Promise<object>} */
+    this.getPublication = async function (id) {
+      if (!Number.isSafeInteger(id) || id <= 0) {
+        throw new Error('Publication id must be a positive integer.');
+      }
+      const url = new browser.URL('/api/feed', browser.getLocation().origin);
+      url.searchParams.set('publication', String(id));
+      const response = await browser.fetch(url.toString(), { headers: { accept: 'application/json' } });
+      if (!response.ok) throw new Error(`Publication request failed with HTTP ${response.status}.`);
+      return feed.createResponse(await response.json());
+    };
   }
 }
 

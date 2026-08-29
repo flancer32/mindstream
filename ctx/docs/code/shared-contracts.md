@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/shared-contracts.md`
 - Template Version: `20260727`
-- Changed: `20260727`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Defines the code-level contract boundary shared by the Node.js backend and brows
 
 ## Current Contract Catalogue
 
-- `Mindstream_Shared_Api_Feed` creates a validated feed response, its sources, publication items, embeddings, and pagination cursor.
+- `Mindstream_Shared_Api_Feed` creates a validated feed response, its sources, publication items, embeddings, and pagination cursor; the same response shape represents a single processed publication selected by a permalink.
 - `Mindstream_Shared_Api_Identity` creates an anonymous identity-registration DTO.
 - `Mindstream_Shared_Api_Attention` creates and validates attention-signal DTOs, including the browser-event to persisted-event mapping.
 

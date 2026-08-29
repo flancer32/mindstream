@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/experience/state.md`
 - Template Version: `20260619`
-- Changed: `20260727`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -61,6 +61,8 @@ A feed with a very limited number of publications is an allowed experience form.
 A small feed does not require explanation and is not considered interface degradation.
 
 ## Publication States
+
+A publication may also be present as the single focused item opened by its permalink, with its overview already open. This is a valid reading form and is independent of the reader's local feed filtering.
 
 For each publication, the following user-experience state forms exist in the MVP and reflect sequential deepening of attention:
 

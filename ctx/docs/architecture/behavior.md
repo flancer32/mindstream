@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/behavior.md`
 - Template Version: `20260605`
-- Changed: `20260619`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -18,6 +18,8 @@ The architecture is organized around a predominantly one-directional server-side
 - enrichment flow derives machine-oriented representations such as summaries and embeddings from collected material
 - attention flow records user attention signals and feeds them into ranking and personalization logic
 - delivery flow serves user-facing read models and interaction endpoints without redefining upstream truth
+
+The delivery flow can project either a paginated personal feed or one processed publication addressed by its stable permalink. Both projections read the same authoritative corpus state.
 
 Detailed flow slices may be expanded in `data-flow/`, `ingress/`, and other deeper architecture documents.
 

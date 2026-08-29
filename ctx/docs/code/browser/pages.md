@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/browser/pages.md`
 - Template Version: `20260726`
-- Changed: `20260726`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -16,7 +16,12 @@ Defines the browser entry points and their user-facing purpose.
 - Purpose: provide the single reading and orientation surface.
 - Important actions: load publications, inspect semantic representations, open sources, activate identity, adjust the interest threshold, and toggle hiding below it.
 
-There are no additional browser routes in the MVP.
+### Publication Permalink
+
+- Entry: `/?publication={positive-integer-id}`.
+- Purpose: present one processed publication with the same card composition and reading actions as the feed, with its Overview disclosure expanded.
+
+There are no additional browser pages in the MVP.
 
 ## Access And Visibility
 
@@ -24,4 +29,4 @@ The page is available in demo and full-access modes. Corpus availability and att
 
 ## Page-Specific Notes
 
-The page uses progressive feed loading without URL transitions. Missing routes are handled by the delivery layer and do not introduce browser-side pages.
+The feed page uses progressive loading without URL transitions. A publication permalink is a query-string variant of the same static entry document; it loads one publication directly instead of discovering it through feed pagination. The complete product-heading block links to `/` so a focused publication view always provides a return path to the feed.

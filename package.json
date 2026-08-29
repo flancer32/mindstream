@@ -91,12 +91,12 @@
     "test:unit": "node --test \"test/unit/**/*.test.mjs\""
   },
   "dependencies": {
-    "@teqfw/cfg": "github:teqfw/cfg#main",
-    "@teqfw/cli": "github:teqfw/cli#main",
-    "@teqfw/db": "github:teqfw/db#main",
-    "@teqfw/di": "github:teqfw/di#main",
-    "@teqfw/log": "github:teqfw/log#main",
-    "@teqfw/web": "^2.0.0",
+    "@teqfw/cfg": ">=2.1.0 <3",
+    "@teqfw/cli": ">=2.2.0 <3",
+    "@teqfw/db": ">=2.2.0 <3",
+    "@teqfw/di": ">=2.10.0 <3",
+    "@teqfw/log": ">=2.1.2 <3",
+    "@teqfw/web": ">=2.0.0 <3",
     "pg": "^8.22.0"
   },
   "devDependencies": {

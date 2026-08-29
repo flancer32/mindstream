@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/browser/web-components.md`
 - Template Version: `20260726`
- - Changed: `20260727`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -24,6 +24,9 @@ Role: browser application and feed owner.
 Responsibilities:
 
 - load feed pages and render publication cards;
+- load and render one processed publication when the static entry has a permalink query parameter;
+- render card-header metadata with right-aligned icon-only original and permalink actions, while retaining their matching contextual actions inside Overview;
+- expand the Overview disclosure for the publication selected by a permalink;
 - coordinate local interest scoring and attention updates;
 - resolve one automatic or manual interest threshold;
 - apply that same resolved threshold to highlighting and optional hiding;

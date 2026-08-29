@@ -61,6 +61,22 @@ mindstream-feed#feed {
   gap: 6px;
 }
 
+.feed-home-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.feed-home-link:hover .feed-title,
+.feed-home-link:focus .feed-title {
+  color: var(--accent);
+}
+
+.feed-home-link:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
 .feed-title {
   font-family: 'Fraunces', serif;
   font-size: 1.8rem;
@@ -492,9 +508,17 @@ mindstream-feed#feed {
   display: none;
 }
 
+.feed-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .feed-meta {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   gap: 6px;
   font-size: 0.9rem;
   color: var(--muted);
@@ -524,14 +548,47 @@ mindstream-feed#feed {
   line-height: 1.3;
 }
 
-.feed-item-title a {
-  text-decoration: none;
-  color: inherit;
+.feed-card-actions,
+.feed-actions {
+  display: flex;
+  gap: 8px;
 }
 
-.feed-item-title a:focus,
-.feed-item-title a:hover {
+.feed-card-actions {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.feed-actions {
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.feed-action-link,
+.feed-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--link);
+  font-size: 1.1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.feed-action-link:hover,
+.feed-action-link:focus,
+.feed-action-button:hover,
+.feed-action-button:focus {
   color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(0, 0, 0, 0.04);
+  outline: none;
 }
 
 .feed-body {
@@ -615,41 +672,6 @@ mindstream-feed#feed {
   margin: 0;
   color: var(--muted);
   line-height: 1.55;
-}
-
-.feed-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.feed-action-link,
-.feed-action-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--link);
-  font-size: 1.1rem;
-  text-decoration: none;
-  cursor: pointer;
-  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
-}
-
-.feed-action-link:hover,
-.feed-action-link:focus,
-.feed-action-button:hover,
-.feed-action-button:focus {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: rgba(0, 0, 0, 0.04);
-  outline: none;
 }
 
 .feed-status {

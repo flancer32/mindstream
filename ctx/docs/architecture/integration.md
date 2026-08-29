@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/integration.md`
 - Template Version: `20260605`
-- Changed: `20260619`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -26,6 +26,7 @@ Major internal contracts include:
 - ingress-to-processing handoff contracts for admitted work
 - processing-to-storage contracts for durable commits
 - storage-to-delivery contracts for read-model projection
+- publication-permalink read contracts that select one processed publication from the shared corpus
 - attention-signal contracts that connect browser-visible behavior to server-side attention processing
 
 Deeper contract details may live in existing architecture subdocuments when necessary.

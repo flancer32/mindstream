@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/overview.md`
 - Template Version: `20260605`
-- Changed: `20260727`
+- Changed: `20260829`
 
 ## Product Identity
 
@@ -49,6 +49,7 @@ The useful result is not publication ownership or social interaction. The useful
 - Full-corpus access for a user with an initialized profile UUID.
 - Positive attention signals as input to personal and aggregated projection logic.
 - Browser-local feed formation for one user context in MVP.
+- Stable public URLs for processed publications in the shared corpus.
 - One browser-local interest threshold for highlighting publications and, after the reader has an interest profile, optionally hiding and immediately restoring publications below that same threshold.
 
 ### Out of Scope

@@ -30,6 +30,36 @@ test('hidden feed cards override the card display mode', async () => {
   );
 });
 
+test('publication cards expose a stable permalink', async () => {
+  const source = path.join(projectRoot, 'web', 'app', 'Web', 'Component', 'Feed.mjs');
+  const content = await fs.readFile(source, 'utf8');
+
+  assert.match(content, /\/?\?publication=\$\{item\.id\}/u);
+  assert.match(content, /Open publication permalink/u);
+  assert.match(content, /feed-card-header/u);
+  assert.match(content, /feed-card-actions/u);
+  assert.match(content, /Open original publication/u);
+  assert.match(content, /detailsActions\.append\(detailsPermalink, detailsOpen, close\)/u);
+  assert.match(content, /details\.open = this\._state\.permalinkId === item\.id/u);
+});
+
+test('feed heading links back to the home feed', async () => {
+  const source = path.join(projectRoot, 'web', 'app', 'Web', 'Component', 'Feed.mjs');
+  const content = await fs.readFile(source, 'utf8');
+
+  assert.match(content, /homeLink\.className = 'feed-home-link'/u);
+  assert.match(content, /homeLink\.href = '\/'/u);
+  assert.match(content, /Return to Mindstream Feed/u);
+});
+
+test('publication card header keeps metadata left and link actions right', async () => {
+  const content = await fs.readFile(feedCssPath, 'utf8');
+
+  assert.match(content, /\.feed-card-header\s*\{[^}]*justify-content:\s*space-between\s*;/u);
+  assert.match(content, /\.feed-card-actions\s*\{[^}]*margin-left:\s*auto\s*;/u);
+  assert.match(content, /\.feed-card-actions,\s*\.feed-actions\s*\{[^}]*display:\s*flex\s*;/u);
+});
+
 test('identity menu includes a bilingual about dialog', async () => {
   const source = path.join(projectRoot, 'web', 'app', 'Web', 'Component', 'IdentityMenu.mjs');
   const content = await fs.readFile(source, 'utf8');

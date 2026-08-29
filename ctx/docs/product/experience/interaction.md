@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/experience/interaction.md`
 - Template Version: `20260619`
-- Changed: `20260727`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -45,6 +45,10 @@ This action reflects a higher level of semantic attention and a deeper stage of 
 The user opens the original external publication.
 
 This action is a form of explicit attention and reflects movement toward the source material.
+
+### Opening A Publication Permalink
+
+The user may open or share a stable URL for one processed publication. This action addresses the shared publication representation and does not expose or transfer a personal feed projection.
 
 ### Positive Mark On A Publication
 

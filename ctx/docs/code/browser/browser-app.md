@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/browser/browser-app.md`
 - Template Version: `20260726`
- - Changed: `20260727`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -21,6 +21,7 @@ The browser surface uses the document DOM as its styling boundary. Global CSS ma
 ## Main User Flows
 
 - Load and progressively extend the publication feed.
+- Load one processed publication from its permalink query parameter.
 - Inspect annotation and overview content and open the source publication.
 - Activate the browser-bound profile UUID.
 - Adjust one automatic or manual interest threshold and optionally hide publications below it.
@@ -58,7 +59,7 @@ Pure calculation, scoring, local-state, transport, and identity services remain 
 
 ## State And Communication
 
-The feed component owns loaded publications, pagination, local projection state, and card rendering. It delegates HTTP request construction and response-contract validation to `Mindstream_Web_Transport_Feed`.
+The feed component owns loaded publications, pagination, local projection state, permalink selection, and card rendering. It delegates HTTP request construction and response-contract validation to `Mindstream_Web_Transport_Feed`. A card header keeps source and date metadata separate from right-aligned icon-only original and permalink actions; matching actions remain in the Overview action row. A permalink selects one processed publication through the same validated feed response shape, keeps that focused card visible independently of local feed filtering, and opens its overview.
 
 The identity-menu component owns its fixed floating control, panel DOM, identity activation interaction, and the unified interest-threshold controls. It supports mouse and touch dragging, chooses the panel direction from the largest available viewport space, communicates setting changes through a browser event, and does not calculate publication scores or card visibility itself.
 

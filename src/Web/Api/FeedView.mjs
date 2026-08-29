@@ -216,7 +216,7 @@ const applyCursorFilter = function (query, cursor) {
  * @param {unknown} cursor
  * @returns {unknown}
  */
-const buildQuery = function (cursor) {
+    const buildQuery = function ({ cursor, publicationId } = {}) {
       const query = getKnex()('publications as p')
         .join('publication_summaries as s', 'p.id', 's.publication_id')
         .join('publication_embeddings as e', 'p.id', 'e.publication_id')
@@ -243,6 +243,9 @@ const buildQuery = function (cursor) {
         .orderBy('p.id', 'desc')
         .limit(MAX_ITEMS);
 
+      if (publicationId !== undefined) {
+        query.where('p.id', publicationId);
+      }
       applyCursorFilter(query, cursor);
       return query;
     };
@@ -330,7 +333,7 @@ const parseQuery = function (url) {
  * @param {unknown} query
  * @returns {unknown}
  */
-const buildCursorFromQuery = function (query) {
+    const buildCursorFromQuery = function (query) {
       const idValue = query?.id;
       if (idValue === undefined || idValue === null || idValue === '') return null;
       const id = Number(idValue);
@@ -348,6 +351,20 @@ const buildCursorFromQuery = function (query) {
     };
 
     /**
+ * @param {unknown} query
+ * @returns {number|undefined}
+ */
+    const buildPublicationIdFromQuery = function (query) {
+      const value = query?.publication;
+      if (value === undefined || value === null || value === '') return undefined;
+      const id = Number(value);
+      if (!Number.isSafeInteger(id) || id <= 0) {
+        throw new Error('Publication id must be a positive integer.');
+      }
+      return id;
+    };
+
+    /**
  * @param {unknown} deps
  * @param {unknown} deps.cursor
  * @returns {Promise<unknown>}
@@ -357,9 +374,9 @@ const buildCursorFromQuery = function (query) {
  * @returns {Promise<unknown>}
  */
 this.getFeedView = async function (params = {}) {
-      const { cursor } = params;
+      const { cursor, publicationId } = params;
       const normalizedCursor = normalizeCursor(cursor);
-      const rows = await buildQuery(normalizedCursor);
+      const rows = await buildQuery({ cursor: normalizedCursor, publicationId });
       const mapped = (rows ?? []).map(mapRow);
       const sliced = mapped.slice(0, MAX_ITEMS);
       const sourcesMap = new Map();
@@ -375,6 +392,10 @@ this.getFeedView = async function (params = {}) {
       const sources = Array.from(sourcesMap.values());
       if (!items.length) {
         return { sources: [], items: [] };
+      }
+
+      if (publicationId !== undefined) {
+        return feed.createResponse({ sources, items });
       }
 
       const last = items[items.length - 1];
@@ -404,7 +425,8 @@ this.handle = async function ({ req, res }) {
       try {
         const query = parseQuery(req?.url);
         const cursor = buildCursorFromQuery(query);
-        const payload = await this.getFeedView({ cursor });
+        const publicationId = buildPublicationIdFromQuery(query);
+        const payload = await this.getFeedView({ cursor, publicationId });
         respond.code200_Ok({
           res,
           headers: { 'content-type': 'application/json' },

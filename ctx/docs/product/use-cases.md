@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/use-cases.md`
 - Template Version: `20260605`
-- Changed: `20260726`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -59,6 +59,18 @@ Expected product outcome: the user reads annotation and overview representations
 Related domain areas: publication corpus, semantic representation.
 
 Lifecycle position: core repeated reading loop.
+
+### Publication Sharing
+
+User goal: give another reader a URL that opens one processed publication.
+
+Participating roles: demo reader, profiled reader.
+
+Expected product outcome: the recipient can inspect the same publication representation with its overview open, independently of the sender's personal feed projection.
+
+Related domain areas: publication corpus, semantic representation.
+
+Lifecycle position: extension of the semantic reading loop.
 
 ### Personal Feed Formation
 

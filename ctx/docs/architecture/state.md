@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/state.md`
 - Template Version: `20260605`
-- Changed: `20260619`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -27,6 +27,7 @@ Authoritative durable state is the source of truth. Derived state must remain su
 - persistence responsibility lives at the storage boundary
 - derived state originates from authoritative durable state and must not silently re-own it
 - browser-delivered projections are downstream reflections, not independent state authorities
+- a publication permalink is a stable address to an existing projection and does not create durable state
 - external providers may influence derived outputs but do not own internal persisted truth
 
 ## Ownership Rules

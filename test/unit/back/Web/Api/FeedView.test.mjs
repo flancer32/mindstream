@@ -135,13 +135,14 @@ const buildRow = function ({
 const getApi = async function ({ rows } = {}) {
   const container = await createTestContainer();
   const { knex, calls } = createKnexStub({ rows });
+  const responses = [];
 
   container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
   container.register('Mindstream_Back_Logger$', buildLogger());
-  container.register('TeqFw_Web_Back_Helper_Respond$', { code200_Ok() {} });
+  container.register('TeqFw_Web_Back_Helper_Respond$', { code200_Ok(response) { responses.push(response); } });
 
   const api = await container.get('Mindstream_Back_Web_Api_FeedView$');
-  return { api, calls };
+  return { api, calls, responses };
 };
 
 test('Mindstream_Back_Web_Api_FeedView returns FeedView DTO structure', async () => {
@@ -230,6 +231,26 @@ test('Mindstream_Back_Web_Api_FeedView omits cursor on empty results', async () 
   const result = await api.getFeedView();
 
   assert.deepEqual(result, { sources: [], items: [] });
+});
+
+test('Mindstream_Back_Web_Api_FeedView returns one processed publication without a cursor', async () => {
+  const { api, calls } = await getApi({ rows: [buildRow({ id: 42 })] });
+
+  const result = await api.getFeedView({ publicationId: 42 });
+
+  assert.equal(result.items.length, 1);
+  assert.equal(result.items[0].id, 42);
+  assert.equal(result.cursor, undefined);
+  assert.deepEqual(calls.where.at(-1), ['p.id', 42]);
+});
+
+test('Mindstream_Back_Web_Api_FeedView reads a permalink query and rejects an invalid id', async () => {
+  const { api, responses } = await getApi({ rows: [buildRow({ id: 42 })] });
+
+  await api.handle({ req: { url: '/api/feed?publication=42' }, res: {} });
+
+  assert.equal(responses[0].body.items[0].id, 42);
+  await assert.rejects(() => api.handle({ req: { url: '/api/feed?publication=nope' }, res: {} }), /positive integer/u);
 });
 
 test('Mindstream_Back_Web_Api_FeedView never returns more than 50 items', async () => {

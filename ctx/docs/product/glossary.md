@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/glossary.md`
 - Template Version: `20260605`
-- Changed: `20260726`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -28,12 +28,16 @@ Does NOT define:
 - Participation terms — user context, user profile, profile UUID, demo mode.
 - Attention terms — attention signal, interest profile, interest vector, aggregated attention statistics.
 - Projection terms — feed, similarity, interest threshold.
+- Addressability terms — publication permalink.
 - Composition terms — interest indicator.
 
 ## Core Terms
 
 **Publication**  
 External text source aggregated by Mindstream. The full source text remains external to the product's canonical corpus model.
+
+**Publication Permalink**
+Stable public URL that opens one processed publication from the shared corpus with its overview already available, without requiring its position in a reader's personal feed.
 
 **Data Corpus**  
 Shared product-wide set of publications, semantic representations, and derived semantic data.

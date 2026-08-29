@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/experience/ui.md`
 - Template Version: `20260619`
-- Changed: `20260727`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -32,6 +32,8 @@ Each publication appears in the MVP in these sequential visual forms:
 2. annotation as the mandatory first form of semantic orientation;
 3. overview as the mandatory deeper form opened from the annotation;
 4. transition to the original as the applied exit to the external publication.
+
+The publication card header presents source and date as metadata on the left, alongside right-aligned actions for the original publication and the permalink. The same actions remain available in the overview as contextual controls. Opening the permalink presents the same card as the focused reading surface, using the established feed visual language with its overview already open.
 
 Absence of any of these forms is not allowed in the MVP.
 

@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/environment/runtime/web-server.md`
 - Template Version: `20260619`
-- Changed: `20260803`
+- Changed: `20260829`
 
 ## Purpose
 
@@ -94,13 +94,13 @@ The Mindstream HTTP server:
 
 ---
 
-## Type Of API Served
+## Type Of Content Served
 
-The HTTP server serves only a **backend JSON API**.
+The HTTP server serves the browser entry assets together with the backend JSON API.
 
 - Interaction model: REST-like HTTP requests (`GET` / `POST`).
-- Response format: JSON.
-- Serving HTML, an SPA, or static files from the Mindstream server is **prohibited**.
+- API response format: JSON.
+- The static browser entry must remain available at `/`, including query-string URLs used to address a publication permalink.
 
 ---
 

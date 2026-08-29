@@ -2,13 +2,15 @@
 
 - Path: `ctx/docs/code/testing.md`
 - Template Version: `20260619`
- - Changed: `20260727`
+- Changed: `20260829`
 
 ## Purpose
 
 This document defines the rigid engineering invariants for testing the Mindstream code layer.
 
 Tests are treated as a first-class part of the codebase, not as auxiliary artifacts. Violating this document is a defect.
+
+Stable publication-addressing behavior must be covered at the backend read-model boundary, the browser transport boundary, and the card presentation boundary, including rejection of an invalid publication identifier, matching header and Overview link actions, and the expanded permalink overview.
 
 This document is not a guide to writing tests and does not define concrete test scenarios.
 
