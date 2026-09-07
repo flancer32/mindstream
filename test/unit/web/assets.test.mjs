@@ -79,10 +79,10 @@ test('identity menu shows a short identity and can copy its full value', async (
   assert.match(content, /clipboard\?\.writeText\(currentIdentity\)/u);
 });
 
-test('identity menu styles it as a fixed floating control', async () => {
+test('reading settings occupy the header with a viewport-positioned panel', async () => {
   const content = await fs.readFile(feedCssPath, 'utf8');
 
-  assert.match(content, /\.identity-menu\s*\{[^}]*position:\s*fixed\s*;/u);
+  assert.match(content, /\.identity-menu\s*\{[^}]*position:\s*relative\s*;/u);
   assert.match(content, /\.identity-menu__panel\s*\{[^}]*position:\s*fixed\s*;/u);
   assert.match(content, /\.identity-menu--filter-enabled \.identity-menu__toggle/u);
 });

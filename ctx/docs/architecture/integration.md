@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/integration.md`
 - Template Version: `20260605`
-- Changed: `20260829`
+- Changed: `20260907`
 
 ## Purpose
 
@@ -20,6 +20,8 @@ The architecture depends on several external integration classes:
 This level records the integration classes and boundary roles, not protocol or endpoint inventories.
 
 ## Internal Contracts
+
+The trusted engineering ingress accepts a prepared publication from a local operator file. Source attribution and text are validated before an atomic, idempotent insertion into the existing Content Collection. The import does not fetch arbitrary URLs, expose a public upload endpoint, or trigger AI processing. Existing summary and embedding stages remain the only path to feed readiness.
 
 Major internal contracts include:
 

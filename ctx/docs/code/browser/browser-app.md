@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/browser/browser-app.md`
 - Template Version: `20260726`
-- Changed: `20260829`
+- Changed: `20260907`
 
 ## Purpose
 
@@ -61,7 +61,7 @@ Pure calculation, scoring, local-state, transport, and identity services remain 
 
 The feed component owns loaded publications, pagination, local projection state, permalink selection, and card rendering. It delegates HTTP request construction and response-contract validation to `Mindstream_Web_Transport_Feed`. A card header keeps source and date metadata separate from right-aligned icon-only original and permalink actions; matching actions remain in the Overview action row. A permalink selects one processed publication through the same validated feed response shape, keeps that focused card visible independently of local feed filtering, and opens its overview.
 
-The identity-menu component owns its fixed floating control, panel DOM, identity activation interaction, and the unified interest-threshold controls. It supports mouse and touch dragging, chooses the panel direction from the largest available viewport space, communicates setting changes through a browser event, and does not calculate publication scores or card visibility itself.
+The identity-menu component owns its labeled header control, panel DOM, identity activation interaction, and the unified interest-threshold controls. It places its panel within the viewport, communicates setting changes through a browser event, and does not calculate publication scores or card visibility itself.
 
 Browser-local persistence is an implementation concern of the feed boundary. One stored manual threshold may be absent to represent automatic mode; the hiding toggle is stored independently because it enables a consumer of the threshold rather than defining another threshold.
 

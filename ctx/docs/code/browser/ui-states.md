@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/browser/ui-states.md`
 - Template Version: `20260726`
-- Changed: `20260727`
+- Changed: `20260907`
 
 ## Purpose
 
@@ -15,13 +15,13 @@ Defines visible browser states for the feed page and identity-menu widget.
 - Empty — the backend feed contains no publications.
 - Filtered empty — loaded publications exist, but all are hidden below the active interest threshold.
 - End reached — no later feed page is available.
-- Failure — feed loading failed and a concise failure message is shown.
+- Failure — loading failed; available articles remain readable and an explicit retry action resumes the failed request. Observer callbacks do not automatically repeat failed requests. A permalink failure retries the selected article rather than requesting feed pages.
 
 Offline, forbidden, and not-found are not separate in-page states in the current static browser surface.
 
 ## Page-Level States
 
-Before an interest profile exists, all loaded cards remain visible regardless of the saved hiding toggle. After a profile exists, hiding uses the same resolved cutoff as bright indicator highlighting.
+Before an interest profile exists, all loaded cards remain visible regardless of the saved hiding toggle, and numeric interest indicators are absent rather than presenting an unformed profile as zero interest. After a profile exists, hiding uses the same resolved cutoff as bright indicator highlighting. Reading actions show a session-local confirmation on the article.
 
 The filtered-empty state reports the active cutoff and offers a “show all” action. The action disables hiding and immediately restores loaded cards.
 

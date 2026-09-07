@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/browser/web-components.md`
 - Template Version: `20260726`
-- Changed: `20260829`
+- Changed: `20260907`
 
 ## Purpose
 
@@ -41,7 +41,7 @@ Role: identity-panel and interest-control owner.
 
 Responsibilities:
 
-- remain fixed above the page, support pointer dragging, and open the panel into the largest available viewport space;
+- present a labeled Settings control in the header and keep its open panel within the viewport;
 - open and dismiss `identity-menu__panel`;
 - present the first section of the browser-bound profile UUID, copy its full value, or activate the identity when it is absent;
 - present an About action that opens a bilingual static application-purpose dialog;

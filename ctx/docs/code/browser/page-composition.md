@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/browser/page-composition.md`
 - Template Version: `20260726`
-- Changed: `20260727`
+- Changed: `20260907`
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Connects the browser page to its layout regions and widgets.
 
 ## Shared Composition Rules
 
-The `mindstream-feed` element owns the layout. It contains one `mindstream-identity-menu` as a fixed floating widget and renders publication cards as feed data arrives.
+The `mindstream-feed` element owns the layout. It contains one `mindstream-identity-menu` as a labeled header control and renders publication cards as feed data arrives.
 
 The product-heading block is a single home link to `/`, including its title and subtitle. It remains available on both the paginated feed and a focused permalink view, so a focused card never removes the reader's return path to the feed.
 
@@ -26,7 +26,7 @@ Interest threshold changes flow from Identity Menu to Feed. Score calculation an
 
 A publication card has a header, a reading body, and an Overview disclosure. The header places source and date metadata on the left and action buttons on the right.
 
-The original-publication and permalink actions appear both in the header for rapid access and in the action row within an open Overview for contextual access. Both locations use the same icon-only action-button form, accessible names, hover and focus treatment, and target behavior. Moving an action to the header must not remove its contextual counterpart from the Overview action row.
+The original-publication and permalink actions appear both in the header for rapid access and in the action row within an open Overview for contextual access. Both locations preserve accessible action controls, accessible names, hover and focus treatment, and target behavior. Moving an action to the header must not remove its contextual counterpart from the Overview action row.
 
 ## Exceptions
 

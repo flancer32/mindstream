@@ -1,4 +1,8 @@
 declare global {
+  type Mindstream_Back_Ingest_Import = typeof import('./src/Ingest/Import.mjs').default;
+  type Mindstream_Back_Ingest_Import$ = InstanceType<Mindstream_Back_Ingest_Import>;
+  type Mindstream_Back_Cli_Ingest_Import = typeof import('./src/Cli/Ingest/Import.mjs').default;
+  type Mindstream_Back_Cli_Ingest_Import$ = InstanceType<Mindstream_Back_Cli_Ingest_Import>;
   type Mindstream_Shared_Api_Attention_ClientSignal = {
     identity: string;
     pubId: number;

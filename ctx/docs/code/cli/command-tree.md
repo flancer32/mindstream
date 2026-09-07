@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/cli/command-tree.md`
 - Template Version: `20260619`
-- Changed: `20260810`
+- Changed: `20260907`
 
 ## Purpose
 
@@ -16,6 +16,7 @@ db:schema:migrate-v2
 db:schema:renew
 ingest:discover:habr
 ingest:extract:habr
+ingest:import
 process:generate:embeddings
 process:generate:summaries
 web:start
@@ -109,6 +110,30 @@ Constraints:
 - uses Habr-specific extraction;
 - is idempotent and may be rerun without changing the result;
 - does not start processing and does not affect runtime.
+
+### `ingest:import`
+
+Contour: ingest.
+
+Purpose: import one prepared external publication from a local JSON file, retaining its source attribution and entering the existing summary-processing pipeline.
+
+Parameter: required `file` path, relative to the invocation directory.
+
+The object contains `source` (`id`, `code`, `name`, `url`), article `url`, `title`, `publishedAt` (ISO timestamp), and `markdown`. Source identifiers are stable operator-assigned integers above 1; identifier 1 remains reserved for Habr. Source identifiers, codes, and URLs must not be reassigned. URLs must use HTTP or HTTPS without embedded credentials. Existing publications are left unchanged on repeated import. New publication and extracted text are inserted in one transaction, with status `extracted`. No downstream processing is started.
+
+Example input:
+
+```json
+{
+  "source": {"id": 2, "code": "journal", "name": "Independent Journal", "url": "https://example.org/"},
+  "url": "https://example.org/articles/first",
+  "title": "A publication worth reading",
+  "publishedAt": "2026-09-07T09:00:00Z",
+  "markdown": "The complete prepared article text."
+}
+```
+
+The operator runs `npm exec -- teq ingest:import article.json`, followed separately by `npm exec -- teq process:generate:summaries` and `npm exec -- teq process:generate:embeddings`. The last two commands use the configured AI services and make successfully processed material eligible for the existing feed.
 
 ### `process:generate:embeddings`
 

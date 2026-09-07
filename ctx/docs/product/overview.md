@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/overview.md`
 - Template Version: `20260605`
-- Changed: `20260829`
+- Changed: `20260907`
 
 ## Product Identity
 
@@ -21,11 +21,14 @@ Its stable intention is to provide semantic representations and statistical cont
 Mindstream is responsible for:
 
 - collecting external publications into a shared corpus;
+- accepting operator-supplied publication text with its original source attribution, including publications outside Habr;
 - producing semantic representations of those publications as annotations and overviews;
 - allowing one browser-bound user context to form a personal feed projection from the corpus;
 - using positive attention signals and aggregated statistics as the product basis for that projection.
 
 ## Product Areas
+
+The current market-facing form is a source-independent summary reader. Habr discovery and operator-supplied external articles feed the same corpus. Advertising, paid publication placement, and a collective trends destination are possible later directions, not current reader-facing capabilities. They must not be represented by inactive controls or unsupported popularity claims.
 
 - Corpus formation and semantic representation of publications.
 - Browser-side user context and profile participation.

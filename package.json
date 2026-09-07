@@ -33,6 +33,13 @@
         },
         "commands": [
           {
+            "id": "ingest:import",
+            "summary": "Import one prepared publication from a local JSON file.",
+            "arguments": [{"name": "file", "kind": "string", "required": true, "description": "Publication JSON file."}],
+            "options": [],
+            "component": "Mindstream_Back_Cli_Ingest_Import$"
+          },
+          {
             "id": "db:schema:create",
             "summary": "Create the database schema.",
             "arguments": [],

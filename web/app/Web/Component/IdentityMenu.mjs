@@ -15,12 +15,10 @@ export default class Mindstream_Web_Component_IdentityMenu {
       en: Object.freeze({
         title: 'About Mindstream',
         paragraphs: Object.freeze([
-          'Every day we face more information than we can realistically read and understand. The challenge is no longer finding knowledge but deciding what truly deserves our attention.',
-          'Mindstream explores a different way to navigate this growing stream.',
-          'The application currently collects articles from Habr and generates concise AI summaries, helping you decide whether an article is worth reading before opening the original.',
-          'As you use the feed, Mindstream builds a personal interest profile and estimates how closely new publications match the subjects that have already attracted your attention. You can also set an interest threshold and hide less relevant content.',
-          'All calculations are performed locally in your browser. By default, no reading data leaves your device. If you choose to activate an anonymous identity, anonymized attention signals may be stored on the server. A future version will aggregate these signals to produce community recommendations without exposing individual user data.',
-          'Habr is currently the first content source. Additional sources and user-submitted articles are planned.',
+          'Mindstream helps you find your next worthwhile read in a stream of articles.',
+          'Start with a short AI summary, open an overview for more detail, and follow the source link to read the original. Summaries can miss context; the original publication remains the reference.',
+          'Habr is the first automated source. Operators can also import prepared articles from other sources into the same reading stream.',
+          'You can read without an account. Activating an anonymous reading profile allows attention signals to be sent to the server with a browser-bound identifier.',
         ]),
         question: 'Mindstream explores a simple question: can human attention become a foundation for navigating an ever-growing world of knowledge?',
         learnMore: 'Learn more:',
@@ -34,12 +32,10 @@ export default class Mindstream_Web_Component_IdentityMenu {
       ru: Object.freeze({
         title: 'О проекте Mindstream',
         paragraphs: Object.freeze([
-          'Каждый день мы сталкиваемся с таким объёмом информации, который невозможно полностью прочитать и осмыслить. Сегодня проблема уже не в поиске знаний, а в выборе того, что действительно заслуживает внимания.',
-          'Mindstream помогает решать именно эту задачу.',
-          'Сейчас приложение собирает публикации с Хабра и автоматически создаёт для каждой краткое изложение при помощи языковой модели. Это позволяет быстро понять смысл статьи и решить, стоит ли читать оригинал.',
-          'Во время работы с лентой Mindstream формирует персональный профиль интересов и показывает, насколько новые публикации соответствуют темам, которые уже привлекали твоё внимание. Можно задать порог интереса и скрыть менее релевантные материалы.',
-          'Все вычисления выполняются локально в браузере. По умолчанию данные о чтении никуда не передаются. При добровольной активации анонимной идентичности обезличенные сигналы внимания могут сохраняться на сервере. В будущем их планируется использовать для расчёта коллективных рекомендаций без раскрытия персональных данных.',
-          'Сегодня Mindstream работает с Хабром. В дальнейшем планируется поддержка других источников и возможность добавлять собственные статьи.',
+          'Mindstream помогает находить статьи, на которые стоит потратить время.',
+          'Начни с краткой аннотации, открой выжимку для подробностей и перейди к первоисточнику, если захочется прочитать статью целиком. ИИ может упустить контекст — сверяй важные детали с оригиналом.',
+          'Хабр — первый автоматический источник. Оператор также может добавлять подготовленные статьи из других источников в общую ленту.',
+          'Для чтения не нужен аккаунт. При активации анонимного профиля сигналы внимания могут отправляться на сервер с идентификатором этого браузера.',
         ]),
         question: 'Mindstream проверяет простую гипотезу: можно ли использовать внимание человека как основу для навигации в постоянно растущем мире знаний?',
         learnMore: 'Подробнее о проекте:',
@@ -66,15 +62,20 @@ export default class Mindstream_Web_Component_IdentityMenu {
         this._rendered = false;
         this._filterEnabled = true;
         this._thresholdPercent = null;
-        this._drag = null;
-        this._skipToggleClick = false;
         this._stopWatchingIdentity = () => {};
         this._handleDocumentClick = (event) => { if (!this.contains(event.target)) this.close(); };
-        this._handleDocumentKeydown = (event) => { if (event.key === 'Escape') this.close(); };
-        this._handleWindowResize = () => {
-          this._keepToggleInViewport();
-          if (!this._panel.hidden) this._placePanel();
+        this._handleDocumentKeydown = (event) => {
+          if (event.key === 'Escape') {
+            if (!this._aboutPanel.hidden) {
+              this._aboutPanel.hidden = true;
+              this._aboutButton.focus();
+            } else if (!this._panel.hidden) {
+              this.close();
+              this._toggle.focus();
+            }
+          }
         };
+        this._handleWindowResize = () => { if (!this._panel.hidden) this._placePanel(); };
       }
 
       connectedCallback() {
@@ -131,16 +132,8 @@ export default class Mindstream_Web_Component_IdentityMenu {
       _bindEvents() {
         this._toggle.addEventListener('click', (event) => {
           event.stopPropagation();
-          if (this._skipToggleClick) {
-            this._skipToggleClick = false;
-            return;
-          }
           if (this._panel.hidden) this.open(); else this.close();
         });
-        this._toggle.addEventListener('pointerdown', (event) => this._startDrag(event));
-        this._toggle.addEventListener('pointermove', (event) => this._moveDrag(event));
-        this._toggle.addEventListener('pointerup', (event) => this._finishDrag(event));
-        this._toggle.addEventListener('pointercancel', (event) => this._finishDrag(event));
         this._identityAction.addEventListener('click', () => {
           if (!window.confirm('Activate this identity? Attention signals will be aggregated on the server.')) return;
           identity.activateIdentity();
@@ -162,49 +155,14 @@ export default class Mindstream_Web_Component_IdentityMenu {
         });
         this._identityCopy.addEventListener('click', () => this._copyIdentity());
         this._aboutButton.addEventListener('click', () => this._openAbout());
-        this._aboutClose.addEventListener('click', () => { this._aboutPanel.hidden = true; });
+        this._aboutClose.addEventListener('click', () => {
+          this._aboutPanel.hidden = true;
+          this._aboutButton.focus();
+        });
         this._aboutEnglish.addEventListener('click', () => this._setAboutLanguage('en'));
         this._aboutRussian.addEventListener('click', () => this._setAboutLanguage('ru'));
       }
 
-      /** @param {PointerEvent} event */
-      _startDrag(event) {
-        if (event.button !== 0 && event.pointerType !== 'touch') return;
-        const rect = this.getBoundingClientRect();
-        this._drag = { offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY };
-        this._toggle.setPointerCapture(event.pointerId);
-      }
-
-      /** @param {PointerEvent} event */
-      _moveDrag(event) {
-        if (!this._drag || event.pointerId !== this._drag.pointerId) return;
-        const moved = Math.abs(event.clientX - this._drag.startX) + Math.abs(event.clientY - this._drag.startY);
-        if (moved < 4) return;
-        this._skipToggleClick = true;
-        const rect = this.getBoundingClientRect();
-        const left = Math.min(Math.max(edgeGap, event.clientX - this._drag.offsetX), window.innerWidth - rect.width - edgeGap);
-        const top = Math.min(Math.max(edgeGap, event.clientY - this._drag.offsetY), window.innerHeight - rect.height - edgeGap);
-        this.style.left = `${left}px`;
-        this.style.top = `${top}px`;
-        this.style.right = 'auto';
-        this._placePanel();
-      }
-
-      /** @param {PointerEvent} event */
-      _finishDrag(event) {
-        if (!this._drag || event.pointerId !== this._drag.pointerId) return;
-        if (this._toggle.hasPointerCapture(event.pointerId)) this._toggle.releasePointerCapture(event.pointerId);
-        this._drag = null;
-      }
-
-      _keepToggleInViewport() {
-        const rect = this.getBoundingClientRect();
-        const left = Math.min(Math.max(edgeGap, rect.left), window.innerWidth - rect.width - edgeGap);
-        const top = Math.min(Math.max(edgeGap, rect.top), window.innerHeight - rect.height - edgeGap);
-        this.style.left = `${left}px`;
-        this.style.top = `${top}px`;
-        this.style.right = 'auto';
-      }
 
       _placePanel() {
         const toggle = this.getBoundingClientRect();
@@ -254,6 +212,7 @@ export default class Mindstream_Web_Component_IdentityMenu {
         const content = about[language];
         this._aboutTitle.textContent = content.title;
         this._aboutContent.lang = language;
+        if (this._aboutPanel) this._aboutPanel.lang = language;
         const paragraphs = content.paragraphs.map((text) => {
           const paragraph = document.createElement('p');
           paragraph.textContent = text;
@@ -295,22 +254,20 @@ export default class Mindstream_Web_Component_IdentityMenu {
         this._toggle = document.createElement('button');
         this._toggle.className = 'identity-menu__toggle';
         this._toggle.type = 'button';
-        this._toggle.setAttribute('aria-label', 'Open identity menu. Drag to reposition.');
-        this._toggle.title = 'Open identity menu. Drag to reposition.';
+        this._toggle.setAttribute('aria-label', 'Reading settings');
+        this._toggle.title = 'Reading settings';
         this._toggle.setAttribute('aria-expanded', 'false');
-        for (let index = 0; index < 3; index += 1) {
-          const bar = document.createElement('span');
-          bar.className = 'identity-menu__bar';
-          this._toggle.append(bar);
-        }
+        this._toggle.textContent = 'Settings';
         this._panel = document.createElement('div');
         this._panel.className = 'identity-menu__panel';
         this._panel.hidden = true;
+        this._profileStatus = document.createElement('p');
+        this._profileStatus.className = 'identity-menu__profile-status';
         this._identityAction = document.createElement('button');
         this._identityAction.className = 'identity-menu__action';
         this._identityAction.type = 'button';
-        this._identityAction.textContent = 'Activate identity';
-        this._identityAction.title = 'Activate identity';
+        this._identityAction.textContent = 'Activate reading profile';
+        this._identityAction.title = 'Activate this browser’s anonymous reading profile';
         const identityHeader = document.createElement('div');
         identityHeader.className = 'identity-menu__identity-header';
         this._identityValue = document.createElement('div');
@@ -324,7 +281,7 @@ export default class Mindstream_Web_Component_IdentityMenu {
         this._aboutButton = document.createElement('button');
         this._aboutButton.className = 'identity-menu__about-button';
         this._aboutButton.type = 'button';
-        this._aboutButton.textContent = '?';
+        this._aboutButton.textContent = 'About';
         this._aboutButton.setAttribute('aria-label', 'About Mindstream');
         this._aboutButton.title = 'About Mindstream';
         identityHeader.append(this._identityValue, this._identityCopy, this._aboutButton);
@@ -376,9 +333,10 @@ export default class Mindstream_Web_Component_IdentityMenu {
         this._aboutPanel.className = 'identity-menu__about-panel';
         this._aboutPanel.hidden = true;
         this._aboutPanel.setAttribute('role', 'dialog');
-        this._aboutPanel.setAttribute('aria-modal', 'true');
+        this._aboutPanel.setAttribute('aria-labelledby', 'mindstream-about-title');
         this._aboutTitle = document.createElement('h2');
         this._aboutTitle.className = 'identity-menu__about-title';
+        this._aboutTitle.id = 'mindstream-about-title';
         this._aboutContent = document.createElement('div');
         this._aboutContent.className = 'identity-menu__about-content';
         const aboutHeader = document.createElement('div');
@@ -406,7 +364,7 @@ export default class Mindstream_Web_Component_IdentityMenu {
         this._aboutPanel.append(aboutHeader, this._aboutContent);
         this._setAboutLanguage('en');
         section.append(header, controls, this._reset, filterLabel);
-        this._panel.append(identityHeader, this._identityAction, divider, section);
+        this._panel.append(this._profileStatus, identityHeader, this._identityAction, divider, section);
         this.append(this._toggle, this._panel, this._aboutPanel);
       }
 
@@ -419,6 +377,7 @@ export default class Mindstream_Web_Component_IdentityMenu {
 
       _syncIdentity() {
         const currentIdentity = identity.getIdentity();
+        this._profileStatus.textContent = currentIdentity ? 'Anonymous reading profile active' : 'Reading locally · No account needed';
         this._identityAction.hidden = Boolean(currentIdentity);
         this._identityValue.hidden = !currentIdentity;
         this._identityCopy.hidden = !currentIdentity;
