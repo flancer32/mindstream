@@ -1,86 +1,60 @@
 # Project Documentation
 
 - Path: `ctx/docs/AGENTS.md`
-- Template Version: `20260605`
-- Changed: `20260727`
+- Template Version: `20261024`
+- Changed: `20261024`
 
 ## Purpose
 
-Defines the structure of project-level declarative documentation organized by ADSM levels.
+This directory contains authoritative project declarations and navigation documents.
 
-Documents at this level describe the system as a design object, including meaning, structure, environment, and implementation constraints.
+ADSM defines four ordered declarative levels: product → architecture → environment → code. Lower levels refine upstream meaning without redefining it. Accepted declarations constrain every valid implementation.
+
+An optional Verification Layer relates declarations to bounded observations of reality. It is not a fifth declarative level and does not establish independent authority over project meaning.
 
 ## Level Map
 
-- `architecture/` — structural form of the system, architectural entities, boundaries, and interaction model.
-- `code/` — engineering invariants governing how architecture is expressed in source code.
-- `environment/` — runtime environment and infrastructural prerequisites required for system operation.
-- `product/` — system meaning, domain entities, and product-level invariants.
-- `AGENTS.md` — level definition for `ctx/docs/`.
-- `filesystem.md` — declarative description of top-level repository directories and root-level files, defining repository boundaries and serving as a navigation map.
+- `architecture/` — system structure, behavior, state ownership, and integration boundaries.
+- `code/` — implementation constraints and engineering conventions.
+- `environment/` — runtime conditions, infrastructure, and deployment constraints.
+- `product/` — product meaning, domain, roles, and expected outcomes.
+- `AGENTS.md` — documentation boundary and working rules.
+- `filesystem.md` — top-level repository navigation.
+
+Keep this map aligned with the actual project structure. Add optional branches only when adopted.
 
 ## Level Boundary
 
 Defines:
 
-- System meaning and domain intent through the documentation dependency chain rooted in `product`.
-- System realization guardrails through `architecture`, `environment`, and `code`.
-- Mandatory declarative constraints that bound any valid implementation.
-
-All statements defined at this level and below are mandatory constraints for any valid implementation.
-
-Violation of these constraints constitutes an incorrect result, regardless of functional correctness.
+- Accepted project declarations and their dependency order.
+- Rules for reading, refining, and maintaining declarative knowledge.
+- Boundaries between declarations, verification specifications, and supporting materials.
 
 Does NOT define:
 
-- Agent operations, workflow execution, or prompt-routing assets under `ctx/agent/`.
-- Concrete implementation artifacts such as `src/`, `bin/`, `test/`, or other product files.
-- Ad hoc task instructions that bypass or override the documentation dependency order.
+- Agent operations and workflows under `ctx/agent/`.
+- Executable product artifacts, runtime state, or operational evidence.
+- Generic ADSM methodology; use the `adsm-ctx` skill when available.
 
-## Level Order
+## Local Reading Map
 
-Documentation levels form a strict dependency order:
+- For repository topology, consult `filesystem.md` when needed.
+- For project declarations, follow the relevant level's `AGENTS.md` and read its task-relevant documents.
+- For lower-level changes, consult the upstream declarations needed to establish their meaning and constraints.
+- For context lifecycle, validation, audit, compression, or upgrade, use the `adsm-ctx` skill when available.
 
-```text
-product
-↓
-architecture
-↓
-environment
-↓
-code
-```
+Avoid unnecessary full-context scans and repeated reading of unchanged documents.
 
-`architecture` translates product intent into stable engineering structure.
+## Documentation Rules
 
-Lower levels may refine but must not redefine statements established at higher levels.
-
-Lower levels may increase explicitness, constraint, and operational precision, but must not introduce new meaning absent from higher levels.
-
-They must not add new product capabilities, invariants, authority, or semantic boundaries unless those are first named upstream.
-
-## Project-Specific Nested Structure
-
-Project-specific documents remain nested inside their applicable ADSM level. Product-facing experience and MVP constraints therefore belong under `product/`; non-normative diagrams belong under `ctx/assets/`.
-
-## Documentation As A Cognitive Interface
-
-Project documentation is the cognitive interface through which humans and agents cooperate across the documentation levels.
-
-- It communicates human goals, constraints, and decisions to agents.
-- It communicates agent findings, inconsistencies, and refinements back to humans.
-- It connects the human direction-setting and result-evaluation loop with the agent refinement and execution-support loop.
-- It must remain compact enough for human control and precise enough for agent execution.
-- It must support the full dependency order from product through architecture, environment, and code.
-
-## Document Attributes
-
-Documents under `ctx/docs/` use:
-
-```md
-- Path: `ctx/docs/{{subdir}}/file.md`
-- Template Version: `YYYYMMDD`
-- Changed: `YYYYMMDD`
-```
-
-All stable documents use `Path`, `Template Version`, and `Changed` attributes.
+- Preserve the authority order: product → architecture → environment → code. Report missing or conflicting upstream meaning rather than inventing or silently changing it downstream.
+- Keep each durable declaration in its appropriate authoritative document. Preserve consistency across dependent levels.
+- Ordinary `*.md` documents are agent-facing and written in English by default. Optional `*.skin.<lang>.md` files provide human-facing semantic projections.
+- Before editing an agent document, read all matching skins. Preserve their meaning and invariants; report projection drift or required human decisions instead of silently resolving conflicts.
+- Keep documents explicit, focused, and maintainable. Preserve meaningful nested structure and do not sacrifice requirements or precision for brevity.
+- Keep each declarative level within nine direct directories and nine direct ordinary files where practical, excluding `AGENTS.md` and matching skins. Record intentional excess under `## Documentation Capacity Exception` in that level's `AGENTS.md`.
+- Adopt `verification/` only when a durable verification specification exists. Require its root `AGENTS.md` and create primary-target categories only when needed. Add the adopted branch to the Level Map.
+- Place verification specifications under their primary declarative targets and link secondary declarations. Keep specifications distinct from actual evidence and operational feedback state. Neither evidence nor assessments may redefine accepted meaning.
+- Keep visual, generated, rendered, and auxiliary artifacts under `ctx/assets/**`; they must not introduce authoritative project meaning.
+- Maintain `Path` and `Changed` attributes in stable documents. Delegate detailed methodology and lifecycle procedures to the `adsm-ctx` skill.
