@@ -32,6 +32,8 @@ Mindstream не является рекомендательным сервисо
 
 ## Требования
 
+The current repository implementation uses `@teqfw/db` and `pgvector`. Migration to DEM 2 and DEM-RDB is pending; the instructions below apply to the current code only. The new schema and data migration require separate implementation and verification. Do not use the legacy maintenance commands as a DEM-RDB migration. Before release, update this section, configuration and restore guidance after the safe cutover has been verified.
+
 - Node.js LTS 20.x.
 - PostgreSQL 16+ с расширением `pgvector`.
 - Доступ к LLM API для генерации аннотаций, обзоров и эмбеддингов.

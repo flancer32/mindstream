@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/es6-modules.md`
 - Template Version: `20260619`
- - Changed: `20260727`
+- Changed: `20260727`
 
 ## Purpose
 

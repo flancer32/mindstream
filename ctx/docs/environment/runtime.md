@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/environment/runtime.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20261120`
 
 ## Purpose
 
@@ -46,7 +46,7 @@ The runtime context describes:
 - Client platform: **browser runtime**.
 - Serverless approaches are not used.
 - The minimum runtime is fixed as:
-- **Node.js LTS** with target version `20.x`;
+- **Node.js LTS** version 22 or later, compatible with the selected DEM packages;
 - **modern evergreen browsers**;
 - **PostgreSQL 16+**.
 
@@ -64,19 +64,15 @@ The runtime context describes:
 ## Data Storage
 
 - Server storage: **PostgreSQL**.
-- Client local storage: **IndexedDB**.
+- Client local storage: **localStorage**.
 - The system uses one shared server-side store for all users and one local store per user.
 - Data is separated by physical location:
-- local data in IndexedDB;
+- local data in localStorage;
 - remote data in PostgreSQL.
 
 ### PostgreSQL And Extensions
 
-Within the MVP it is assumed that the server-side data store, PostgreSQL, supports the **pgvector** extension.
-
-Using pgvector is a **mandatory runtime requirement**, because publication embeddings are stored as vector data and used for semantic similarity operations.
-
-PostgreSQL environments without pgvector support are considered invalid for running the Mindstream MVP.
+The target stores embeddings as DEM-RDB JSON-serialized text in PostgreSQL. Native pgvector is not a target runtime prerequisite; an existing legacy database may require it until its data has been converted and cut over.
 
 ---
 
@@ -96,7 +92,7 @@ PostgreSQL environments without pgvector support are considered invalid for runn
 - The LLM provider may be any provider compatible with the API.
 - Embeddings are stored:
 - on the server in PostgreSQL;
-- on the client in IndexedDB.
+- on the client in localStorage.
 
 ---
 

@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/cli/command-tree.md`
 - Template Version: `20260619`
-- Changed: `20260907`
+- Changed: `20261120`
 
 ## Purpose
 
@@ -11,9 +11,6 @@ This document defines the canonical space of allowed CLI commands for the Mindst
 ## Command Registry
 
 ```text
-db:schema:create
-db:schema:migrate-v2
-db:schema:renew
 ingest:discover:habr
 ingest:extract:habr
 ingest:import
@@ -26,56 +23,7 @@ Commands absent from this hierarchy are invalid.
 
 ## Command Registry
 
-### `db:schema:create`
-
-Contour: maintenance.
-
-Purpose: create the application data schema in an empty database.
-
-Parameters: none.
-
-Constraints:
-
-- assumes an empty database;
-- creates only DB structure such as tables, indexes, and constraints;
-- is not idempotent;
-- does not run migrations;
-- is not used in runtime.
-
-### `db:schema:migrate-v2`
-
-Contour: maintenance.
-
-Purpose: migrate the restored legacy Mindstream schema to the canonical DEM v2 contract in the configured database.
-
-Parameters: none.
-
-Constraints:
-
-- operates in exactly one configured PostgreSQL database;
-- acquires a transaction-scoped advisory lock and performs the transition atomically;
-- validates the legacy table set, data values, pgvector dimensions, constraints, and row counts before recording success;
-- adds only the explicitly specified missing constraint and does not infer renames, conversions, or deletions;
-- records the compiled DEM v2 declaration and fingerprint in `schema_version` only after validation;
-- is idempotent and leaves no partial migration state on failure;
-- does not authorize a production cutover.
-
-### `db:schema:renew`
-
-Contour: maintenance.
-
-Purpose: fully recreate the application data schema with a best-effort attempt to preserve existing data.
-
-Parameters: none.
-
-Constraints:
-
-- destructive, non-interactive operation without confirmations;
-- works with exactly one database from application configuration;
-- recreates the schema only from `Mindstream_Back_Storage_Schema`;
-- records the new schema in `schema_version` after successful creation;
-- during data transfer, matches tables and columns by name, drops extra structures, and attempts type conversion;
-- if data restoration fails, the command ends with error and no partial success.
+Schema initialization and explicit migration follow the storage lifecycle contract. A migration command and its exact interface must be declared here once designed; legacy schema commands do not define the target lifecycle.
 
 ### `ingest:discover:habr`
 

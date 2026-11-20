@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/configuration/structure.md`
 - Template Version: `20260619`
-- Changed: `20260810`
+- Changed: `20261120`
 
 ## Purpose
 
@@ -20,7 +20,7 @@ It **does not describe values**, loading sources, parameter semantics, or the lo
 
 ## General Configuration Form
 
-`@teqfw/cfg` addresses values as `NAMESPACE__PARAMETER`. The application uses `TEQFW_WEB` for web transport, `TEQFW_DB` for package-owned database settings, and `MINDSTREAM` for product-owned LLM settings. `Mindstream_Back_App_Configuration` maps only the application-owned settings below; `@teqfw/db` owns its immutable typed database projection.
+`@teqfw/cfg` addresses values as `NAMESPACE__PARAMETER`. The application uses `TEQFW_WEB` for web transport, `TEQFW_DEM_RDB` for package-owned database settings, and `MINDSTREAM` for product-owned LLM settings. `Mindstream_Back_App_Configuration` maps only the application-owned settings below; DEM-RDB owns its database configuration projection.
 
 The backend configuration is represented as a single object with these top-level sections:
 

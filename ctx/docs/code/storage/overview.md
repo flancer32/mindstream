@@ -1,130 +1,26 @@
 # Code Storage Layer — Overview
 
 - Path: `ctx/docs/code/storage/overview.md`
-- Template Version: `20260619`
-- Changed: `20260810`
+- Changed: `20261120`
 
-## Purpose
+## Boundary
 
-This document defines the **engineering role and form of the relational-database layer** in the Mindstream MVP.
+The server-side storage layer realizes the existing PostgreSQL Storage contour without changing product behavior. Browser state remains in `localStorage`; DEM-IDB is outside this scope.
 
-The data-storage layer belongs only to the `code/` level and implements the architectural `Storage` contour already fixed in the architecture documents, **without extending or changing system architecture**.
+The storage layer introduces no architectural contour or data flow. It provides reproducible schema and persistence operations for canonical entities, but does not interpret attention signals or form the personal feed. Normal operation preserves the architecture's monotonic storage behavior. Destructive schema operations are explicit maintenance actions, never automatic runtime behavior.
 
-This document describes what counts as the DB layer as an engineering object, what responsibilities it carries, and which invariants are mandatory in the MVP.
+## Persistence And Access
 
-## Architectural Position Of The Layer
+The host composes Format 2 declarations using `@teqfw/dem` 2.x and initializes `@teqfw/dem-rdb` 2.x with the PostgreSQL driver. DEM-RDB owns the shared Knex client, schema lifecycle, and connection disposal; the host loads CFG before initialization and closes the backend before disconnecting. The package configuration namespace is `TEQFW_DEM_RDB`.
 
-The DB layer:
+Use DEM Repository and atomic Batch for operations their contracts express. Application-owned PostgreSQL queries may borrow the package-owned client for operations such as joins, anti-joins, cursor pagination and conflict handling that cannot be expressed correctly or efficiently through those contracts. Keep this boundary specific to application queries; do not construct another connection or introduce a generic adapter.
 
-- is not an architectural contour;
-- introduces no new data flows;
-- does not extend the architectural storage model;
-- implements the existing `Storage` contour at the engineering level.
+Publication embeddings use the DEM Core vector type and DEM-RDB JSON-serialized text representation. Native pgvector is not required by the target. The API, feed ordering, identity and attention semantics remain unchanged.
 
-All architectural properties of `Storage`, such as canonicity, monotonicity, and absence of reactivity and control feedback loops, are treated as **defined externally** and are not restated here.
+## Lifecycle And Safety
 
-## Role Of The DB Layer In The Codebase
+Initialize an empty scope with the compiled application and DEM infrastructure entities. DEM-RDB records and validates model history in `/dem/snapshot` and `/dem/application`; a different, incomplete, or incompatible layout fails visibly. Initialization must not automatically rebuild or migrate persistent data.
 
-The DB layer is responsible for:
+An explicit, operator-controlled migration transfers the old physical layout and data only after a separate restorable backup, compatibility preflight and a verified conversion plan. Validate row counts, keys, constraints, timestamps, identity and attention behavior, and every embedding value before accepting cutover. Failure stops cutover and uses the verified backup for rollback. No migration is inferred from matching names.
 
-- implementing CRUD + L operations for canonical storage entities;
-- managing schema at the code-layer level;
-- ensuring reproducibility of database structure;
-- supporting controlled schema recreation with data preservation;
-- isolating application code from SQL details and concrete DBMS behavior.
-
-The DB layer contains no product logic, does not interpret attention signals, and does not participate in formation of the personal feed.
-
-## Technology Base
-
-In the Mindstream MVP:
-
-- `@teqfw/db` v2+ is the relational persistence and schema-lifecycle package;
-- Knex remains its execution substrate and may be exposed by the application-owned connection adapter to existing domain-specific storage modules;
-- direct construction of Knex connections and direct SQL outside the package-supported Knex boundary are prohibited;
-- the host installs the PostgreSQL driver, loads `@teqfw/cfg`, initializes the default `@teqfw/db` connection, and disconnects it during shutdown;
-- the DB layer is implemented for **PostgreSQL 16+ with mandatory `pgvector`**, as fixed in the `environment/` layer.
-
-The choice of PostgreSQL with `pgvector` is not an interchangeable option but part of the fixed runtime environment.
-
-## Data Schema Model
-
-The data schema:
-
-- is described **declaratively** as JavaScript-based descriptions;
-- is treated as the **canonical source of truth** for database structure;
-- is not derived from code and is not formed as a side effect of application execution.
-
-The DB layer must support **full restoration of the schema** from declarative description without relying on the current database state.
-
-The schema must remain compatible with storage of publication vector representations through types and capabilities provided by PostgreSQL and `pgvector`.
-
-## Schema Lifecycle Management
-
-The DB layer owns schema-lifecycle operations as a separate engineering responsibility.
-
-In the MVP, the following are allowed:
-
-- full schema recreation;
-- schema rebuild with preservation of existing data;
-- manual destructive operations on the schema.
-
-All destructive operations:
-
-- run **only manually**;
-- are triggered through CLI or an explicit engineering call;
-- are not part of the regular runtime application;
-- are not triggered automatically during system operation.
-
-In operational mode, the state of `Storage` is considered monotonic.
-
-## Domain And Persistence
-
-In the MVP, a **one-to-one correspondence** is allowed between:
-
-- domain entities;
-- persistence model such as tables, fields, and indexes.
-
-There is no separate domain-to-persistence mapping layer.
-
-Domain entities are treated as canonical data structures, not rich domain models with encapsulated behavior.
-
-## Data-Access Contracts
-
-CRUD + L operations are implemented through **explicit domain-specific contracts** tied to each storage entity.
-
-Generic repositories and generic contracts are not used in the MVP.
-
-Each storage module:
-
-- is responsible for one concrete entity;
-- implements only the operations required for that entity;
-- uses the Knex execution object obtained from the initialized `@teqfw/db` connection adapter.
-
-## Testability
-
-The DB layer is designed with unit testing as a priority.
-
-In the MVP:
-
-- DB-layer unit tests run with a fully mocked DBAL;
-- real DBMS connections are not used in unit tests;
-- side effects such as filesystem, network, and real database access are excluded.
-
-Integration tests for the DB layer are outside the MVP scope.
-
-## Document Boundary
-
-This document does not describe:
-
-- concrete tables and fields;
-- SQL structures and indexes;
-- application-service APIs;
-- CLI interfaces and commands;
-- implementation of concrete storage modules.
-
-These topics belong to later documents in `code/storage/`.
-
-## Summary
-
-The DB layer of the Mindstream MVP is an engineering layer of the codebase that implements the architectural `Storage` contour without extending it, provides declarative schema description, explicit CRUD + L contracts, and controlled schema-lifecycle management within the MVP.
+Focused tests cover essential contracts; critical flows and migration require real isolated PostgreSQL verification. Schema details are defined in [schema.md](schema.md).

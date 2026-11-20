@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/cli/dispatcher.md`
 - Template Version: `20260619`
-- Changed: `20260803`
+- Changed: `20261120`
 
 ## Purpose
 
@@ -16,7 +16,7 @@ The complete colon-delimited command `id` is the sole public command name. The h
 
 ## Distinct Responsibilities
 
-- `Mindstream_Back_App_Plugin` is a DI lifecycle component. On startup it loads configuration, initializes the `@teqfw/db` connection and application configuration, configures Teq Web runtime settings, and registers Mindstream HTTP handlers. On shutdown it disconnects the database connection.
+- `Mindstream_Back_App_Plugin` is a DI lifecycle component. On startup it loads configuration, initializes DEM-RDB storage and application configuration, configures Teq Web runtime settings, and registers Mindstream HTTP handlers. On shutdown it closes storage and disconnects the database connection.
 - Mindstream command products are finite DI components. They expose Teq command metadata and `async execute(context)`; they neither select commands nor control process status.
 - `web:start` is the dependency-owned long-running command. It freezes the prepared runtime configuration, starts the server, and stops it after a host signal.
 

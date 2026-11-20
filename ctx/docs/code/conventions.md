@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/conventions.md`
 - Template Version: `20260619`
- - Changed: `20260803`
+- Changed: `20260803`
 
 ## Purpose
 

@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/testing.md`
 - Template Version: `20260619`
-- Changed: `20260829`
+- Changed: `20261120`
 
 ## Purpose
 
@@ -42,11 +42,11 @@ A test that bypasses the DI container is not a valid project test.
 
 ## Platform API And Side Effects
 
-Real side effects are prohibited in tests, including filesystem access, network access, sockets, timers, and background processes. Any access to platform APIs must happen only through DI. Mocking platform dependencies is fully allowed.
+Real side effects are prohibited in unit tests, including filesystem access, network access, sockets, timers, and background processes. Any access to platform APIs in unit tests must happen only through DI. Mocking platform dependencies is fully allowed.
 
 ## Test Types
 
-Only unit tests are allowed in the MVP. Integration, e2e, snapshot, property-based, and fuzz tests are not used.
+Focused PostgreSQL integration checks are required for storage lifecycle, critical data flows and migration cutover. They use an isolated disposable database and must not mutate production data. Unit tests remain the default for other code; broader test types are not required by default.
 
 ## Testing Tools
 

@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/AGENTS.md`
 - Template Version: `20260619`
-- Changed: `20260727`
+- Changed: `20261120`
 
 ## Purpose
 
@@ -61,3 +61,7 @@ It may refine implementation precision, but it must not introduce new meaning or
 - Use deeper subdirectories only where a stable engineering subdomain already exists.
 - Reflect actual filesystem structure exactly in the level map.
 - Surface conflicts with architecture or environment documentation instead of normalizing them locally.
+
+## Documentation Capacity Exception
+
+The code level intentionally retains ten direct documents. Their distinct engineering responsibilities are kept separate to preserve existing navigation and authority boundaries.

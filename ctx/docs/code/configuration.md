@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/configuration.md`
 - Template Version: `20260619`
-- Changed: `20260810`
+- Changed: `20261120`
 
 ## Purpose
 
@@ -35,20 +35,20 @@ The architecture and environment layers **do not operate** on configuration as a
 
 ## Single Configuration Object
 
-There is exactly one product-owned configuration object in the backend application: `Mindstream_Back_App_Configuration`. Infrastructure packages may own their versioned immutable projections; `TeqFw_Db_Back_Config$` exclusively owns the `TEQFW_DB` projection.
+There is exactly one product-owned configuration object in the backend application: `Mindstream_Back_App_Configuration`. Infrastructure packages may own their versioned immutable projections; `TeqFw_Dem_RDb_Config$` owns the `TEQFW_DEM_RDB` projection.
 
 - the product object is created by a single assembly point in application code;
 - it remains in process memory for the lifetime of the application;
 - it is used as a **read-only** structure and is not changed after initialization;
 - it is accessed through standard code-binding mechanisms such as import or DI, without global state.
 
-Creating product configuration duplicates or re-projecting `TEQFW_DB` inside application configuration is a violation.
+Creating product configuration duplicates or re-projecting `TEQFW_DEM_RDB` inside application configuration is a violation.
 
 ---
 
 ## Value Sources
 
-`Mindstream_Back_App_Plugin` explicitly loads the optional project-root `.env` Source followed by the explicit `process.env` Source. `@teqfw/cfg` therefore gives `process.env` higher precedence for each complete key. No module reads `process.env` directly. `MINDSTREAM` is the product namespace; `TEQFW_WEB` and `TEQFW_DB` are package-owned runtime namespaces.
+`Mindstream_Back_App_Plugin` explicitly loads the optional project-root `.env` Source followed by the explicit `process.env` Source. `@teqfw/cfg` therefore gives `process.env` higher precedence for each complete key. No module reads `process.env` directly. `MINDSTREAM` is the product namespace; `TEQFW_WEB` and `TEQFW_DEM_RDB` are package-owned runtime namespaces.
 
 ---
 

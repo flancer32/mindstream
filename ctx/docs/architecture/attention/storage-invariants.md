@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/attention/storage-invariants.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20261120`
 
 ## Purpose
 
@@ -119,13 +119,7 @@ In the MVP, an Attention Event is not a historical event but a **logical attenti
 
 ## Derived Data Boundary
 
-In the future, the following may be added:
-
-- server-side aggregates;
-- derived tables;
-- materialized views;
-
-if all of the following hold:
+Server-side aggregates, derived tables, or materialized views, where otherwise authorized, must satisfy all of the following:
 
 - they do not change the ontology of primary attention states;
 - they do not introduce read models for identity within the write-ingress contour;
