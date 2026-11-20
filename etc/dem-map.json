@@ -1,0 +1,8 @@
+{
+  "$format": 1,
+  "identityProfiles": {
+    "/mindstream/source": {"id": {"type": "int", "capacity": "large"}},
+    "/mindstream/publication": {"id": {"type": "int", "capacity": "large"}},
+    "/mindstream/identity": {"id": {"type": "int", "capacity": "large"}}
+  }
+}

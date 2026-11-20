@@ -101,6 +101,8 @@
     "@teqfw/cfg": ">=2.1.0 <3",
     "@teqfw/cli": ">=2.2.0 <3",
     "@teqfw/db": "2.2.0",
+    "@teqfw/dem": "^2.0.0",
+    "@teqfw/dem-rdb": "^2.0.0",
     "@teqfw/di": "github:teqfw/di",
     "@teqfw/log": ">=2.1.2 <3",
     "@teqfw/web": ">=2.0.0 <3",

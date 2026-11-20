@@ -1,0 +1,125 @@
+{
+  "$format": 2,
+  "$namespace": "/mindstream/",
+  "source": {
+    "attributes": [
+      {"name": "id", "type": {"name": "identity"}, "generation": true},
+      {"name": "code", "type": {"name": "string", "params": {"length": 64}}},
+      {"name": "url", "type": {"name": "string", "params": {"length": 255}}},
+      {"name": "name", "type": {"name": "string", "params": {"length": 255}}},
+      {"name": "description", "type": {"name": "text"}, "nullable": true},
+      {"name": "is_active", "type": {"name": "boolean"}},
+      {"name": "created_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}},
+      {"name": "updated_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}}
+    ],
+    "uniqueKeys": {
+      "code": ["code"],
+      "url": ["url"]
+    }
+  },
+  "publication": {
+    "attributes": [
+      {"name": "id", "type": {"name": "identity"}, "generation": true},
+      {"name": "source_id", "type": {"name": "ref"}},
+      {"name": "source_item_hash", "type": {"name": "string", "params": {"length": 64}}},
+      {"name": "source_url", "type": {"name": "string", "params": {"length": 1024}}},
+      {"name": "rss_title", "type": {"name": "string", "params": {"length": 512}}, "nullable": true},
+      {"name": "rss_guid", "type": {"name": "string", "params": {"length": 255}}, "nullable": true},
+      {"name": "rss_published_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}, "nullable": true},
+      {"name": "discovered_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}},
+      {"name": "status", "type": {"name": "string", "params": {"length": 32}}, "default": "extract_pending"}
+    ],
+    "uniqueKeys": {
+      "source_item": ["source_id", "source_item_hash"]
+    },
+    "indexes": {
+      "source": {"attributes": ["source_id"]}
+    },
+    "relations": {
+      "source": {
+        "attributes": ["source_id"],
+        "target": {"path": "source", "attributes": ["id"]}
+      }
+    }
+  },
+  "extraction": {
+    "attributes": [
+      {"name": "publication_id", "type": {"name": "ref"}},
+      {"name": "html", "type": {"name": "text"}, "nullable": true},
+      {"name": "md_text", "type": {"name": "text"}, "nullable": true},
+      {"name": "created_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}}
+    ],
+    "primaryKey": ["publication_id"],
+    "relations": {
+      "publication": {
+        "attributes": ["publication_id"],
+        "target": {"path": "publication", "attributes": ["id"]}
+      }
+    }
+  },
+  "summary": {
+    "attributes": [
+      {"name": "publication_id", "type": {"name": "ref"}},
+      {"name": "overview", "type": {"name": "text"}},
+      {"name": "annotation", "type": {"name": "text"}},
+      {"name": "created_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}}
+    ],
+    "primaryKey": ["publication_id"],
+    "relations": {
+      "publication": {
+        "attributes": ["publication_id"],
+        "target": {"path": "publication", "attributes": ["id"]}
+      }
+    }
+  },
+  "embedding": {
+    "attributes": [
+      {"name": "publication_id", "type": {"name": "ref"}},
+      {"name": "overview_embedding", "type": {"name": "vector", "params": {"dimensions": 1536, "element": "float"}}},
+      {"name": "annotation_embedding", "type": {"name": "vector", "params": {"dimensions": 1536, "element": "float"}}},
+      {"name": "created_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}}
+    ],
+    "primaryKey": ["publication_id"],
+    "relations": {
+      "publication": {
+        "attributes": ["publication_id"],
+        "target": {"path": "publication", "attributes": ["id"]}
+      }
+    }
+  },
+  "identity": {
+    "attributes": [
+      {"name": "id", "type": {"name": "identity"}, "generation": true},
+      {"name": "identity_uuid", "type": {"name": "string", "params": {"length": 36}}},
+      {"name": "registered_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}}
+    ],
+    "uniqueKeys": {
+      "identity_uuid": ["identity_uuid"]
+    },
+    "indexes": {
+      "registered_at": {"attributes": ["registered_at"]}
+    }
+  },
+  "attention": {
+    "attributes": [
+      {"name": "identity_id", "type": {"name": "ref"}},
+      {"name": "publication_id", "type": {"name": "ref"}},
+      {"name": "attention_type", "type": {"name": "enum", "params": {"values": ["overview_view", "link_click", "link_click_after_overview"]}}},
+      {"name": "created_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}}
+    ],
+    "primaryKey": ["identity_id", "publication_id", "attention_type"],
+    "indexes": {
+      "created_at": {"attributes": ["created_at"]}
+    },
+    "relations": {
+      "identity": {
+        "attributes": ["identity_id"],
+        "target": {"path": "identity", "attributes": ["id"]}
+      },
+      "publication": {
+        "attributes": ["publication_id"],
+        "target": {"path": "publication", "attributes": ["id"]}
+      }
+    }
+  }
+}
