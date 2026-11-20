@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import test from 'node:test';
 import Container from '@teqfw/di';
@@ -14,18 +13,10 @@ test('DEM 2 schema composes the MindStream storage model with infrastructure his
   const registry = await container.get('TeqFw_Dem_Registry$');
   registry.finalize();
 
+  const acquisition = await container.get('TeqFw_Dem_Acquire$');
+  const inputs = await acquisition.exec({ hostRoot: projectRoot });
   const compiler = await container.get('TeqFw_Dem_Compile$');
-  const infrastructure = JSON.parse(await fs.readFile(path.join(demRoot, 'etc/dem-schema.json'), 'utf8'));
-  const declaration = JSON.parse(await fs.readFile(path.join(projectRoot, 'etc/dem-schema.json'), 'utf8'));
-  const map = JSON.parse(await fs.readFile(path.join(projectRoot, 'etc/dem-map.json'), 'utf8'));
-  const result = await compiler.exec({
-    schemas: [
-      { packageName: '@teqfw/dem', filename: 'etc/dem-schema.json', document: infrastructure },
-      { packageName: '@flancer32/mindstream', filename: 'etc/dem-schema.json', document: declaration },
-    ],
-    map: { packageName: '@flancer32/mindstream', filename: 'etc/dem-map.json', document: map },
-    trustedPackages: ['@teqfw/dem'],
-  });
+  const result = await compiler.exec(inputs);
   compiler.assertResult({ value: result });
 
   assert.deepEqual(Object.keys(result.model.entities).sort(), [

@@ -103,7 +103,7 @@
     "@teqfw/db": "2.2.0",
     "@teqfw/dem": "^2.0.0",
     "@teqfw/dem-rdb": "^2.0.0",
-    "@teqfw/di": "github:teqfw/di",
+    "@teqfw/di": "^2.12.1",
     "@teqfw/log": ">=2.1.2 <3",
     "@teqfw/web": ">=2.0.0 <3",
     "pg": "^8.22.0"
