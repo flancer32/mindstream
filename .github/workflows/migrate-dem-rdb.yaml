@@ -1,0 +1,64 @@
+name: LIVE - Migrate Mindstream to DEM-RDB once
+
+on:
+  workflow_dispatch:
+    inputs:
+      writers_stopped:
+        description: All production database writers are stopped for maintenance
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mindstream-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    if: github.ref == 'refs/heads/main' && inputs.writers_stopped
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      APP_DIR: /home/${{ vars.USER }}/app/mindstream
+      ARCHIVE: mindstream-migration-${{ github.run_id }}-${{ github.run_attempt }}.tar.gz
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Package the migration
+        run: |
+          npm ci --omit=dev --omit=optional
+          tar -czf "$ARCHIVE" package.json etc src web node_modules .github/scripts/migrate-dem-rdb.sh
+
+      - name: Upload migration package
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: ${{ env.ARCHIVE }}
+          target: ${{ env.APP_DIR }}/var/migration
+
+      - name: Back up production and migrate the legacy schema
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          command_timeout: 45m
+          script: |
+            set -eu
+            umask 077
+            app_dir="${{ env.APP_DIR }}"
+            archive="$app_dir/var/migration/${{ env.ARCHIVE }}"
+            release=$(mktemp -d "$app_dir/var/migration/release.XXXXXXXX")
+            trap 'rm -rf -- "$release"; rm -f -- "$archive"' EXIT
+            tar -xzf "$archive" -C "$release"
+            cd "$release"
+            bash .github/scripts/migrate-dem-rdb.sh "$app_dir"

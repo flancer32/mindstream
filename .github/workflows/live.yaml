@@ -2,6 +2,10 @@ name: LIVE - Build & Deploy Mindstream (PM2 cluster x4)
 
 on: workflow_dispatch
 
+concurrency:
+  group: mindstream-production
+  cancel-in-progress: false
+
 env:
   PRJ: mindstream
   APP_DIR: /home/${{ vars.USER }}/app/mindstream
@@ -13,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install production dependencies
         run: |

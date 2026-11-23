@@ -73,6 +73,12 @@ CREATE SCHEMA mindstream_data AUTHORIZATION mindstream;
 Миграционная команда инициализирует целевые таблицы и историю DEM до транзакции копирования. При ошибке копирования транзакция откатывается, а целевая схема остаётся инициализированной с пустыми таблицами данных. Исходные таблицы сохраняются. Шаги 8–9 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
 После запуска откройте `http://localhost:3000`.
 
+### Production DEM-RDB migration
+
+1. Schedule maintenance and verify that an independent PostgreSQL backup can be restored. Stop `mindstream-web` with `pm2 stop mindstream-web` and pause every other writer, including scheduled ingestion and processing jobs.
+2. Dispatch **LIVE - Migrate Mindstream to DEM-RDB once** on `main` with `writers_stopped=true`. The workflow uses the deployed database credentials. It checks the PM2 workers, saves and reads back a full archive under `var/backups/postgresql` on the deployment host, then migrates `public` into `mindstream_data`. The successful run records the archive path in `mindstream-dem-rdb.completed` in the same directory.
+3. Review the migration result and verify the target before resuming writers. The workflow leaves the release and PM2 state in place. Configure the new release with the matching `TEQFW_DEM_RDB__*` connection settings and `TEQFW_DEM_RDB__SEARCH_PATH=mindstream_data,public` before starting it. Keep the archive and the previous release available for rollback until cutover is accepted.
+
 ## Attention API (MVP)
 
 `POST /api/attention` принимает write-события сигналов внимания.
