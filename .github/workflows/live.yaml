@@ -113,22 +113,32 @@ jobs:
               : "${!DB_NAME_KEY:?Database name is required for deployment backup}"
               : "${!DB_USER_KEY:?Database user is required for deployment backup}"
 
-              mkdir -p "$BACKUP_DIR"
-              chmod 700 "$BACKUP_DIR"
-              BACKUP_FILE="$BACKUP_DIR/${{ env.PRJ }}_${TIMESTAMP}.dump"
+              if [ "${{ inputs.activate_migrated_database }}" = true ]; then
+                BACKUP_FILE=$(cat "$BACKUP_DIR/mindstream-dem-rdb.completed")
+                case "$BACKUP_FILE" in
+                  "$BACKUP_DIR"/mindstream-pre-dem-rdb.*.dump) ;;
+                  *) echo 'Invalid migration backup path.' >&2; exit 1 ;;
+                esac
+                pg_restore --list "$BACKUP_FILE" >/dev/null
+                echo "Using the verified backup from the completed migration: $BACKUP_FILE"
+              else
+                mkdir -p "$BACKUP_DIR"
+                chmod 700 "$BACKUP_DIR"
+                BACKUP_FILE="$BACKUP_DIR/${{ env.PRJ }}_${TIMESTAMP}.dump"
 
-              PGPASSWORD="${!DB_PASSWORD_KEY:-}" pg_dump \
-                --format=custom \
-                --host="${!DB_HOST_KEY:-localhost}" \
-                --port="${!DB_PORT_KEY:-5432}" \
-                --username="${!DB_USER_KEY}" \
-                --file="$BACKUP_FILE" \
-                "${!DB_NAME_KEY}"
-              pg_restore --list "$BACKUP_FILE" >/dev/null
+                PGPASSWORD="${!DB_PASSWORD_KEY:-}" pg_dump \
+                  --format=custom \
+                  --host="${!DB_HOST_KEY:-localhost}" \
+                  --port="${!DB_PORT_KEY:-5432}" \
+                  --username="${!DB_USER_KEY}" \
+                  --file="$BACKUP_FILE" \
+                  "${!DB_NAME_KEY}"
+                pg_restore --list "$BACKUP_FILE" >/dev/null
 
-              # Keep the most recent 30 days of deployment backups.
-              find "$BACKUP_DIR" -type f -name '${{ env.PRJ }}_*.dump' -mtime +30 -delete
-              echo "PostgreSQL backup created and archive catalog checked: $BACKUP_FILE"
+                # Keep the most recent 30 days of deployment backups.
+                find "$BACKUP_DIR" -type f -name '${{ env.PRJ }}_*.dump' -mtime +30 -delete
+                echo "PostgreSQL backup created and archive catalog checked: $BACKUP_FILE"
+              fi
             else
               echo "No previous deployment found; PostgreSQL backup is not required."
             fi
