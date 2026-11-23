@@ -160,6 +160,7 @@ test('Mindstream_Back_Web_Api_FeedView returns FeedView DTO structure', async ()
   assert.equal(result.sources.length, 1);
   assert.ok(result.cursor);
   assert.equal(result.cursor.id, 9);
+  assert.equal(result.cursor.publishedAt, '2025-01-01T00:00:00.000000Z');
 
   const item = result.items[0];
   assert.deepEqual(
@@ -170,6 +171,20 @@ test('Mindstream_Back_Web_Api_FeedView returns FeedView DTO structure', async ()
   assert.ok(Array.isArray(item.embeddings.overview));
   assert.ok(item.embeddings.annotation.every(Number.isFinite));
   assert.ok(item.embeddings.overview.every(Number.isFinite));
+});
+
+test('Mindstream_Back_Web_Api_FeedView returns native vector components at float32 precision', async () => {
+  const { api } = await getApi({
+    rows: [buildRow({
+      annotationEmbedding: Array(1536).fill(0.1),
+      overviewEmbedding: JSON.stringify(Array(1536).fill(0.1)),
+    })],
+  });
+
+  const result = await api.getFeedView();
+
+  assert.equal(result.items[0].embeddings.annotation[0], Math.fround(0.1));
+  assert.equal(result.items[0].embeddings.overview[0], Math.fround(0.1));
 });
 
 test('Mindstream_Back_Web_Api_FeedView enforces feed filters in query', async () => {
@@ -212,17 +227,25 @@ test('Mindstream_Back_Web_Api_FeedView applies sorting and cursor filter', async
   const cursorGroup = calls.whereNested[0];
   assert.deepEqual(cursorGroup[0], {
     type: 'where',
-    args: ['p.rss_published_at', '<', '2025-01-02T00:00:00.000Z'],
+    args: ['p.rss_published_at', '<', '2025-01-02T00:00:00.000000Z'],
   });
   assert.deepEqual(cursorGroup[1].type, 'orWhereNested');
   assert.deepEqual(cursorGroup[1].calls[0], {
     type: 'where',
-    args: ['p.rss_published_at', '=', '2025-01-02T00:00:00.000Z'],
+    args: ['p.rss_published_at', '=', '2025-01-02T00:00:00.000000Z'],
   });
   assert.deepEqual(cursorGroup[1].calls[1], {
     type: 'andWhere',
     args: ['p.id', '<', 100],
   });
+});
+
+test('Mindstream_Back_Web_Api_FeedView preserves database microseconds in its next-page cursor', async () => {
+  const { api } = await getApi({ rows: [buildRow({ id: 7, publishedAt: '2025-01-01T00:00:00.123456Z' })] });
+
+  const result = await api.getFeedView();
+
+  assert.equal(result.cursor.publishedAt, '2025-01-01T00:00:00.123456Z');
 });
 
 test('Mindstream_Back_Web_Api_FeedView omits cursor on empty results', async () => {

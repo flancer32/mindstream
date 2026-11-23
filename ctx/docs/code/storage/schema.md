@@ -18,7 +18,7 @@ Legacy domain columns retain their names and nullability unless the conversion b
 | `publications` | `/mindstream/publication` | `mindstream_publication` | Keep IDs, references, status and source metadata. |
 | `publication_extractions` | `/mindstream/extraction` | `mindstream_extraction` | Keep publication reference, HTML, Markdown and nullable values. |
 | `publication_summaries` | `/mindstream/summary` | `mindstream_summary` | Keep publication reference, overview and annotation. |
-| `publication_embeddings` | `/mindstream/embedding` | `mindstream_embedding` | Keep both component orders and 1536 dimensions; write/read through the DEM-RDB vector codec into native PostgreSQL `vector(1536)`. |
+| `publication_embeddings` | `/mindstream/embedding` | `mindstream_embedding` | Copy both native PostgreSQL `vector(1536)` columns directly with `INSERT … SELECT`, preserving component order and stored float32 values. Verify the target values through the DEM-RDB vector codec. |
 | `anonymous_identities` | `/mindstream/identity` | `mindstream_identity` | Keep bigint IDs and UUID strings. |
 | `attention_states` | `/mindstream/attention` | `mindstream_attention` | Keep identity/publication references and allowed attention values. |
 
@@ -44,9 +44,15 @@ The selected adapter must enforce the required referential actions and closed at
 
 Numeric identity and reference values use DEM's normalized string representation and PostgreSQL `bigint`. Use DEM-RDB repository generation for generated IDs. Application-owned SQL writing those entities must supply IDs consistent with the selected allocation contract. Preserve existing externally visible numeric identifiers where conversion is exact and safe. Reject unsafe conversion at the API boundary.
 
+Migration preserves explicit numeric IDs. Verify that repository-generated IDs after migration advance beyond the highest imported ID for each generated entity.
+
 DEM-RDB stores datetime values as text in PostgreSQL. Use canonical UTC values with six fractional digits where represented by the schema. Preserve the original instant and stored precision during migration, including microseconds. Queries that compare datetime values or use them in a cursor must use the same canonical representation.
 
+The publication feed orders by `rss_published_at` descending and then `id` descending. Its next-page cursor carries the exact canonical publication timestamp and ID, and the query uses both values to continue after ties without losing microsecond precision.
+
 Declare both publication embedding attributes as `teqfw.dem_rdb.vector` with `dimensions: 1536`. Register the DEM-RDB type definition before compiling the model and bind its handler to the DEM runtime before opening the adapter. PostgreSQL stores both attributes as native pgvector `vector(1536)` columns. The adapter rejects malformed vectors and explicitly rounds components to float32 on write, which can lose precision relative to JavaScript numbers. On reopen, validate the physical type and dimension before writes.
+
+The feed API reads pgvector values through an application-owned PostgreSQL query. Normalize these components to float32 before exposing them so the API preserves the stored vector values represented by DEM-RDB reads.
 
 During explicit migration, preserve the order and stored float32 value of every legacy component. Verify both vectors through the target DEM-RDB codec against the original stored values. Compare values at float32 precision if the source is read through pgvector's decimal text output. Measure target size and query performance on representative data before cutover.
 

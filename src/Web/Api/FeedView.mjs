@@ -65,7 +65,12 @@ const normalizeCursor = function (cursor) {
         if (typeof cursor.publishedAt !== 'string' || !cursor.publishedAt.trim()) {
           throw new Error('Cursor publishedAt must be a non-empty string.');
         }
-        publishedAt = cursor.publishedAt.trim();
+        const value = cursor.publishedAt.trim();
+        const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,6}))?Z$/u.exec(value);
+        if (!match || Number.isNaN(Date.parse(`${match[1]}Z`))) {
+          throw new Error('Cursor publishedAt must be a UTC timestamp with at most six fractional digits.');
+        }
+        publishedAt = `${match[1]}.${(match[2] ?? '').padEnd(6, '0')}Z`;
       }
       return { id, publishedAt };
     };
@@ -148,7 +153,7 @@ const normalizeUrl = function (value, name) {
 const normalizeVector = function (value, name) {
       if (Array.isArray(value)) {
         const normalized = value.map((item) => {
-          const num = Number(item);
+          const num = Math.fround(Number(item));
           if (!Number.isFinite(num)) {
             throw new Error(`${name} must contain only numbers.`);
           }
@@ -173,7 +178,7 @@ const normalizeVector = function (value, name) {
           throw new Error(`${name} must contain exactly 1536 components.`);
         }
         return parts.map((part) => {
-          const num = Number(part);
+          const num = Math.fround(Number(part));
           if (!Number.isFinite(num)) {
             throw new Error(`${name} must contain only numbers.`);
           }
@@ -278,6 +283,7 @@ const mapRow = function (row) {
       const overviewEmbedding = normalizeVector(row.overview_embedding, 'Overview embedding');
 
       return {
+        cursorPublishedAt: row.published_at,
         item: {
           id,
           sourceCode,
@@ -403,7 +409,7 @@ this.getFeedView = async function (params = {}) {
         sources,
         items,
         cursor: {
-          publishedAt: last.publishedAt,
+          publishedAt: normalizeCursor({ id: last.id, publishedAt: sliced.at(-1).cursorPublishedAt }).publishedAt,
           id: last.id,
         },
       });

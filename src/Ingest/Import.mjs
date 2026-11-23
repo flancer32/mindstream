@@ -47,7 +47,7 @@ export default class Mindstream_Back_Ingest_Import {
         const hash = cryptoModule.createHash('sha256').update(articleUrl).digest('hex');
         const now = new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
         const result = await database.get().transaction(async (/** @type {ReturnType<Mindstream_Back_Storage_Database$['get']>} */ trx) => {
-          await trx('mindstream_source').insert({id: source.id, code, name, url: sourceUrl, is_active: true, created_at: now, updated_at: now}).onConflict().ignore();
+          await trx('mindstream_source').insert({id: source.id, code, name, url: sourceUrl, is_active: 1, created_at: now, updated_at: now}).onConflict().ignore();
           const stored = await trx('mindstream_source').where({id: source.id}).first();
           if (!stored || stored.code !== code || stored.url !== sourceUrl || stored.name !== name) throw new Error('Source identity conflicts with an existing source. Use its exact descriptor or a new identifier.');
           await trx.raw('SELECT pg_advisory_xact_lock(hashtextextended(?, 0))', ['mindstream_publication']);
