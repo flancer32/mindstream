@@ -1,8 +1,8 @@
 # Architecture Documentation
 
 - Path: `ctx/docs/architecture/AGENTS.md`
-- Template Version: `20260605`
-- Changed: `20260619`
+- Template Version: `20261118`
+- Changed: `20261123`
 
 ## Purpose
 
@@ -21,7 +21,7 @@ Documents at this level translate product intent into stable engineering structu
 - `AGENTS.md` — level definition for `ctx/docs/architecture/`.
 - `behavior.md` — internal architectural flows and major system behavior, not product use cases.
 - `constraints.md` — non-negotiable architecture restrictions and trust boundaries.
-- `decisions.md` — short ADR-like records of durable decisions, rejected alternatives, and reasoning.
+- `decisions.md` — current decisions, constraints, and relevant rationale.
 - `integration.md` — external integrations and major internal contracts between architectural blocks.
 - `overview.md` — compact architectural overview and navigation index.
 - `state.md` — state ownership, sources of truth, derived state, and state-changing authority.
@@ -107,3 +107,5 @@ When product knowledge is missing or contradictory, architecture documents must 
 - Use deeper subdirectories only when the project scale justifies them.
 - Respect the dependency order during analysis and change planning.
 - Do not introduce new architectural owners, new persistent state, new external integrations, or new system boundaries without corresponding document updates and human approval.
+
+Preserve project-specific nested architecture documentation when it improves maintainability.

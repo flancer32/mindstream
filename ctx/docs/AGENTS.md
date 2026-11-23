@@ -1,8 +1,8 @@
 # Project Documentation
 
 - Path: `ctx/docs/AGENTS.md`
-- Template Version: `20261024`
-- Changed: `20261120`
+- Template Version: `20261118`
+- Changed: `20261123`
 
 ## Purpose
 
@@ -10,7 +10,7 @@ This directory contains authoritative project declarations and navigation docume
 
 ADSM defines four ordered declarative levels: product → architecture → environment → code. Lower levels refine upstream meaning without redefining it. Accepted declarations constrain every valid implementation.
 
-The Verification Layer relates declarations to bounded observations of reality. It is not a fifth declarative level and does not establish independent authority over project meaning.
+The mandatory cross-cutting Verification Layer relates declarations to bounded observations of reality. It is not a fifth declarative level and does not establish independent authority over project meaning.
 
 ## Level Map
 
@@ -43,6 +43,7 @@ Does NOT define:
 - For repository topology, consult `filesystem.md` when needed.
 - For project declarations, follow the relevant level's `AGENTS.md` and read its task-relevant documents.
 - For lower-level changes, consult the upstream declarations needed to establish their meaning and constraints.
+- For Verification Layer work, follow `verification/AGENTS.md`.
 - For context lifecycle, validation, audit, compression, or upgrade, use the `adsm-ctx` skill when available.
 
 Avoid unnecessary full-context scans and repeated reading of unchanged documents.

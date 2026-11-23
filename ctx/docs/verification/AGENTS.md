@@ -1,6 +1,7 @@
 # Verification Layer
 
 - Path: `ctx/docs/verification/AGENTS.md`
+- Template Version: `20261118`
 - Changed: `20261120`
 
 ## Purpose

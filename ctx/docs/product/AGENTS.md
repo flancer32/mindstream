@@ -1,8 +1,8 @@
 # Product Documentation
 
 - Path: `ctx/docs/product/AGENTS.md`
-- Template Version: `20260619`
-- Changed: `20260727`
+- Template Version: `20260708`
+- Changed: `20261123`
 
 ## Purpose
 
@@ -47,3 +47,5 @@ product
 Lower levels may refine this meaning but must not redefine it.
 
 Changes here imply possible downstream alignment work in architecture, environment, and code documentation.
+
+Preserve project-specific nested product documentation when it improves maintainability.

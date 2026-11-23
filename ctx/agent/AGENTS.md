@@ -1,8 +1,8 @@
 # Agent Operational Context
 
 - Path: `ctx/agent/AGENTS.md`
-- Template Version: `20260610`
-- Changed: `20260619`
+- Template Version: `20261024`
+- Changed: `20261123`
 
 ## Purpose
 
@@ -38,4 +38,6 @@ Does NOT define:
 - Documents at this level may be more procedural than `ctx/docs/`, but must remain subordinate to declarative constraints defined there.
 - Operational assets at this level should stay generic enough for the project type and should not duplicate product documentation.
 - Operational assets at this level are service documentation for agent coordination and must not be treated as product-code authoring instructions.
-- If only one operational branch exists, it should be represented as `flows/` and treated as the entry point for repository-local agent routines.
+- Project-specific materials are optional. Only this boundary file belongs to the reusable initialization baseline; add operational materials only for concrete project needs.
+- Follow the applicable instruction hierarchy and local navigation. Operational instructions cannot grant authority to change accepted meaning or bypass human supervision.
+- Keep the Level Map aligned with the filesystem, listing directories first and sorting each group.

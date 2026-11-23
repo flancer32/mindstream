@@ -1,8 +1,8 @@
 # Environment Documentation
 
 - Path: `ctx/docs/environment/AGENTS.md`
-- Template Version: `20260619`
-- Changed: `20260619`
+- Template Version: `20260708`
+- Changed: `20261123`
 
 ## Purpose
 
@@ -45,3 +45,5 @@ product
 ```
 
 It may refine runtime assumptions but must not introduce new product or architecture meaning.
+
+Preserve project-specific nested environment documentation when it improves maintainability.

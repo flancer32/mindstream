@@ -1,8 +1,8 @@
 # Code Documentation
 
 - Path: `ctx/docs/code/AGENTS.md`
-- Template Version: `20260619`
-- Changed: `20261120`
+- Template Version: `20260708`
+- Changed: `20261123`
 
 ## Purpose
 
@@ -65,3 +65,5 @@ It may refine implementation precision, but it must not introduce new meaning or
 ## Documentation Capacity Exception
 
 The code level intentionally retains ten direct documents. Their distinct engineering responsibilities are kept separate to preserve existing navigation and authority boundaries.
+
+Preserve project-specific nested code documentation when it improves maintainability.

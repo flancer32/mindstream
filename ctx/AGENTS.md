@@ -1,14 +1,14 @@
 # Cognitive Context
 
 - Path: `ctx/AGENTS.md`
-- Template Version: `20261024`
-- Changed: `20261024`
+- Template Version: `20261118`
+- Changed: `20261123`
 
 ## Purpose
 
 This directory contains the project's cognitive context.
 
-`docs/` holds authoritative project definitions, `agent/` holds project-local agent operations, and `assets/` holds non-authoritative supporting materials.
+`docs/` holds the currently accepted target, including approved requirements not yet implemented, and durable verification specifications. Obsolete states, historical narratives, speculative plans, progress reports, and evidence do not belong there; Git preserves the evolution of declarations. `agent/` holds project-local operations and `assets/` holds supporting materials; neither grants its contents authority over `docs/`.
 
 Keep generic ADSM methodology outside the project context.
 
