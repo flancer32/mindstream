@@ -118,6 +118,7 @@ test('DEM-RDB initializes and reopens native vector schema with required constra
     } });
     const embeddings = (await embeddingsRepository.read({ key: { kind: 'primary', values: { publication_id: publication.id } } })).record;
     assert.deepEqual(embeddings.overview_embedding.slice(0, 3), [Math.fround(0.1), Math.fround(1e-45), 1.5]);
+    assert.deepEqual(embeddings.annotation_embedding.slice(0, 3), [Math.fround(0.1), Math.fround(1e-45), 1.5]);
     assert.equal(embeddings.created_at, timestamp);
 
     const identityRepository = await first.backend.get({ path: '/mindstream/identity' });
@@ -188,12 +189,32 @@ test('DEM-RDB initializes and reopens native vector schema with required constra
     assert.equal(reopened.history.created, false);
     await reopened.storage.close();
 
+    const assertIncompatibleReopenDoesNotWrite = async () => {
+      const before = await admin.query(`SELECT
+        (SELECT count(*) FROM "${schema}".dem_application) AS history,
+        (SELECT count(*) FROM "${schema}".mindstream_source) AS sources,
+        (SELECT count(*) FROM "${schema}".mindstream_publication) AS publications,
+        (SELECT count(*) FROM "${schema}".mindstream_attention) AS attention`);
+      const incompatible = await createContainer({ schema });
+      await assert.rejects(incompatible.storage.initialize({ hostRoot: projectRoot, scope: 'mindstream' }));
+      const after = await admin.query(`SELECT
+        (SELECT count(*) FROM "${schema}".dem_application) AS history,
+        (SELECT count(*) FROM "${schema}".mindstream_source) AS sources,
+        (SELECT count(*) FROM "${schema}".mindstream_publication) AS publications,
+        (SELECT count(*) FROM "${schema}".mindstream_attention) AS attention`);
+      assert.deepEqual(after.rows, before.rows);
+    };
+
     await admin.query(`ALTER TABLE "${schema}".mindstream_embedding ALTER COLUMN overview_embedding TYPE text USING overview_embedding::text`);
-    const historyBefore = await admin.query(`SELECT count(*) FROM "${schema}".dem_application`);
-    const incompatible = await createContainer({ schema });
-    await assert.rejects(incompatible.storage.initialize({ hostRoot: projectRoot, scope: 'mindstream' }));
-    const historyAfter = await admin.query(`SELECT count(*) FROM "${schema}".dem_application`);
-    assert.equal(historyAfter.rows[0].count, historyBefore.rows[0].count);
+    await assertIncompatibleReopenDoesNotWrite();
+    await admin.query(`ALTER TABLE "${schema}".mindstream_embedding ALTER COLUMN overview_embedding TYPE vector(3) USING overview_embedding::vector(3)`);
+    await assertIncompatibleReopenDoesNotWrite();
+    await admin.query(`ALTER TABLE "${schema}".mindstream_embedding ALTER COLUMN overview_embedding TYPE vector(1536) USING overview_embedding::vector(1536)`);
+
+    await admin.query(`ALTER TABLE "${schema}".mindstream_publication DROP CONSTRAINT mindstream_publication_f_0`);
+    await assertIncompatibleReopenDoesNotWrite();
+    await admin.query(`ALTER TABLE "${schema}".mindstream_attention DROP CONSTRAINT mindstream_attention_e_attention_type`);
+    await assertIncompatibleReopenDoesNotWrite();
   });
 });
 
