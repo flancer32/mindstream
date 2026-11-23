@@ -72,7 +72,7 @@ jobs:
 
             TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 
-            # Create and validate a PostgreSQL backup before stopping the old runtime.
+            # Create a PostgreSQL backup and check its archive catalog before stopping the old runtime.
             # The first deployment has no previous .env and therefore has no database
             # configuration available on the server yet.
             BACKUP_DIR="${{ env.APP_DIR }}/var/backups/postgresql"
@@ -90,25 +90,35 @@ jobs:
               . "$BACKUP_ENV"
               set +a
 
-              : "${TEQFW_DEM_RDB__DATABASE:?TEQFW_DEM_RDB__DATABASE is required for deployment backup}"
-              : "${TEQFW_DEM_RDB__USER:?TEQFW_DEM_RDB__USER is required for deployment backup}"
+              # The previous release may still use the legacy database configuration.
+              DB_CONFIG=TEQFW_DEM_RDB
+              if [ -z "${TEQFW_DEM_RDB__DATABASE:-}${TEQFW_DEM_RDB__USER:-}" ]; then
+                DB_CONFIG=TEQFW_DB
+              fi
+              DB_NAME_KEY="${DB_CONFIG}__DATABASE"
+              DB_USER_KEY="${DB_CONFIG}__USER"
+              DB_HOST_KEY="${DB_CONFIG}__HOST"
+              DB_PORT_KEY="${DB_CONFIG}__PORT"
+              DB_PASSWORD_KEY="${DB_CONFIG}__PASSWORD"
+              : "${!DB_NAME_KEY:?Database name is required for deployment backup}"
+              : "${!DB_USER_KEY:?Database user is required for deployment backup}"
 
               mkdir -p "$BACKUP_DIR"
               chmod 700 "$BACKUP_DIR"
               BACKUP_FILE="$BACKUP_DIR/${{ env.PRJ }}_${TIMESTAMP}.dump"
 
-              PGPASSWORD="${TEQFW_DEM_RDB__PASSWORD:-}" pg_dump \
+              PGPASSWORD="${!DB_PASSWORD_KEY:-}" pg_dump \
                 --format=custom \
-                --host="${TEQFW_DEM_RDB__HOST:-localhost}" \
-                --port="${TEQFW_DEM_RDB__PORT:-5432}" \
-                --username="$TEQFW_DEM_RDB__USER" \
+                --host="${!DB_HOST_KEY:-localhost}" \
+                --port="${!DB_PORT_KEY:-5432}" \
+                --username="${!DB_USER_KEY}" \
                 --file="$BACKUP_FILE" \
-                "$TEQFW_DEM_RDB__DATABASE"
+                "${!DB_NAME_KEY}"
               pg_restore --list "$BACKUP_FILE" >/dev/null
 
               # Keep the most recent 30 days of deployment backups.
               find "$BACKUP_DIR" -type f -name '${{ env.PRJ }}_*.dump' -mtime +30 -delete
-              echo "PostgreSQL backup created and validated: $BACKUP_FILE"
+              echo "PostgreSQL backup created and archive catalog checked: $BACKUP_FILE"
             else
               echo "No previous deployment found; PostgreSQL backup is not required."
             fi
@@ -137,7 +147,7 @@ jobs:
               cp -a prod.old/var/. prod/var/ || true
             fi
 
-            # Start the default fl32:web:start command in PM2 cluster mode (4 workers)
+            # Start the default web:start command in PM2 cluster mode (4 workers)
             cd "${{ env.APP_DIR }}/prod"
             pm2 start ./node_modules/.bin/teq \
               --name mindstream-web \

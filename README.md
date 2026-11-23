@@ -50,28 +50,27 @@ MindStream uses DEM 2 and DEM-RDB for its PostgreSQL schema, repositories, and c
 ## Запуск (dev)
 
 1. Установите зависимости: `npm install`.
-2. Подготовьте PostgreSQL и включите `pgvector`:
+2. Подготовьте базу PostgreSQL и один раз включите `pgvector` в схеме `public`:
 
 ```sql
-CREATE EXTENSION vector;
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
 ```
 
-3. Создайте отдельную target-схему и включите pgvector в базе:
+3. Создайте отдельную целевую схему:
 
 ```sql
 CREATE SCHEMA mindstream_data AUTHORIZATION mindstream;
-CREATE EXTENSION vector;
 ```
 
-4. Заполните `.env` по [примеру](.env.example). При первом запуске приложение создаёт пустую DEM-RDB-схему и историю модели.
-5. Для переноса остановленной legacy-базы подготовьте и проверьте отдельную восстанавливаемую резервную копию. Укажите target-схему первой в `TEQFW_DEM_RDB__SEARCH_PATH`, затем запустите `npm run db:migrate-legacy -- --source-schema=public`. Старые таблицы сохраняются в source-схеме.
+4. Заполните `.env` по [примеру](.env.example). Задайте `TEQFW_DEM_RDB__SEARCH_PATH=mindstream_data,public`. При первом запуске приложение создаёт таблицы и историю модели в `mindstream_data`.
+5. Для переноса legacy-данных остановите процессы записи, сделайте отдельную резервную копию и проверьте её восстановлением в изолированной базе. Затем запустите `npm run db:migrate-legacy -- --source-schema=public`. Для другой исходной схемы укажите её имя. [Требования к переключению](ctx/docs/environment/setup/postgresql.md#backup-and-cutover).
 6. Обнаружьте публикации из RSS Хабра: `npm exec -- teq ingest:discover:habr`.
 7. Извлеките тексты публикаций: `npm exec -- teq ingest:extract:habr`.
 8. Сформируйте обзор и аннотацию: `npm exec -- teq process:generate:summaries`.
 9. Сформируйте эмбеддинги: `npm exec -- teq process:generate:embeddings`.
 10. Запустите сервер: `npm start` (это запускает команду `web:start` по умолчанию).
 
-Миграционная команда предназначена для отдельной target-схемы, требует остановленных writers и проверенной резервной копии. Она копирует данные одной транзакцией и не удаляет legacy-таблицы. Шаги 7–8 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
+Миграционная команда инициализирует целевые таблицы и историю DEM до транзакции копирования. При ошибке копирования транзакция откатывается, а целевая схема остаётся инициализированной с пустыми таблицами данных. Исходные таблицы сохраняются. Шаги 8–9 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
 После запуска откройте `http://localhost:3000`.
 
 ## Attention API (MVP)
@@ -105,6 +104,6 @@ Payload:
 
 ## Тесты
 
-Unit-тесты: `npm run test:unit`.
+Быстрые локальные проверки: `npm test`. Команда запускает unit-тесты и проверки файлов приложения. Только unit-тесты: `npm run test:unit`.
 
 Изолированные PostgreSQL-проверки DEM-RDB и переноса данных: `npm run test:postgresql:dem`. Нужна отдельная тестовая БД `dem_rdb_test` с доступной в `public` extension `vector` и правами пользователя на создание и удаление схем. По умолчанию тесты подключаются через локальный Unix socket, используя пользователя из `USER`. Для другой настройки подключения задайте `DEM_TEST_PG_DATABASE`, `DEM_TEST_PG_HOST`, `DEM_TEST_PG_PORT`, `DEM_TEST_PG_USER` и при необходимости `DEM_TEST_PG_PASSWORD`.

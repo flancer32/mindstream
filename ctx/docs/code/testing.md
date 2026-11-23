@@ -41,11 +41,11 @@ Tests use a dedicated composition root independent from production. Resolver con
 
 ## Imports And Access To Production Code
 
-Tests must not statically import production code from `src/` or `web/app/`, must not directly import production modules even for form validation, and must not bypass the DI container by any means.
+Executable tests must not statically import production code from `src/` or `web/app/`, must not directly import production modules even for form validation, and must not bypass the DI container when executing production modules.
 
 Static import is allowed only for test helpers, fixtures, snapshot data, and standard Node.js modules from `node:*`. Access to production code is performed only through the DI container via `container.get(...)`.
 
-A test that bypasses the DI container is not a valid project test.
+Read-only artifact checks under `test/artifacts/` may inspect repository files directly without executing production modules. Run them with `npm run test:artifacts` or together with the unit suite using `npm test`.
 
 ## Platform API And Side Effects
 
@@ -53,9 +53,9 @@ Real side effects are prohibited in unit tests, including filesystem access, net
 
 ## Test Types
 
-Focused PostgreSQL integration checks are required for storage lifecycle, critical data flows and migration cutover. They use an isolated disposable database and must not mutate production data. For the DEM-RDB storage target, integration coverage must prove selected FK delete/update actions, dependent and multilevel cascade paths, and child integrity. It must prove accepted attention types and rejection of invalid direct SQL inserts and updates. Reopen must accept a matching layout and reject missing, tampered, or divergent FK and CHECK constraints before writes. Check transactional rollback.
+Focused PostgreSQL integration checks are required for storage lifecycle, critical data flows and migration cutover. They use an isolated disposable database and must not mutate production data. Verify the declared FK actions, including the source delete restriction, propagation of key updates, and deletion of direct dependents of publications and identities. Verify accepted attention types and rejection of invalid direct SQL inserts and updates. Reopen must accept a matching layout and reject missing or divergent FK and CHECK constraints before writes, including changed definitions under the expected names. Check transactional rollback.
 
-Use PostgreSQL with pgvector to verify both native `vector(1536)` columns and the float32 round trip through DEM-RDB. Verify that initialization rejects a missing extension and reopen rejects an incompatible vector column. Migration checks compare every stored legacy component with the value read through the target codec, preserving order and float32 values. Unit tests remain the default for other code; broader test types are not required by default.
+Use PostgreSQL with pgvector to verify both native `vector(1536)` columns and the float32 round trip through DEM-RDB. Verify that initialization fails before writes when the vector type is unavailable on the application search path, and that reopen rejects an incompatible vector column. Migration checks compare every stored legacy component with the value read through the target codec, preserving order and float32 values. Unit tests remain the default for other code; broader test types are not required by default.
 
 ## Testing Tools
 

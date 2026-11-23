@@ -1,7 +1,7 @@
 # PostgreSQL Runtime For Mindstream
 
 - Path: `ctx/docs/environment/setup/postgresql.md`
-- Changed: `20261120`
+- Changed: `20261123`
 
 ## Requirements
 
@@ -15,4 +15,4 @@ Before cutover, confirm that the selected DEM-RDB release supports the required 
 
 Before migration, create a separate consistent backup and prove it can be restored in an isolated environment. Preserve the backup and the old runtime until cutover has been verified and accepted. Migration is an explicit maintenance operation: stop writers, preflight the old and new layouts, convert data using an explicit mapping, verify values and constraints, and resume service only after acceptance. On failure, stop and restore the verified backup; never rebuild automatically on startup.
 
-The deployed backup workflow must be adapted to the new connection configuration and verified before deployment of the new runtime. Both legacy and target restores require pgvector on the restore server and the `vector` extension in the restored database.
+The deployment backup reads connection settings from the previous release. It uses `TEQFW_DEM_RDB__*` when a database name or user is configured in that namespace and otherwise uses `TEQFW_DB__*` for the legacy release. The selected namespace must provide both the database and user. The deployment archive catalog check is separate from the required pre-cutover restore rehearsal. Both legacy and target restores require pgvector on the restore server and the `vector` extension in the restored database. Configure the new runtime with `TEQFW_DEM_RDB__*` before starting it against the verified target.

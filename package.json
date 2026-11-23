@@ -95,7 +95,9 @@
   "scripts": {
     "db:migrate-legacy": "teq db:schema:migrate-legacy-to-dem-rdb",
     "start": "teq web:start",
+    "test": "npm run test:unit && npm run test:artifacts",
     "test:unit": "node --test \"test/unit/**/*.test.mjs\"",
+    "test:artifacts": "node --test test/artifacts/web/assets.test.mjs",
     "test:postgresql:dem": "node --test test/optin/DemPostgresql.test.mjs"
   },
   "dependencies": {

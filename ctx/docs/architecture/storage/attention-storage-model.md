@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/storage/attention-storage-model.md`
 - Template Version: `20260619`
-- Changed: `20260620`
+- Changed: `20261123`
 
 ## Purpose
 
@@ -29,10 +29,13 @@ Anonymous Identity represents a registered anonymous identifier of a browser con
 
 **Attributes:**
 
-- `identity_id`
+- `identity_uuid`
 - type: UUID
 - required
-- primary key
+- unique public identity key supplied by the browser
+- `id`
+- type: generated internal identifier
+- primary key referenced by stored attention states
 - `registered_at`
 - type: timestamp (UTC)
 - required
@@ -43,7 +46,7 @@ Anonymous Identity represents a registered anonymous identifier of a browser con
 - an identity may exist without attention events;
 - an identity without events may be removed by TTL;
 - identity removal is full and irreversible;
-- storage does not generate identity.
+- storage assigns the internal key and preserves the browser-provided UUID.
 
 ### 2. Publication Reference
 
@@ -72,9 +75,9 @@ The state records the fact that attention of a given type is considered expresse
 **Attributes:**
 
 - `identity_id`
-- type: UUID
+- type: matches the internal Anonymous Identity key
 - required
-- foreign key to Anonymous Identity
+- foreign key to Anonymous Identity `id`; the ingress resolves the public UUID before storage
 - `publication_id`
 - type: matches Publication Reference
 - required
@@ -144,16 +147,16 @@ At the storage level, the schema must allow:
 - manual cleanup execution;
 - preservation of aggregated statistics outside primary tables during attention-event cleanup.
 
-## Conceptual Write-Event Example
+## Conceptual Stored State Example
 
 The following example is non-normative and included only for context:
 
 ```json
 {
-  "identity_id": "550e8400-e29b-41d4-a716-446655440000",
-  "publication_id": "pub_12345",
+  "identity_id": "9",
+  "publication_id": "12345",
   "attention_type": "overview_view",
-  "timestamp": "2026-02-10T15:30:00Z"
+  "created_at": "2026-02-10T15:30:00.000000Z"
 }
 ```
 
