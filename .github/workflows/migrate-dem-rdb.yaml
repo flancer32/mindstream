@@ -3,8 +3,8 @@ name: LIVE - Migrate Mindstream to DEM-RDB once
 on:
   workflow_dispatch:
     inputs:
-      writers_stopped:
-        description: All production database writers are stopped for maintenance
+      maintenance_confirmed:
+        description: Stop the production web workers and migrate during the maintenance window
         type: boolean
         required: true
         default: false
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   migrate:
-    if: github.ref == 'refs/heads/main' && inputs.writers_stopped
+    if: github.ref == 'refs/heads/main' && inputs.maintenance_confirmed
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:

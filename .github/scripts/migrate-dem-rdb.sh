@@ -26,8 +26,6 @@ require_stopped_workers() {
   '
 }
 
-require_stopped_workers
-
 set -a
 # shellcheck source=/dev/null
 source "$app_dir/prod/.env"
@@ -71,6 +69,27 @@ connection=(
   --dbname="$TEQFW_DEM_RDB__DATABASE"
 )
 
+if crontab -l 2>/dev/null | awk '!/^[[:space:]]*#/ && /mindstream/ {found=1} END {exit !found}'; then
+  echo 'Pause the deployment account cron jobs for Mindstream before migrating.' >&2
+  exit 1
+fi
+
+pm2 stop mindstream-web
+require_stopped_workers
+
+require_no_other_database_clients() {
+  local clients
+  clients=$(PGPASSWORD="$TEQFW_DEM_RDB__PASSWORD" psql "${connection[@]}" -XAt --set=ON_ERROR_STOP=1 \
+    --command="SELECT count(*) FROM pg_stat_activity
+      WHERE datname = current_database() AND backend_type = 'client backend'
+      AND pid <> pg_backend_pid() AND usename IS DISTINCT FROM 'agent_ro'")
+  if [[ "$clients" != 0 ]]; then
+    echo "Found $clients other Mindstream database clients after stopping PM2." >&2
+    exit 1
+  fi
+}
+
+require_no_other_database_clients
 install -d -m 700 "$backup_dir"
 backup=$(mktemp "$backup_dir/mindstream-pre-dem-rdb.XXXXXXXX.dump.part")
 trap 'rm -f -- "$backup"' EXIT
@@ -83,6 +102,7 @@ mv -- "$backup" "$archive"
 echo "Production backup verified and retained at $archive"
 
 require_stopped_workers
+require_no_other_database_clients
 PGPASSWORD="$TEQFW_DEM_RDB__PASSWORD" psql "${connection[@]}" -X --set=ON_ERROR_STOP=1 \
   --command='CREATE SCHEMA IF NOT EXISTS mindstream_data'
 npm run db:migrate-legacy -- --source-schema public
