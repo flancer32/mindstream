@@ -194,14 +194,28 @@ test('DEM-RDB initializes and reopens native vector schema with required constra
         (SELECT count(*) FROM "${schema}".dem_application) AS history,
         (SELECT count(*) FROM "${schema}".mindstream_source) AS sources,
         (SELECT count(*) FROM "${schema}".mindstream_publication) AS publications,
-        (SELECT count(*) FROM "${schema}".mindstream_attention) AS attention`);
+        (SELECT count(*) FROM "${schema}".mindstream_attention) AS attention,
+        (SELECT format_type(a.atttypid, a.atttypmod)
+         FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid JOIN pg_namespace n ON n.oid = c.relnamespace
+         WHERE n.nspname = '${schema}' AND c.relname = 'mindstream_embedding' AND a.attname = 'overview_embedding') AS embedding_type,
+        (SELECT count(*) FROM pg_constraint c JOIN pg_class t ON t.oid = c.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace
+         WHERE n.nspname = '${schema}' AND t.relname = 'mindstream_publication' AND c.conname = 'mindstream_publication_f_0') AS publication_fk,
+        (SELECT count(*) FROM pg_constraint c JOIN pg_class t ON t.oid = c.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace
+         WHERE n.nspname = '${schema}' AND t.relname = 'mindstream_attention' AND c.conname = 'mindstream_attention_e_attention_type') AS attention_check`);
       const incompatible = await createContainer({ schema });
       await assert.rejects(incompatible.storage.initialize({ hostRoot: projectRoot, scope: 'mindstream' }));
       const after = await admin.query(`SELECT
         (SELECT count(*) FROM "${schema}".dem_application) AS history,
         (SELECT count(*) FROM "${schema}".mindstream_source) AS sources,
         (SELECT count(*) FROM "${schema}".mindstream_publication) AS publications,
-        (SELECT count(*) FROM "${schema}".mindstream_attention) AS attention`);
+        (SELECT count(*) FROM "${schema}".mindstream_attention) AS attention,
+        (SELECT format_type(a.atttypid, a.atttypmod)
+         FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid JOIN pg_namespace n ON n.oid = c.relnamespace
+         WHERE n.nspname = '${schema}' AND c.relname = 'mindstream_embedding' AND a.attname = 'overview_embedding') AS embedding_type,
+        (SELECT count(*) FROM pg_constraint c JOIN pg_class t ON t.oid = c.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace
+         WHERE n.nspname = '${schema}' AND t.relname = 'mindstream_publication' AND c.conname = 'mindstream_publication_f_0') AS publication_fk,
+        (SELECT count(*) FROM pg_constraint c JOIN pg_class t ON t.oid = c.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace
+         WHERE n.nspname = '${schema}' AND t.relname = 'mindstream_attention' AND c.conname = 'mindstream_attention_e_attention_type') AS attention_check`);
       assert.deepEqual(after.rows, before.rows);
     };
 
