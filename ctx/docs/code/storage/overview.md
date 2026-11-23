@@ -1,7 +1,7 @@
 # Code Storage Layer — Overview
 
 - Path: `ctx/docs/code/storage/overview.md`
-- Changed: `20261120`
+- Changed: `20261123`
 
 ## Boundary
 
@@ -15,7 +15,7 @@ The host composes Format 2 declarations using `@teqfw/dem` 2.x and initializes `
 
 Use DEM Repository and atomic Batch for operations their contracts express. Application-owned PostgreSQL queries may borrow the package-owned client for operations such as joins, anti-joins, cursor pagination and conflict handling that cannot be expressed correctly or efficiently through those contracts. Keep this boundary specific to application queries; do not construct another connection or introduce a generic adapter.
 
-Publication embeddings use the DEM Core vector type and DEM-RDB JSON-serialized text representation. Native pgvector is not required by the target. The API, feed ordering, identity and attention semantics remain unchanged.
+Publication embeddings use a supported DEM vector extension and DEM-RDB JSON-serialized text representation. The current descriptor still names the Core vector; adapt it when the extension contract is implemented. Native pgvector is not required by the target. The API, feed ordering, identity and attention semantics remain unchanged.
 
 ## Lifecycle And Safety
 
