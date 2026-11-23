@@ -75,9 +75,9 @@ CREATE SCHEMA mindstream_data AUTHORIZATION mindstream;
 
 ### Production DEM-RDB migration
 
-1. Schedule maintenance and verify that an independent PostgreSQL backup can be restored. Pause writers outside `mindstream-web`, including scheduled ingestion and processing jobs.
-2. Dispatch **LIVE - Migrate Mindstream to DEM-RDB once** on `main` with `maintenance_confirmed=true`. The workflow stops `mindstream-web` in PM2, checks for other database clients, saves and reads back a full archive under `var/backups/postgresql` on the deployment host, then migrates `public` into `mindstream_data`. The successful run records the archive path in `mindstream-dem-rdb.completed` in the same directory.
-3. Review the migration result and verify the target before resuming writers. Configure the new release with the matching `TEQFW_DEM_RDB__*` connection settings and `TEQFW_DEM_RDB__SEARCH_PATH=mindstream_data,public` before starting it. Keep the archive and the previous release available for rollback until cutover is accepted.
+1. Schedule maintenance and verify that an independent PostgreSQL backup can be restored. Pause any writers outside the deployment account.
+2. Dispatch **LIVE - Migrate Mindstream to DEM-RDB once** on `main` with `maintenance_confirmed=true`. The workflow pauses Mindstream entries in the deployment account's crontab, stops `mindstream-web` in PM2, checks for other database clients, and saves and reads back a full archive under `var/backups/postgresql` on the deployment host. It then migrates `public` into `mindstream_data` and records the archive path in `mindstream-dem-rdb.completed`.
+3. Review the migration result and verify the target before resuming writers. Configure and start the new release with the matching `TEQFW_DEM_RDB__*` connection settings and `TEQFW_DEM_RDB__SEARCH_PATH=mindstream_data,public`. Review the saved deployment crontab before re-enabling its jobs. Keep the archive and the previous release available for rollback until cutover is accepted.
 
 ## Attention API (MVP)
 

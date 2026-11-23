@@ -69,11 +69,40 @@ connection=(
   --dbname="$TEQFW_DEM_RDB__DATABASE"
 )
 
-if crontab -l 2>/dev/null | awk '!/^[[:space:]]*#/ && /mindstream/ {found=1} END {exit !found}'; then
-  echo 'Pause the deployment account cron jobs for Mindstream before migrating.' >&2
-  exit 1
+install -d -m 700 "$backup_dir"
+backup=
+cron_backup=
+workers_stopped=false
+migration_complete=false
+cleanup() {
+  if [[ -n "$backup" && -e "$backup" ]]; then
+    rm -- "$backup"
+  fi
+  if [[ "$migration_complete" == false ]]; then
+    if [[ -n "$cron_backup" ]]; then
+      crontab "$cron_backup" || echo "Restore the deployment crontab from $cron_backup." >&2
+    fi
+    if [[ "$workers_stopped" == true ]]; then
+      pm2 restart mindstream-web || echo 'Restart the previous mindstream-web release in PM2.' >&2
+    fi
+  fi
+}
+trap cleanup EXIT
+
+if current_crontab=$(crontab -l 2>/dev/null); then
+  paused_crontab=$(printf '%s\n' "$current_crontab" | awk '
+    !/^[[:space:]]*#/ && tolower($0) ~ /mindstream/ {print "# DEM-RDB maintenance: " $0; next}
+    {print}
+  ')
+  if [[ "$current_crontab" != "$paused_crontab" ]]; then
+    cron_backup=$(mktemp "$backup_dir/mindstream-crontab.XXXXXXXX")
+    printf '%s\n' "$current_crontab" > "$cron_backup"
+    printf '%s\n' "$paused_crontab" | crontab -
+    echo "Mindstream cron jobs paused. Original crontab saved at $cron_backup"
+  fi
 fi
 
+workers_stopped=true
 pm2 stop mindstream-web
 require_stopped_workers
 
@@ -90,9 +119,7 @@ require_no_other_database_clients() {
 }
 
 require_no_other_database_clients
-install -d -m 700 "$backup_dir"
 backup=$(mktemp "$backup_dir/mindstream-pre-dem-rdb.XXXXXXXX.dump.part")
-trap 'rm -f -- "$backup"' EXIT
 PGPASSWORD="$TEQFW_DEM_RDB__PASSWORD" PGOPTIONS='-c default_transaction_read_only=on' \
   pg_dump "${connection[@]}" --lock-wait-timeout=10s --format=custom --file="$backup"
 pg_restore --list "$backup" >/dev/null
@@ -106,5 +133,6 @@ require_no_other_database_clients
 PGPASSWORD="$TEQFW_DEM_RDB__PASSWORD" psql "${connection[@]}" -X --set=ON_ERROR_STOP=1 \
   --command='CREATE SCHEMA IF NOT EXISTS mindstream_data'
 npm run db:migrate-legacy -- --source-schema public
+migration_complete=true
 printf '%s\n' "$archive" > "$completion"
 echo 'Migration completed. Keep writers stopped until the DEM-RDB release is verified.'
