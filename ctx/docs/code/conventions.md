@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/conventions.md`
 - Template Version: `20260619`
-- Changed: `20260803`
+- Changed: `20261123`
 
 ## Purpose
 
@@ -98,8 +98,7 @@ This document does not describe system architecture, product properties, or the 
 
 ## Testing
 
-- **Unit tests** are sufficient for the MVP.
-- Integration tests are not used in the MVP.
+- Unit tests are the default for the MVP; focused PostgreSQL integration checks are required where specified in [testing.md](testing.md).
 - Absence of tests is allowed only for application entry points and stable interfaces unlikely to change.
 
 ## Prohibited

@@ -1,6 +1,9 @@
 {
   "schema": "adsm-context",
-  "version": "0.1.0",
+  "version": "0.8",
+  "capabilities": [
+    "verification-layer"
+  ],
   "notes": [
     "Context migrated toward the canonical adsm-ctx template baseline on 2026-06-19."
   ]

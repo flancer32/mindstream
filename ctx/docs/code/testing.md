@@ -2,13 +2,20 @@
 
 - Path: `ctx/docs/code/testing.md`
 - Template Version: `20260619`
-- Changed: `20261120`
+- Changed: `20261123`
 
 ## Purpose
 
 This document defines the rigid engineering invariants for testing the Mindstream code layer.
 
 Tests are treated as a first-class part of the codebase, not as auxiliary artifacts. Violating this document is a defect.
+
+Project checks assess engineering health. Product verification assesses declared
+behavior through bounded observations against applicable specifications in the
+[Verification Layer](../verification/AGENTS.md). A passing project check alone does
+not establish product conformance. Select checks for the changed responsibility
+and report their scope, missing prerequisites and remaining coverage; preserve the
+specific project requirements below.
 
 Stable publication-addressing behavior must be covered at the backend read-model boundary, the browser transport boundary, and the card presentation boundary, including rejection of an invalid publication identifier, matching header and Overview link actions, and the expanded permalink overview.
 
