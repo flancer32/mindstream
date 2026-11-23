@@ -98,7 +98,7 @@ const createQueryBuilder = function ({ rows } = {}) {
 const createKnexStub = function ({ rows } = {}) {
   const { builder, calls } = createQueryBuilder({ rows });
   const knex = function (table) {
-    if (table === 'publications as p') return builder;
+    if (table === 'mindstream_publication as p') return builder;
     throw new Error(`Unexpected table "${table}".`);
   };
   return { knex, calls };
@@ -114,8 +114,8 @@ const buildRow = function ({
   publishedAt = '2025-01-01T00:00:00.000Z',
   annotation = 'Annotation',
   overview = 'Overview',
-  annotationEmbedding = [0.1, 0.2],
-  overviewEmbedding = '[0.3, 0.4]'
+  annotationEmbedding = Array(1536).fill(0.1),
+  overviewEmbedding = JSON.stringify(Array(1536).fill(0.3))
 } = {}) {
   return {
     id,
@@ -147,7 +147,7 @@ const getApi = async function ({ rows } = {}) {
 
 test('Mindstream_Back_Web_Api_FeedView returns FeedView DTO structure', async () => {
   const rows = [
-    buildRow({ id: 10, overviewEmbedding: '[0.5, 1.5]' }),
+    buildRow({ id: 10, overviewEmbedding: JSON.stringify(Array(1536).fill(0.5)) }),
     buildRow({ id: 9, title: null, publicationUrl: 'https://habr.com/2' }),
   ];
   const { api } = await getApi({ rows });
@@ -178,9 +178,9 @@ test('Mindstream_Back_Web_Api_FeedView enforces feed filters in query', async ()
   await api.getFeedView();
 
   const joins = calls.join.map((args) => args[0]);
-  assert.ok(joins.includes('publication_summaries as s'));
-  assert.ok(joins.includes('publication_embeddings as e'));
-  assert.ok(joins.includes('publication_sources as src'));
+  assert.ok(joins.includes('mindstream_summary as s'));
+  assert.ok(joins.includes('mindstream_embedding as e'));
+  assert.ok(joins.includes('mindstream_source as src'));
 
   const notNullColumns = calls.whereNotNull.map((args) => args[0]).sort();
   assert.deepEqual(notNullColumns, [

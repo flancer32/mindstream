@@ -4,13 +4,16 @@
 export default class Mindstream_Back_Cli_Db_Schema_MigrateV2 {
   /** @param {object} deps @param {Mindstream_Back_Storage_LegacyMigration$} deps.migration */
   constructor({ migration }) {
-    this.id = 'db:schema:migrate-v2';
-    this.summary = 'Migrate the restored legacy schema to DEM v2 in place.';
+    this.id = 'db:schema:migrate-legacy-to-dem-rdb';
+    this.summary = 'Copy legacy PostgreSQL data into an initialized DEM-RDB target schema.';
     this.lifetime = 'finite';
     this.arguments = [];
-    this.options = [];
-    this.execute = async function () {
-      await migration.execute();
+    this.options = [{
+      name: 'source-schema', kind: 'string', required: false,
+      description: 'Legacy PostgreSQL schema. Defaults to public.',
+    }];
+    this.execute = async function ({ options }) {
+      await migration.execute({ sourceSchema: options['source-schema'] ?? 'public' });
     };
   }
 }

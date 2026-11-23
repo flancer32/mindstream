@@ -33,11 +33,11 @@ const getKnex = function () {
  * @returns {unknown}
  */
 const normalizeId = function (value, name) {
-      const num = Number(value);
-      if (!Number.isFinite(num)) {
+      const num = typeof value === 'number' && Number.isSafeInteger(value) ? BigInt(value) : typeof value === 'string' && /^\d+$/.test(value) ? BigInt(value) : null;
+      if (num === null || num < 1n || num > 9223372036854775807n) {
         throw new Error(`${name} must be a number.`);
       }
-      return num;
+      return num.toString();
     };
 
     /**
@@ -50,7 +50,7 @@ const normalizeId = function (value, name) {
  */
 this.findByPublicationId = async function (publicationId) {
       const id = normalizeId(publicationId, 'Publication id');
-      const row = await getKnex()('publication_extractions').where({ publication_id: id }).first();
+      const row = await getKnex()('mindstream_extraction').where({ publication_id: id }).first();
       return row ?? null;
     };
 
@@ -73,17 +73,17 @@ this.saveHtml = async function ({ publicationId, html }) {
       }
 
       const knexRef = getKnex();
-      const existing = await knexRef('publication_extractions').where({ publication_id: id }).first();
+      const existing = await knexRef('mindstream_extraction').where({ publication_id: id }).first();
       if (existing?.html) {
         logger.debug(NAMESPACE, `HTML already stored for publication ${id}.`);
         return existing;
       }
 
-      const createdAt = existing?.created_at ?? new Date().toISOString();
+      const createdAt = existing?.created_at ?? new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
       if (existing) {
-        await knexRef('publication_extractions').where({ publication_id: id }).update({ html, created_at: createdAt });
+        await knexRef('mindstream_extraction').where({ publication_id: id }).update({ html, created_at: createdAt });
       } else {
-        await knexRef('publication_extractions').insert({
+        await knexRef('mindstream_extraction').insert({
           publication_id: id,
           html,
           md_text: null,
@@ -91,7 +91,7 @@ this.saveHtml = async function ({ publicationId, html }) {
         });
       }
 
-      return await knexRef('publication_extractions').where({ publication_id: id }).first();
+      return await knexRef('mindstream_extraction').where({ publication_id: id }).first();
     };
 
     /**
@@ -113,13 +113,13 @@ this.saveMarkdown = async function ({ publicationId, markdown }) {
       }
 
       const knexRef = getKnex();
-      const existing = await knexRef('publication_extractions').where({ publication_id: id }).first();
-      const createdAt = existing?.created_at ?? new Date().toISOString();
+      const existing = await knexRef('mindstream_extraction').where({ publication_id: id }).first();
+      const createdAt = existing?.created_at ?? new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
 
       if (existing) {
-        await knexRef('publication_extractions').where({ publication_id: id }).update({ md_text: markdown, created_at: createdAt });
+        await knexRef('mindstream_extraction').where({ publication_id: id }).update({ md_text: markdown, created_at: createdAt });
       } else {
-        await knexRef('publication_extractions').insert({
+        await knexRef('mindstream_extraction').insert({
           publication_id: id,
           html: null,
           md_text: markdown,
@@ -127,7 +127,7 @@ this.saveMarkdown = async function ({ publicationId, markdown }) {
         });
       }
 
-      return await knexRef('publication_extractions').where({ publication_id: id }).first();
+      return await knexRef('mindstream_extraction').where({ publication_id: id }).first();
     };
   }
 }

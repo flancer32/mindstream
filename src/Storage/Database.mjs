@@ -4,29 +4,40 @@
 export default class Mindstream_Back_Storage_Database {
   /**
    * @param {object} deps
-   * @param {TeqFw_Db_Back_Config} deps.config
-   * @param {TeqFw_Db_Back_RDb_Connect} deps.connection
+   * @param {Mindstream_Back_Storage_DemDatabase$} deps.demDatabase
+   * @param {TeqFw_Cli_Config$} deps.runtime
    */
-  constructor({ config, connection }) {
+  constructor({ demDatabase, runtime }) {
     let initialized = false;
     this.init = async function () {
       if (initialized) return;
-      await connection.init(config.get());
+      await demDatabase.initialize({ hostRoot: runtime.applicationRoot, scope: 'mindstream' });
       initialized = true;
     };
-    this.getConnection = function () {
-      if (!initialized) throw new Error('Mindstream database connection is not initialized.');
-      return connection;
+    this.getBackend = function () {
+      if (!initialized) throw new Error('Mindstream DEM-RDB storage is not initialized.');
+      return demDatabase.getBackend();
     };
-    this.get = function () { return this.getConnection().getClient(); };
+    this.getCompilation = function () {
+      if (!initialized) throw new Error('Mindstream DEM-RDB storage is not initialized.');
+      return demDatabase.getCompilation();
+    };
+    this.openBackend = async function ({ connection }) {
+      if (!initialized) throw new Error('Mindstream DEM-RDB storage is not initialized.');
+      return demDatabase.openBackend({ connection });
+    };
+    this.get = function () {
+      if (!initialized) throw new Error('Mindstream DEM-RDB storage is not initialized.');
+      return demDatabase.getClient();
+    };
     this.destroy = async function () {
       if (!initialized) return;
       initialized = false;
-      await connection.disconnect();
+      await demDatabase.close();
     };
   }
 }
 
 export const __deps__ = Object.freeze({
-  default: Object.freeze({ config: 'TeqFw_Db_Back_Config$', connection: 'TeqFw_Db_Back_RDb_Connect$' }),
+  default: Object.freeze({ demDatabase: 'Mindstream_Back_Storage_DemDatabase$', runtime: 'TeqFw_Cli_Config$' }),
 });

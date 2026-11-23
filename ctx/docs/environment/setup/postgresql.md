@@ -7,6 +7,8 @@
 
 The target requires PostgreSQL 16 or later, an application database, a configured schema first in the connection search path, and privileges to manage its tables and constraints. Install pgvector on the server and enable the `vector` extension in the application database before initialization. The extension type must be visible on the application's search path. Initialization fails before writes if the extension is unavailable to the application connection.
 
+The application connection uses `TEQFW_DEM_RDB__CLIENT`, `TEQFW_DEM_RDB__HOST`, `TEQFW_DEM_RDB__PORT`, `TEQFW_DEM_RDB__DATABASE`, `TEQFW_DEM_RDB__USER`, `TEQFW_DEM_RDB__PASSWORD`, and `TEQFW_DEM_RDB__SEARCH_PATH`. Put the target schema first in `SEARCH_PATH` and `public` after it when pgvector is installed there. Create the target schema before startup. The legacy source schema remains separately addressable for the explicit migration command.
+
 Before cutover, confirm that the selected DEM-RDB release supports the required physical foreign-key actions and enum `CHECK` constraints, and validates them when reopening the schema. The target requires the declared cascade behavior and the closed `attention_type` set to be enforced in PostgreSQL for application and direct SQL writes. If either guarantee is unsupported or the existing layout does not match, stop the cutover; do not compensate with weaker application-only validation or automatic DDL repair.
 
 ## Backup And Cutover

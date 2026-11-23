@@ -98,12 +98,10 @@ declare global {
   type Mindstream_Back_Process_Publication_SummaryStore$ = InstanceType<Mindstream_Back_Process_Publication_SummaryStore>;
   type Mindstream_Back_Storage_Database = typeof import("./src/Storage/Database.mjs").default;
   type Mindstream_Back_Storage_Database$ = InstanceType<Mindstream_Back_Storage_Database>;
+  type Mindstream_Back_Storage_DemDatabase = typeof import("./src/Storage/DemDatabase.mjs").default;
+  type Mindstream_Back_Storage_DemDatabase$ = InstanceType<Mindstream_Back_Storage_DemDatabase>;
   type Mindstream_Back_Storage_LegacyMigration = typeof import("./src/Storage/LegacyMigration.mjs").default;
   type Mindstream_Back_Storage_LegacyMigration$ = InstanceType<Mindstream_Back_Storage_LegacyMigration>;
-  type Mindstream_Back_Storage_Schema = typeof import("./src/Storage/Schema.mjs").default;
-  type Mindstream_Back_Storage_Schema$ = InstanceType<Mindstream_Back_Storage_Schema>;
-  type Mindstream_Back_Storage_SchemaManager = typeof import("./src/Storage/SchemaManager.mjs").default;
-  type Mindstream_Back_Storage_SchemaManager$ = InstanceType<Mindstream_Back_Storage_SchemaManager>;
   type Mindstream_Back_Web_Api_Attention = typeof import("./src/Web/Api/Attention.mjs").default;
   type Mindstream_Back_Web_Api_Attention$ = InstanceType<Mindstream_Back_Web_Api_Attention>;
   type Mindstream_Back_Web_Api_Fallback = typeof import("./src/Web/Api/Fallback.mjs").default;

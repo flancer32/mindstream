@@ -23,7 +23,7 @@ Before the first DI resolution, the Teq executable discovers `teqfw.fw.di.namesp
 
 ## Configuration Boundary
 
-`Mindstream_Back_App_Plugin` owns the one-shot loading of the optional project `.env` source followed by `process.env`, then initializes `Mindstream_Back_App_Configuration`.
+`@teqfw/cli` loads the optional project `.env` source followed by `process.env` through CFG before it resolves lifecycle plugins. `Mindstream_Back_App_Plugin` initializes `Mindstream_Back_App_Configuration`, then storage reads `TEQFW_DEM_RDB` from the same CFG snapshot and starts DEM-RDB.
 
 ## Status
 

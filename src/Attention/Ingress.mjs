@@ -30,7 +30,7 @@ const getKnex = function () {
  * @returns {Promise<unknown>}
  */
 const resolveIdentityId = async function (identityUuid) {
-      const row = await getKnex()('anonymous_identities')
+      const row = await getKnex()('mindstream_identity')
         .select('id')
         .where({ identity_uuid: identityUuid })
         .first();
@@ -46,7 +46,7 @@ const resolveIdentityId = async function (identityUuid) {
  * @returns {Promise<unknown>}
  */
 const ensurePublicationExists = async function (publicationId) {
-      const row = await getKnex()('publications')
+      const row = await getKnex()('mindstream_publication')
         .select('id')
         .where({ id: publicationId })
         .first();
@@ -68,8 +68,8 @@ const ensurePublicationExists = async function (publicationId) {
  * @returns {Promise<unknown>}
  */
 const storeAttention = async function ({ identityId, publicationId, attentionType }) {
-      const createdAt = new Date().toISOString();
-      await getKnex()('attention_states')
+      const createdAt = new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
+      await getKnex()('mindstream_attention')
         .insert({
           identity_id: identityId,
           publication_id: publicationId,

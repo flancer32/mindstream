@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { createTestContainer } from '../../di-node.mjs';
 
-test('Mindstream_Back_App_Plugin initializes and releases the @teqfw/db connection', async () => {
+test('Mindstream_Back_App_Plugin initializes and releases application storage', async () => {
   const container = await createTestContainer();
   const calls = [];
   container.register('TeqFw_Cli_Config$', { applicationRoot: '/application', cwd: '/other', argv: [], dotenvPath: undefined, dotenvExplicit: false });

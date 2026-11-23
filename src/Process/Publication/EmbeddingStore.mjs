@@ -18,10 +18,6 @@ constructor({ database, logger }) {
 /**
  * @returns {unknown}
  */
-const getKnex = function () {
-      return database.get();
-    };
-
     /**
  * @param {unknown} value
  * @param {unknown} name
@@ -33,11 +29,11 @@ const getKnex = function () {
  * @returns {unknown}
  */
 const normalizeId = function (value, name) {
-      const num = Number(value);
-      if (!Number.isFinite(num)) {
+      const num = typeof value === 'number' && Number.isSafeInteger(value) ? BigInt(value) : typeof value === 'string' && /^\d+$/.test(value) ? BigInt(value) : null;
+      if (num === null || num < 1n || num > 9223372036854775807n) {
         throw new Error(`${name} must be a number.`);
       }
-      return num;
+      return num.toString();
     };
 
     /**
@@ -51,15 +47,14 @@ const normalizeId = function (value, name) {
  * @returns {unknown}
  */
 const normalizeVector = function (value, name) {
-      if (!Array.isArray(value) || value.length === 0) {
-        throw new Error(`${name} must be a non-empty array.`);
+      if (!Array.isArray(value) || value.length !== 1536) {
+        throw new Error(`${name} must contain exactly 1536 components.`);
       }
       const normalized = value.map((item) => {
-        const num = Number(item);
-        if (!Number.isFinite(num)) {
+        if (typeof item !== 'number' || !Number.isFinite(item)) {
           throw new Error(`${name} must contain only numbers.`);
         }
-        return num;
+        return item;
       });
       return normalized;
     };
@@ -74,8 +69,9 @@ const normalizeVector = function (value, name) {
  */
 this.findByPublicationId = async function (publicationId) {
       const id = normalizeId(publicationId, 'Publication id');
-      const row = await getKnex()('publication_embeddings').where({ publication_id: id }).first();
-      return row ?? null;
+      const repository = await database.getBackend().get({ path: '/mindstream/embedding' });
+      const result = await repository.read({ key: { kind: 'primary', values: { publication_id: id } } });
+      return result?.record ?? null;
     };
 
     /**
@@ -97,8 +93,8 @@ this.saveEmbeddings = async function ({ publicationId, overviewEmbedding, annota
       const overviewVector = normalizeVector(overviewEmbedding, 'Overview embedding');
       const annotationVector = normalizeVector(annotationEmbedding, 'Annotation embedding');
 
-      const knexRef = getKnex();
-      const existing = await knexRef('publication_embeddings').where({ publication_id: id }).first();
+      const repository = await database.getBackend().get({ path: '/mindstream/embedding' });
+      const existing = (await repository.read({ key: { kind: 'primary', values: { publication_id: id } } }))?.record;
       if (existing?.overview_embedding && existing?.annotation_embedding) {
         logger.debug(NAMESPACE, `Embeddings already stored for publication ${id}.`);
         return existing;
@@ -107,24 +103,20 @@ this.saveEmbeddings = async function ({ publicationId, overviewEmbedding, annota
         throw new Error(`Publication ${id} has incomplete embeddings.`);
       }
 
-      const createdAt = new Date().toISOString();
-      await knexRef.raw(
-        `
-  insert into publication_embeddings
-    (publication_id, overview_embedding, annotation_embedding, created_at)
-  values
-    (?, ?::vector, ?::vector, ?)
-  `,
-        [
-          id,
-          JSON.stringify(overviewVector),
-          JSON.stringify(annotationVector),
-          createdAt,
-        ]
-      );
-
-
-      return await knexRef('publication_embeddings').where({ publication_id: id }).first();
+      const createdAt = new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
+      try {
+        return (await repository.create({ record: {
+          publication_id: id,
+          overview_embedding: overviewVector,
+          annotation_embedding: annotationVector,
+          created_at: createdAt,
+        } })).record;
+      } catch (error) {
+        if (error?.code !== 'CONFLICT') throw error;
+        const concurrent = (await repository.read({ key: { kind: 'primary', values: { publication_id: id } } }))?.record;
+        if (concurrent?.overview_embedding && concurrent?.annotation_embedding) return concurrent;
+        throw error;
+      }
     };
   }
 }

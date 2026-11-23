@@ -84,8 +84,8 @@ const createKnexStub = function ({ rows } = {}) {
   const updates = [];
 
   const knex = function (table) {
-    if (table === 'publications as p') return builder;
-    if (table === 'publications') {
+    if (table === 'mindstream_publication as p') return builder;
+    if (table === 'mindstream_publication') {
       return {
         where(criteria) {
           return {
@@ -160,6 +160,6 @@ test('Mindstream_Back_Process_Publication_Store updates status', async () => {
   await store.updateStatus({ id: 5, status: 'summary_failed' });
 
   assert.equal(updates.length, 1);
-  assert.deepEqual(updates[0].criteria, { id: 5 });
+  assert.deepEqual(updates[0].criteria, { id: '5' });
   assert.deepEqual(updates[0].payload, { status: 'summary_failed' });
 });

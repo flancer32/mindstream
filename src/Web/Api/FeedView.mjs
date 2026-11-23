@@ -57,8 +57,8 @@ const normalizeCursor = function (cursor) {
         throw new Error('Cursor must be an object.');
       }
       const id = Number(cursor.id);
-      if (!Number.isFinite(id)) {
-        throw new Error('Cursor id must be a number.');
+      if (!Number.isSafeInteger(id) || id <= 0) {
+        throw new Error('Cursor id must be a positive safe integer.');
       }
       let publishedAt = null;
       if (cursor.publishedAt !== undefined) {
@@ -154,8 +154,8 @@ const normalizeVector = function (value, name) {
           }
           return num;
         });
-        if (!normalized.length) {
-          throw new Error(`${name} must be a non-empty array.`);
+        if (normalized.length !== 1536) {
+          throw new Error(`${name} must contain exactly 1536 components.`);
         }
         return normalized;
       }
@@ -169,8 +169,8 @@ const normalizeVector = function (value, name) {
           raw = raw.slice(1, -1);
         }
         const parts = raw.split(',').map((part) => part.trim()).filter(Boolean);
-        if (!parts.length) {
-          throw new Error(`${name} must be a non-empty vector.`);
+        if (parts.length !== 1536) {
+          throw new Error(`${name} must contain exactly 1536 components.`);
         }
         return parts.map((part) => {
           const num = Number(part);
@@ -217,10 +217,10 @@ const applyCursorFilter = function (query, cursor) {
  * @returns {unknown}
  */
     const buildQuery = function ({ cursor, publicationId } = {}) {
-      const query = getKnex()('publications as p')
-        .join('publication_summaries as s', 'p.id', 's.publication_id')
-        .join('publication_embeddings as e', 'p.id', 'e.publication_id')
-        .join('publication_sources as src', 'p.source_id', 'src.id')
+      const query = getKnex()('mindstream_publication as p')
+        .join('mindstream_summary as s', 'p.id', 's.publication_id')
+        .join('mindstream_embedding as e', 'p.id', 'e.publication_id')
+        .join('mindstream_source as src', 'p.source_id', 'src.id')
         .select(
           'p.id as id',
           'p.rss_title as title',
@@ -263,8 +263,8 @@ const mapRow = function (row) {
         throw new Error('Feed row is invalid.');
       }
       const id = Number(row.id);
-      if (!Number.isFinite(id)) {
-        throw new Error('Feed item id must be a number.');
+      if (!Number.isSafeInteger(id) || id <= 0) {
+        throw new Error('Feed item id must be a positive safe integer.');
       }
       const sourceCode = normalizeText(row.source_code, 'Source code');
       const sourceName = normalizeText(row.source_name, 'Source name');
@@ -337,8 +337,8 @@ const parseQuery = function (url) {
       const idValue = query?.id;
       if (idValue === undefined || idValue === null || idValue === '') return null;
       const id = Number(idValue);
-      if (!Number.isFinite(id)) {
-        throw new Error('Cursor id must be a number.');
+      if (!Number.isSafeInteger(id) || id <= 0) {
+        throw new Error('Cursor id must be a positive safe integer.');
       }
       const publishedAt = query?.publishedAt;
       if (publishedAt !== undefined && publishedAt !== null && publishedAt !== '') {

@@ -90,20 +90,20 @@ jobs:
               . "$BACKUP_ENV"
               set +a
 
-              : "${TEQFW_DB__DATABASE:?TEQFW_DB__DATABASE is required for deployment backup}"
-              : "${TEQFW_DB__USER:?TEQFW_DB__USER is required for deployment backup}"
+              : "${TEQFW_DEM_RDB__DATABASE:?TEQFW_DEM_RDB__DATABASE is required for deployment backup}"
+              : "${TEQFW_DEM_RDB__USER:?TEQFW_DEM_RDB__USER is required for deployment backup}"
 
               mkdir -p "$BACKUP_DIR"
               chmod 700 "$BACKUP_DIR"
               BACKUP_FILE="$BACKUP_DIR/${{ env.PRJ }}_${TIMESTAMP}.dump"
 
-              PGPASSWORD="${TEQFW_DB__PASSWORD:-}" pg_dump \
+              PGPASSWORD="${TEQFW_DEM_RDB__PASSWORD:-}" pg_dump \
                 --format=custom \
-                --host="${TEQFW_DB__HOST:-localhost}" \
-                --port="${TEQFW_DB__PORT:-5432}" \
-                --username="$TEQFW_DB__USER" \
+                --host="${TEQFW_DEM_RDB__HOST:-localhost}" \
+                --port="${TEQFW_DEM_RDB__PORT:-5432}" \
+                --username="$TEQFW_DEM_RDB__USER" \
                 --file="$BACKUP_FILE" \
-                "$TEQFW_DB__DATABASE"
+                "$TEQFW_DEM_RDB__DATABASE"
               pg_restore --list "$BACKUP_FILE" >/dev/null
 
               # Keep the most recent 30 days of deployment backups.

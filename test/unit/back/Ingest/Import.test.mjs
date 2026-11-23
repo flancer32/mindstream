@@ -14,14 +14,22 @@ async function setup({duplicate = false, conflict = false, extractionFails = fal
     const trx = (/** @type {string} */ table) => ({
       insert: (/** @type {Record<string, unknown>} */ data) => {
         rows.push({table, data});
-        if (table === 'publication_extractions') {
+        if (table === 'mindstream_extraction') {
           if (extractionFails) throw new Error('Storage unavailable');
           return Promise.resolve();
         }
-        return {onConflict: () => ({ignore: () => table === 'publications' ? {returning: async () => duplicate ? [] : [{id: 12}]} : Promise.resolve()})};
+        return {
+          onConflict: () => ({
+            ignore: () => table === 'mindstream_publication'
+              ? {returning: async () => duplicate ? [] : [{id: data.id}]}
+              : Promise.resolve(),
+          }),
+        };
       },
       where: () => ({first: async () => ({...article().source, code: conflict ? 'other' : 'journal'})}),
+      select: () => ({first: async () => ({ value: '11' })}),
     });
+    trx.raw = async () => ({ rows: [] });
     try { const result = await callback(trx); outcomes.push('commit'); return result; }
     catch (error) { outcomes.push('rollback'); throw error; }
   }})};
@@ -33,18 +41,20 @@ async function setup({duplicate = false, conflict = false, extractionFails = fal
 
 test('imports attributed external text atomically into the existing extracted stage', async () => {
   const {service, rows, outcomes} = await setup();
-  assert.deepEqual(await service.execute(article()), {created: true, id: 12});
-  assert.equal(rows[1].data.status, 'extracted');
-  assert.equal(rows[1].data.source_id, 2);
-  assert.equal(rows[2].data.publication_id, 12);
-  assert.equal(rows[2].data.md_text, article().markdown);
+  assert.deepEqual(await service.execute(article()), {created: true, id: '12'});
+  const publication = rows.find(row => row.table === 'mindstream_publication');
+  const extraction = rows.find(row => row.table === 'mindstream_extraction');
+  assert.equal(publication.data.status, 'extracted');
+  assert.equal(publication.data.source_id, 2);
+  assert.equal(extraction.data.publication_id, '12');
+  assert.equal(extraction.data.md_text, article().markdown);
   assert.deepEqual(outcomes, ['commit']);
 });
 
 test('duplicate imports leave existing article text untouched', async () => {
   const {service, rows} = await setup({duplicate: true});
   assert.deepEqual(await service.execute(article()), {created: false});
-  assert.equal(rows.some(row => row.table === 'publication_extractions'), false);
+  assert.equal(rows.some(row => row.table === 'mindstream_extraction'), false);
 });
 
 test('conflicting source attribution and extraction failures abort the transaction', async () => {

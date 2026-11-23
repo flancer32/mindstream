@@ -36,14 +36,14 @@ const getKnex = function () {
  * @returns {unknown}
  */
 const buildSourcePayload = function (source) {
-      const now = new Date().toISOString();
+      const now = new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
       return {
         id: source.id,
         code: source.code,
         url: source.url,
         name: source.name,
         description: source.description ?? null,
-        is_active: Boolean(source.is_active),
+        is_active: Number(Boolean(source.is_active)),
         created_at: now,
         updated_at: now,
       };
@@ -61,7 +61,7 @@ const buildSourcePayload = function (source) {
  */
 const ensureSource = async function (trx, source) {
       const payload = buildSourcePayload(source);
-      await trx('publication_sources').insert(payload).onConflict('id').ignore();
+      await trx('mindstream_source').insert(payload).onConflict('id').ignore();
     };
 
     /**
@@ -73,14 +73,16 @@ const ensureSource = async function (trx, source) {
  * @returns {unknown}
  */
 const buildPublicationPayloads = function (items) {
-      const now = new Date().toISOString();
+      const now = new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
       return items.map((item) => ({
         source_id: item.source_id,
         source_item_hash: item.source_item_hash,
         source_url: item.source_url,
         rss_title: item.rss_title ?? null,
         rss_guid: item.rss_guid ?? null,
-        rss_published_at: item.rss_published_at ?? null,
+        rss_published_at: item.rss_published_at
+          ? new Date(item.rss_published_at).toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`)
+          : null,
         discovered_at: now,
         status: statusCatalog.EXTRACT_PENDING,
       }));
@@ -109,7 +111,17 @@ this.saveDiscovered = async function ({ source, items }) {
       await knexRef.transaction(async (trx) => {
         await ensureSource(trx, source);
         const payloads = buildPublicationPayloads(rows);
-        await trx('publications')
+        await trx.raw('SELECT pg_advisory_xact_lock(hashtextextended(?, 0))', ['mindstream_publication']);
+        const highest = await trx('mindstream_publication')
+          .select(trx.raw('CAST(MAX(??) AS TEXT) AS value', ['id']))
+          .first();
+        let nextId = BigInt(highest?.value ?? '0') + 1n;
+        for (const payload of payloads) {
+          if (nextId > 9223372036854775807n) throw new Error('Publication identity capacity exhausted.');
+          payload.id = nextId.toString();
+          nextId++;
+        }
+        await trx('mindstream_publication')
           .insert(payloads)
           .onConflict(['source_id', 'source_item_hash'])
           .ignore();
@@ -131,13 +143,16 @@ this.saveDiscovered = async function ({ source, items }) {
  */
 this.listForExtraction = async function (params = {}) {
       const { sourceId, status, limit } = params;
-      const source = Number(sourceId);
-      if (!Number.isFinite(source)) {
-        throw new Error('Source id must be a number.');
+      const sourceValue = typeof sourceId === 'number' && Number.isSafeInteger(sourceId)
+        ? BigInt(sourceId)
+        : typeof sourceId === 'string' && /^\d+$/.test(sourceId) ? BigInt(sourceId) : null;
+      if (sourceValue === null || sourceValue < 1n || sourceValue > 9223372036854775807n) {
+        throw new Error('Source id must be a positive 64-bit integer.');
       }
+      const source = sourceValue.toString();
       const statusValue = status || statusCatalog.EXTRACT_PENDING;
       const pageSize = Number.isFinite(Number(limit)) ? Number(limit) : 4;
-      const rows = await getKnex()('publications')
+      const rows = await getKnex()('mindstream_publication')
         .select('id', 'source_id', 'source_url', 'status')
         .where({ source_id: source, status: statusValue })
         .orderBy('id', 'asc')
@@ -158,14 +173,17 @@ this.listForExtraction = async function (params = {}) {
  * @returns {Promise<unknown>}
  */
 this.updateStatus = async function ({ id, status }) {
-      const pubId = Number(id);
-      if (!Number.isFinite(pubId)) {
-        throw new Error('Publication id must be a number.');
+      const publicationValue = typeof id === 'number' && Number.isSafeInteger(id)
+        ? BigInt(id)
+        : typeof id === 'string' && /^\d+$/.test(id) ? BigInt(id) : null;
+      if (publicationValue === null || publicationValue < 1n || publicationValue > 9223372036854775807n) {
+        throw new Error('Publication id must be a positive 64-bit integer.');
       }
+      const pubId = publicationValue.toString();
       if (!status || typeof status !== 'string') {
         throw new Error('Publication status must be a string.');
       }
-      await getKnex()('publications').where({ id: pubId }).update({ status });
+      await getKnex()('mindstream_publication').where({ id: pubId }).update({ status });
     };
   }
 }

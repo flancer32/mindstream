@@ -32,9 +32,9 @@ Mindstream не является рекомендательным сервисо
 
 ## Требования
 
-The current repository implementation uses `@teqfw/db` and `pgvector`. Migration to DEM 2 and DEM-RDB is pending; the instructions below apply to the current code only. The new schema and data migration require separate implementation and verification. Do not use the legacy maintenance commands as a DEM-RDB migration. Before release, update this section, configuration and restore guidance after the safe cutover has been verified.
+MindStream uses DEM 2 and DEM-RDB for its PostgreSQL schema, repositories, and connection lifecycle. PostgreSQL-specific feed queries borrow the same DEM-RDB-owned Knex connection. Both embedding columns use native pgvector storage.
 
-- Node.js LTS 20.x.
+- Node.js LTS 22 or later.
 - PostgreSQL 16+ с расширением `pgvector`.
 - Доступ к LLM API для генерации аннотаций, обзоров и эмбеддингов.
 
@@ -42,7 +42,7 @@ The current repository implementation uses `@teqfw/db` and `pgvector`. Migration
 
 - `TEQFW_WEB__PORT`
 - `TEQFW_WEB__TYPE`
-- `TEQFW_DB__CLIENT`, `TEQFW_DB__HOST`, `TEQFW_DB__PORT`, `TEQFW_DB__DATABASE`, `TEQFW_DB__USER`, `TEQFW_DB__PASSWORD`
+- `TEQFW_DEM_RDB__CLIENT`, `TEQFW_DEM_RDB__HOST`, `TEQFW_DEM_RDB__PORT`, `TEQFW_DEM_RDB__DATABASE`, `TEQFW_DEM_RDB__USER`, `TEQFW_DEM_RDB__PASSWORD`, `TEQFW_DEM_RDB__SEARCH_PATH`
 - `MINDSTREAM__LLM_API_KEY`, `MINDSTREAM__LLM_BASE_URL`, `MINDSTREAM__LLM_GENERATION_MODEL`, `MINDSTREAM__LLM_EMBEDDING_MODEL`
 
 Конфигурация загружается один раз в bootstrap через `@teqfw/cfg`: значения из `process.env` имеют приоритет над необязательным `.env`. Логи создаются через `@teqfw/log` с источником, соответствующим TeqFW-адресу компонента.
@@ -56,16 +56,22 @@ The current repository implementation uses `@teqfw/db` and `pgvector`. Migration
 CREATE EXTENSION vector;
 ```
 
-3. Создайте схему в пустой базе: `npm exec -- teq db:schema:create`.
-4. Для восстановленной legacy-схемы выполните атомарную in-place миграцию: `npm run db:migrate-v2`.
-5. При необходимости полностью пересоздать уже совместимую схему с переносом данных используйте: `npm exec -- teq db:schema:renew` (операция разрушительная).
+3. Создайте отдельную target-схему и включите pgvector в базе:
+
+```sql
+CREATE SCHEMA mindstream_data AUTHORIZATION mindstream;
+CREATE EXTENSION vector;
+```
+
+4. Заполните `.env` по [примеру](.env.example). При первом запуске приложение создаёт пустую DEM-RDB-схему и историю модели.
+5. Для переноса остановленной legacy-базы подготовьте и проверьте отдельную восстанавливаемую резервную копию. Укажите target-схему первой в `TEQFW_DEM_RDB__SEARCH_PATH`, затем запустите `npm run db:migrate-legacy -- --source-schema=public`. Старые таблицы сохраняются в source-схеме.
 6. Обнаружьте публикации из RSS Хабра: `npm exec -- teq ingest:discover:habr`.
 7. Извлеките тексты публикаций: `npm exec -- teq ingest:extract:habr`.
 8. Сформируйте обзор и аннотацию: `npm exec -- teq process:generate:summaries`.
 9. Сформируйте эмбеддинги: `npm exec -- teq process:generate:embeddings`.
 10. Запустите сервер: `npm start` (это запускает команду `web:start` по умолчанию).
 
-Шаги 7–8 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
+Миграционная команда предназначена для отдельной target-схемы, требует остановленных writers и проверенной резервной копии. Она копирует данные одной транзакцией и не удаляет legacy-таблицы. Шаги 7–8 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
 После запуска откройте `http://localhost:3000`.
 
 ## Attention API (MVP)
@@ -99,4 +105,6 @@ Payload:
 
 ## Тесты
 
-`npm run test:unit`
+Unit-тесты: `npm run test:unit`.
+
+Изолированные PostgreSQL-проверки DEM-RDB и переноса данных: `npm run test:postgresql:dem`. Нужна отдельная тестовая БД `dem_rdb_test` с доступной в `public` extension `vector` и правами пользователя на создание и удаление схем. По умолчанию тесты подключаются через локальный Unix socket, используя пользователя из `USER`. Для другой настройки подключения задайте `DEM_TEST_PG_DATABASE`, `DEM_TEST_PG_HOST`, `DEM_TEST_PG_PORT`, `DEM_TEST_PG_USER` и при необходимости `DEM_TEST_PG_PASSWORD`.

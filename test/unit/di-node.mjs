@@ -161,7 +161,6 @@ export async function createTestContainer() {
     { prefix: 'TeqFw_Web_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'web', 'src'), defaultExt: '.mjs' },
     { prefix: 'Teqfw_Di_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'di', 'src'), defaultExt: '.mjs' },
     { prefix: 'TeqFw_Cfg_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'cfg', 'src'), defaultExt: '.mjs' },
-    { prefix: 'TeqFw_Db_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'db', 'src'), defaultExt: '.mjs' },
     { prefix: 'TeqFw_Log_', target: path.join(projectRoot, 'node_modules', '@teqfw', 'log', 'src'), defaultExt: '.mjs' },
   ];
   const mocks = new Map();

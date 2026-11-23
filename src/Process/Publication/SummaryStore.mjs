@@ -18,10 +18,6 @@ constructor({ database, logger }) {
 /**
  * @returns {unknown}
  */
-const getKnex = function () {
-      return database.get();
-    };
-
     /**
  * @param {unknown} value
  * @param {unknown} name
@@ -33,11 +29,11 @@ const getKnex = function () {
  * @returns {unknown}
  */
 const normalizeId = function (value, name) {
-      const num = Number(value);
-      if (!Number.isFinite(num)) {
+      const num = typeof value === 'number' && Number.isSafeInteger(value) ? BigInt(value) : typeof value === 'string' && /^\d+$/.test(value) ? BigInt(value) : null;
+      if (num === null || num < 1n || num > 9223372036854775807n) {
         throw new Error(`${name} must be a number.`);
       }
-      return num;
+      return num.toString();
     };
 
     /**
@@ -67,8 +63,9 @@ const normalizeText = function (value, name) {
  */
 this.findByPublicationId = async function (publicationId) {
       const id = normalizeId(publicationId, 'Publication id');
-      const row = await getKnex()('publication_summaries').where({ publication_id: id }).first();
-      return row ?? null;
+      const repository = await database.getBackend().get({ path: '/mindstream/summary' });
+      const result = await repository.read({ key: { kind: 'primary', values: { publication_id: id } } });
+      return result?.record ?? null;
     };
 
     /**
@@ -90,8 +87,8 @@ this.saveSummary = async function ({ publicationId, overview, annotation }) {
       const overviewText = normalizeText(overview, 'Overview');
       const annotationText = normalizeText(annotation, 'Annotation');
 
-      const knexRef = getKnex();
-      const existing = await knexRef('publication_summaries').where({ publication_id: id }).first();
+      const repository = await database.getBackend().get({ path: '/mindstream/summary' });
+      const existing = (await repository.read({ key: { kind: 'primary', values: { publication_id: id } } }))?.record;
       if (existing?.overview && existing?.annotation) {
         logger.debug(NAMESPACE, `Summaries already stored for publication ${id}.`);
         return existing;
@@ -100,15 +97,20 @@ this.saveSummary = async function ({ publicationId, overview, annotation }) {
         throw new Error(`Publication ${id} has incomplete summaries.`);
       }
 
-      const createdAt = new Date().toISOString();
-      await knexRef('publication_summaries').insert({
-        publication_id: id,
-        overview: overviewText,
-        annotation: annotationText,
-        created_at: createdAt,
-      });
-
-      return await knexRef('publication_summaries').where({ publication_id: id }).first();
+      const createdAt = new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
+      try {
+        return (await repository.create({ record: {
+          publication_id: id,
+          overview: overviewText,
+          annotation: annotationText,
+          created_at: createdAt,
+        } })).record;
+      } catch (error) {
+        if (error?.code !== 'CONFLICT') throw error;
+        const concurrent = (await repository.read({ key: { kind: 'primary', values: { publication_id: id } } }))?.record;
+        if (concurrent?.overview && concurrent?.annotation) return concurrent;
+        throw error;
+      }
     };
   }
 }

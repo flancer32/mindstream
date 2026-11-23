@@ -52,11 +52,11 @@ const normalizeLimit = function (value) {
  * @returns {unknown}
  */
 const normalizeId = function (value, name) {
-      const num = Number(value);
-      if (!Number.isFinite(num)) {
+      const num = typeof value === 'number' && Number.isSafeInteger(value) ? BigInt(value) : typeof value === 'string' && /^\d+$/.test(value) ? BigInt(value) : null;
+      if (num === null || num < 1n || num > 9223372036854775807n) {
         throw new Error(`${name} must be a number.`);
       }
-      return num;
+      return num.toString();
     };
 
     /**
@@ -72,9 +72,9 @@ this.listForSummaries = async function (params = {}) {
       const { limit } = params;
       const pageSize = normalizeLimit(limit);
       const knexRef = getKnex();
-      const query = knexRef('publications as p')
-        .join('publication_extractions as e', 'p.id', 'e.publication_id')
-        .leftJoin('publication_summaries as s', 'p.id', 's.publication_id')
+      const query = knexRef('mindstream_publication as p')
+        .join('mindstream_extraction as e', 'p.id', 'e.publication_id')
+        .leftJoin('mindstream_summary as s', 'p.id', 's.publication_id')
         .select('p.id', 'p.status', 'e.md_text')
         .whereNotNull('e.md_text')
         .whereNull('s.publication_id')
@@ -105,9 +105,9 @@ this.listForEmbeddings = async function (params = {}) {
       const { limit } = params;
       const pageSize = normalizeLimit(limit);
       const knexRef = getKnex();
-      const query = knexRef('publications as p')
-        .join('publication_summaries as s', 'p.id', 's.publication_id')
-        .leftJoin('publication_embeddings as e', 'p.id', 'e.publication_id')
+      const query = knexRef('mindstream_publication as p')
+        .join('mindstream_summary as s', 'p.id', 's.publication_id')
+        .leftJoin('mindstream_embedding as e', 'p.id', 'e.publication_id')
         .select('p.id', 'p.status', 's.overview', 's.annotation')
         .whereNotNull('s.overview')
         .whereNotNull('s.annotation')
@@ -150,7 +150,7 @@ this.updateStatus = async function ({ id, status }) {
       if (!status || typeof status !== 'string') {
         throw new Error('Publication status must be a string.');
       }
-      await getKnex()('publications').where({ id: pubId }).update({ status });
+      await getKnex()('mindstream_publication').where({ id: pubId }).update({ status });
     };
   }
 }

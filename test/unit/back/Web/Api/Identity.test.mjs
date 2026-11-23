@@ -16,27 +16,13 @@ const buildLogger = function () {
 
 const createKnexStub = function () {
   const inserted = [];
-  const builder = {
-    insert(payload) {
-      inserted.push(payload);
-      return this;
-    },
-    onConflict() {
-      return this;
-    },
-    async ignore() {
-      return undefined;
+  const repository = {
+    async create({ record }) {
+      inserted.push(record);
+      return { record };
     },
   };
-
-  const knex = function (table) {
-    if (table !== 'anonymous_identities') {
-      throw new Error(`Unexpected table "${table}".`);
-    }
-    return builder;
-  };
-
-  return { knex, inserted };
+  return { backend: { async get({ path }) { assert.equal(path, '/mindstream/identity'); return repository; } }, inserted };
 };
 
 const createRespondStub = function () {
@@ -89,9 +75,9 @@ const buildPayload = function ({ identity = '550e8400-e29b-41d4-a716-44665544000
 
 const getHandler = async function () {
   const container = await createTestContainer();
-  const { knex, inserted } = createKnexStub();
+  const { backend, inserted } = createKnexStub();
 
-  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { getBackend: () => backend });
   container.register('Mindstream_Back_Logger$', buildLogger());
   container.register('TeqFw_Web_Back_Helper_Respond$', createRespondStub());
 

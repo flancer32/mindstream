@@ -20,16 +20,6 @@ constructor({
     const NAMESPACE = 'Mindstream_Back_Web_Api_Identity';
 
     /**
- * @returns {unknown}
- */
-/**
- * @returns {unknown}
- */
-const getKnex = function () {
-      return database.get();
-    };
-
-    /**
  * @param {unknown} err
  * @returns {unknown}
  */
@@ -75,11 +65,13 @@ const readBody = function (req) {
  * @returns {Promise<unknown>}
  */
 const storeIdentity = async function (identityId) {
-      const registeredAt = new Date().toISOString();
-      await getKnex()('anonymous_identities')
-        .insert({ identity_uuid: identityId, registered_at: registeredAt })
-        .onConflict(['identity_uuid'])
-        .ignore();
+      const registeredAt = new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
+      const repository = await database.getBackend().get({ path: '/mindstream/identity' });
+      try {
+        await repository.create({ record: { identity_uuid: identityId, registered_at: registeredAt } });
+      } catch (error) {
+        if (error?.code !== 'CONFLICT') throw error;
+      }
     };
 
     /**

@@ -17,43 +17,25 @@ const buildLogger = function () {
   };
 };
 
-const createKnexStub = function ({ existingRow } = {}) {
+const createBackendStub = function ({ existingRow } = {}) {
   const state = { row: existingRow ?? null };
-  const inserts = [];
-
-  const knex = function (table) {
-    if (table !== 'publication_summaries') {
-      throw new Error(`Unexpected table "${table}".`);
-    }
-    return {
-      where(criteria) {
-        return {
-          async first() {
-            return state.row;
-          },
-        };
-      },
-      async insert(payload) {
-        inserts.push(payload);
-        state.row = {
-          publication_id: payload.publication_id,
-          overview: payload.overview,
-          annotation: payload.annotation,
-          created_at: payload.created_at,
-        };
-      },
-    };
+  const creates = [];
+  const repository = {
+    async read() { return state.row ? { record: state.row } : undefined; },
+    async create({ record }) { creates.push(record); state.row = record; return { record }; },
   };
-
-  return { knex, state, inserts };
+  return {
+    state, creates,
+    async get({ path }) { assert.equal(path, '/mindstream/summary'); return repository; },
+  };
 };
 
 test('Mindstream_Back_Process_Publication_SummaryStore saves new summaries', async () => {
   const container = await createTestContainer();
   const logger = buildLogger();
-  const { knex, inserts, state } = createKnexStub();
+  const backend = createBackendStub();
 
-  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { getBackend: () => backend });
   container.register('Mindstream_Back_Logger$', logger);
 
   const store = await container.get('Mindstream_Back_Process_Publication_SummaryStore$');
@@ -63,8 +45,8 @@ test('Mindstream_Back_Process_Publication_SummaryStore saves new summaries', asy
     annotation: 'Annotation',
   });
 
-  assert.equal(inserts.length, 1);
-  assert.equal(state.row.publication_id, 10);
+  assert.equal(backend.creates.length, 1);
+  assert.equal(backend.state.row.publication_id, '10');
   assert.equal(row.overview, 'Overview');
   assert.equal(row.annotation, 'Annotation');
   assert.equal(logger.calls.debug.length, 0);
@@ -73,11 +55,11 @@ test('Mindstream_Back_Process_Publication_SummaryStore saves new summaries', asy
 test('Mindstream_Back_Process_Publication_SummaryStore skips existing summaries', async () => {
   const container = await createTestContainer();
   const logger = buildLogger();
-  const { knex, inserts } = createKnexStub({
+  const backend = createBackendStub({
     existingRow: { publication_id: 11, overview: 'Ready', annotation: 'Ready' },
   });
 
-  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { getBackend: () => backend });
   container.register('Mindstream_Back_Logger$', logger);
 
   const store = await container.get('Mindstream_Back_Process_Publication_SummaryStore$');
@@ -87,7 +69,7 @@ test('Mindstream_Back_Process_Publication_SummaryStore skips existing summaries'
     annotation: 'Annotation',
   });
 
-  assert.equal(inserts.length, 0);
+  assert.equal(backend.creates.length, 0);
   assert.equal(row.overview, 'Ready');
   assert.equal(logger.calls.debug.length, 1);
 });
@@ -95,11 +77,11 @@ test('Mindstream_Back_Process_Publication_SummaryStore skips existing summaries'
 test('Mindstream_Back_Process_Publication_SummaryStore rejects incomplete summaries', async () => {
   const container = await createTestContainer();
   const logger = buildLogger();
-  const { knex } = createKnexStub({
+  const backend = createBackendStub({
     existingRow: { publication_id: 12, overview: 'Only overview', annotation: null },
   });
 
-  container.register('Mindstream_Back_Storage_Database$', { get: () => knex });
+  container.register('Mindstream_Back_Storage_Database$', { getBackend: () => backend });
   container.register('Mindstream_Back_Logger$', logger);
 
   const store = await container.get('Mindstream_Back_Process_Publication_SummaryStore$');

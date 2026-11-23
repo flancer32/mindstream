@@ -38,7 +38,9 @@
     "relations": {
       "source": {
         "attributes": ["source_id"],
-        "target": {"path": "source", "attributes": ["id"]}
+        "target": {"path": "source", "attributes": ["id"]},
+        "onDelete": "restrict",
+        "onUpdate": "cascade"
       }
     }
   },
@@ -53,7 +55,9 @@
     "relations": {
       "publication": {
         "attributes": ["publication_id"],
-        "target": {"path": "publication", "attributes": ["id"]}
+        "target": {"path": "publication", "attributes": ["id"]},
+        "onDelete": "cascade",
+        "onUpdate": "cascade"
       }
     }
   },
@@ -68,22 +72,26 @@
     "relations": {
       "publication": {
         "attributes": ["publication_id"],
-        "target": {"path": "publication", "attributes": ["id"]}
+        "target": {"path": "publication", "attributes": ["id"]},
+        "onDelete": "cascade",
+        "onUpdate": "cascade"
       }
     }
   },
   "embedding": {
     "attributes": [
       {"name": "publication_id", "type": {"name": "ref"}},
-      {"name": "overview_embedding", "type": {"name": "vector", "params": {"dimensions": 1536, "element": "float"}}},
-      {"name": "annotation_embedding", "type": {"name": "vector", "params": {"dimensions": 1536, "element": "float"}}},
+      {"name": "overview_embedding", "type": {"name": "teqfw.dem_rdb.vector", "params": {"dimensions": 1536}}},
+      {"name": "annotation_embedding", "type": {"name": "teqfw.dem_rdb.vector", "params": {"dimensions": 1536}}},
       {"name": "created_at", "type": {"name": "datetime", "params": {"precision": 6, "timezone": true}}}
     ],
     "primaryKey": ["publication_id"],
     "relations": {
       "publication": {
         "attributes": ["publication_id"],
-        "target": {"path": "publication", "attributes": ["id"]}
+        "target": {"path": "publication", "attributes": ["id"]},
+        "onDelete": "cascade",
+        "onUpdate": "cascade"
       }
     }
   },
@@ -114,11 +122,15 @@
     "relations": {
       "identity": {
         "attributes": ["identity_id"],
-        "target": {"path": "identity", "attributes": ["id"]}
+        "target": {"path": "identity", "attributes": ["id"]},
+        "onDelete": "cascade",
+        "onUpdate": "cascade"
       },
       "publication": {
         "attributes": ["publication_id"],
-        "target": {"path": "publication", "attributes": ["id"]}
+        "target": {"path": "publication", "attributes": ["id"]},
+        "onDelete": "cascade",
+        "onUpdate": "cascade"
       }
     }
   }

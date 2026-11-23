@@ -71,9 +71,9 @@ const createKnexStub = function ({ identities = [], publications = [] } = {}) {
   };
 
   const knex = function (table) {
-    if (table === 'anonymous_identities') return createIdentityBuilder();
-    if (table === 'publications') return createPublicationBuilder();
-    if (table === 'attention_states') return createAttentionBuilder();
+    if (table === 'mindstream_identity') return createIdentityBuilder();
+    if (table === 'mindstream_publication') return createPublicationBuilder();
+    if (table === 'mindstream_attention') return createAttentionBuilder();
     throw new Error(`Unexpected table "${table}".`);
   };
 
