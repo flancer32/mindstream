@@ -72,7 +72,7 @@ The runtime context describes:
 
 ### PostgreSQL And Extensions
 
-The target stores embeddings as DEM-RDB JSON-serialized text in PostgreSQL. Native pgvector is not a target runtime prerequisite; an existing legacy database may require it until its data has been converted and cut over.
+Server-side publication embeddings use native PostgreSQL vectors through the required pgvector extension. See [PostgreSQL setup](setup/postgresql.md) for provisioning and restore requirements.
 
 ---
 

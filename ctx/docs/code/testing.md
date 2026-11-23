@@ -53,7 +53,9 @@ Real side effects are prohibited in unit tests, including filesystem access, net
 
 ## Test Types
 
-Focused PostgreSQL integration checks are required for storage lifecycle, critical data flows and migration cutover. They use an isolated disposable database and must not mutate production data. For the DEM-RDB storage target, integration coverage must prove selected FK delete/update actions, dependent and multilevel cascade paths, and child integrity. It must prove accepted attention types and rejection of invalid direct SQL inserts and updates. Reopen must accept a matching layout and reject missing, tampered, or divergent FK and CHECK constraints before writes. Check transactional rollback. Migration checks also verify stored vectors through the target codec. Native pgvector support is not a gate for the JSON/text migration target. Unit tests remain the default for other code; broader test types are not required by default.
+Focused PostgreSQL integration checks are required for storage lifecycle, critical data flows and migration cutover. They use an isolated disposable database and must not mutate production data. For the DEM-RDB storage target, integration coverage must prove selected FK delete/update actions, dependent and multilevel cascade paths, and child integrity. It must prove accepted attention types and rejection of invalid direct SQL inserts and updates. Reopen must accept a matching layout and reject missing, tampered, or divergent FK and CHECK constraints before writes. Check transactional rollback.
+
+Use PostgreSQL with pgvector to verify both native `vector(1536)` columns and the float32 round trip through DEM-RDB. Verify that initialization rejects a missing extension and reopen rejects an incompatible vector column. Migration checks compare every stored legacy component with the value read through the target codec, preserving order and float32 values. Unit tests remain the default for other code; broader test types are not required by default.
 
 ## Testing Tools
 
