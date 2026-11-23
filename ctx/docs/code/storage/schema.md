@@ -1,7 +1,7 @@
 # Code Storage Layer — Schema Declaration
 
 - Path: `ctx/docs/code/storage/schema.md`
-- Changed: `20261120`
+- Changed: `20261123`
 
 ## Model
 
@@ -11,7 +11,7 @@ The effective declaration must be independent of runtime state and identify attr
 
 DEM paths contain lowercase alphanumeric segments, and DEM-RDB maps path segments to underscore-separated table names; columns use attribute names. Explicitly map the existing physical layout during migration. Preserve uniqueness, referential integrity, cascade behavior and the closed attention type set. Confirm that the selected DEM and adapter contracts enforce each required constraint; fail preflight if they cannot, rather than silently weakening it. Keep legacy `schema_version` as migration input, not the target history authority.
 
-The selected DEM-RDB storage contract must preserve the legacy foreign-key actions, including `ON DELETE CASCADE` and `ON UPDATE CASCADE` where declared. DEM Format 2 relations describe topology; do not add adapter-specific action keys to that closed format. SQL constraints must admit only the declared enum alternatives for non-null values, respecting attribute nullability for all writers. On history-managed reopen, validate the physical FK actions and enum constraints against the selected model and policy before permitting writes. Missing or divergent enforcement blocks cutover; initialization must not repair it automatically. These adapter capabilities are tracked in [DEM-RDB FK action policy](https://github.com/teqfw/dem-rdb/issues/2) and [DEM-RDB enum CHECK constraints](https://github.com/teqfw/dem-rdb/issues/3).
+The selected DEM-RDB storage contract must preserve the legacy foreign-key actions, including `ON DELETE CASCADE` and `ON UPDATE CASCADE` where declared. The target DEM relation owns required logical actions; its declaration contract and adapter integration must be established before use. Do not invent keys in the current closed Format 2. SQL constraints must admit only the declared enum alternatives for non-null values, respecting attribute nullability for all writers. On history-managed reopen, validate physical FK actions and enum constraints against the selected model before permitting writes. Missing or divergent enforcement blocks cutover; initialization must not repair it automatically. Earlier adapter work is tracked in [DEM-RDB FK action policy](https://github.com/teqfw/dem-rdb/issues/2) and [DEM-RDB enum CHECK constraints](https://github.com/teqfw/dem-rdb/issues/3).
 
 The selected adapter must enforce the required referential actions and closed attention type set for every write path, including application-owned SQL. Repository validation alone is insufficient. Do not assume that altering adapter-owned constraints is supported; verify compatibility with its layout validation before cutover.
 
