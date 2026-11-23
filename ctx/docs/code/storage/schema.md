@@ -7,6 +7,33 @@
 
 The canonical logical schema is a reproducible DEM 2 Format 2 descriptor, normally `etc/dem-schema.json`, composed with the DEM infrastructure descriptor through supported acquisition and compilation. The host supplies trusted package information for reserved `/dem/` entities. Host maps use their separate Format 1 contract. The schema declares attributes, identity profiles, keys, relations and indexes supported by DEM; physical layout and lifecycle belong to DEM-RDB.
 
+## Legacy Physical Mapping
+
+Legacy domain columns retain their names and nullability unless the conversion below says otherwise. The target path maps to a PostgreSQL table by joining its lowercase path segments with underscores.
+
+| Legacy table | DEM path | Target table | Conversion |
+|---|---|---|---|
+| `schema_version` | `/dem/snapshot`, `/dem/application` | DEM-RDB history tables | Do not copy the legacy audit row into DEM history. Preserve it with the untouched source schema; initialize the target history through DEM-RDB before copying domain data. |
+| `publication_sources` | `/mindstream/source` | `mindstream_source` | Keep identifiers and names; convert legacy `is_active` boolean to the target integer representation of logical boolean. |
+| `publications` | `/mindstream/publication` | `mindstream_publication` | Keep IDs, references, status and source metadata. |
+| `publication_extractions` | `/mindstream/extraction` | `mindstream_extraction` | Keep publication reference, HTML, Markdown and nullable values. |
+| `publication_summaries` | `/mindstream/summary` | `mindstream_summary` | Keep publication reference, overview and annotation. |
+| `publication_embeddings` | `/mindstream/embedding` | `mindstream_embedding` | Keep both component orders and 1536 dimensions; write/read through the DEM-RDB vector codec into native PostgreSQL `vector(1536)`. |
+| `anonymous_identities` | `/mindstream/identity` | `mindstream_identity` | Keep bigint IDs and UUID strings. |
+| `attention_states` | `/mindstream/attention` | `mindstream_attention` | Keep identity/publication references and allowed attention values. |
+
+Legacy identity and reference columns remain PostgreSQL signed `bigint`; DEM exposes these values as normalized decimal strings. API boundaries convert to JavaScript numbers only when the value is a positive safe integer. Legacy `timestamptz` values are converted to UTC text with six fractional digits, retaining the instant and source microseconds. The DEM-RDB vector codec uses float32 values; migration compares each decoded component with the legacy PostgreSQL vector value at float32 precision.
+
+| Legacy PostgreSQL type | DEM logical type | DEM-RDB PostgreSQL type / representation |
+|---|---|---|
+| generated or referenced signed `bigint` | `identity` / `ref` with `int`, `large` profile | `bigint`; repository IDs are decimal strings |
+| `varchar(n)` | `string` | `text` |
+| `text` | `text` | `text` |
+| `boolean` | `boolean` | `integer`, encoded as `0` or `1` |
+| `varchar(32)` attention alternatives | closed `enum` | `text` plus a validated CHECK constraint |
+| `timestamptz` | UTC `datetime`, precision 6 | canonical UTC `text` with six fractional digits |
+| `vector(1536)` | `teqfw.dem_rdb.vector`, dimensions 1536 | native pgvector `vector(1536)`; writes round to float32 |
+
 The effective declaration must be independent of runtime state and identify attributes, nullability, primary and unique keys, relations and necessary indexes. Identifier strategies distinguish internal generated identifiers from external stable identifiers. Required integrity constraints must be enforced in storage, not replaced solely with application logic; unsupported declarations are a blocker requiring an explicit resolution. Do not implicitly provision PostgreSQL extensions or infer data conversions.
 
 DEM paths contain lowercase alphanumeric segments, and DEM-RDB maps path segments to underscore-separated table names; columns use attribute names. Explicitly map the existing physical layout during migration. Preserve uniqueness, referential integrity, cascade behavior and the closed attention type set. Confirm that the selected DEM and adapter contracts enforce each required constraint; fail preflight if they cannot, rather than silently weakening it. Keep legacy `schema_version` as migration input, not the target history authority.
