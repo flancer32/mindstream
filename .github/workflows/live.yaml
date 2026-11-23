@@ -221,3 +221,16 @@ jobs:
             echo "Mindstream deployed successfully (PM2 cluster x4)"
             pm2 ls
             ls -lh "${{ env.APP_DIR }}"
+
+            if [ "${{ inputs.activate_migrated_database }}" = true ]; then
+              crontab -l 2>/dev/null | awk '
+                /^# DEM-RDB maintenance: / {
+                  if (match($0, /(ingest|process):[[:alnum:]_-]+(:[[:alnum:]_-]+)*/)) {
+                    print "Paused Mindstream command: " substr($0, RSTART, RLENGTH)
+                  } else {
+                    unknown++
+                  }
+                }
+                END { if (unknown) print "Paused Mindstream entries requiring manual review: " unknown }
+              '
+            fi
