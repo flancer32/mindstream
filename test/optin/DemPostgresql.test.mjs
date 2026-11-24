@@ -361,8 +361,8 @@ test('PostgreSQL feed API pages canonical microsecond timestamps and decodes nat
       const publicationRepository = await backend.get({ path: '/mindstream/publication' });
       const summaryStore = await container.get('Mindstream_Back_Process_Publication_SummaryStore$');
       const embeddingStore = await container.get('Mindstream_Back_Process_Publication_EmbeddingStore$');
-      const vector = Array.from({ length: 1536 }, () => 0);
-      vector[0] = 0.1;
+      const overviewEmbedding = Array.from({ length: 1536 }, (_, index) => (index + 1) / 10);
+      const annotationEmbedding = overviewEmbedding.map((component) => -component);
       const ids = [];
 
       for (let index = 0; index < 52; index++) {
@@ -385,8 +385,8 @@ test('PostgreSQL feed API pages canonical microsecond timestamps and decodes nat
         });
         await embeddingStore.saveEmbeddings({
           publicationId: publication.id,
-          overviewEmbedding: vector,
-          annotationEmbedding: vector,
+          overviewEmbedding,
+          annotationEmbedding,
         });
       }
 
@@ -398,7 +398,8 @@ test('PostgreSQL feed API pages canonical microsecond timestamps and decodes nat
       const retainedEmbedding = await embeddingStore.saveEmbeddings({
         publicationId: ids[0], overviewEmbedding: changedVector, annotationEmbedding: changedVector,
       });
-      assert.equal(retainedEmbedding.overview_embedding[0], Math.fround(0.1));
+      assert.deepEqual(retainedEmbedding.overview_embedding, overviewEmbedding.map(Math.fround));
+      assert.deepEqual(retainedEmbedding.annotation_embedding, annotationEmbedding.map(Math.fround));
 
       const firstPage = await feedApi.getFeedView();
       assert.equal(firstPage.items.length, 50);
@@ -410,8 +411,8 @@ test('PostgreSQL feed API pages canonical microsecond timestamps and decodes nat
       const secondPage = await feedApi.getFeedView({ cursor: firstPage.cursor });
       assert.deepEqual(secondPage.items.map(({ id }) => id), [Number(ids[49]), Number(ids[51])]);
       assert.equal(secondPage.cursor.publishedAt, '2026-11-23T12:34:56.123405Z');
-      assert.equal(secondPage.items[0].embeddings.overview.length, 1536);
-      assert.equal(secondPage.items[0].embeddings.overview[0], Math.fround(0.1));
+      assert.deepEqual(secondPage.items[0].embeddings.overview, overviewEmbedding.map(Math.fround));
+      assert.deepEqual(secondPage.items[0].embeddings.annotation, annotationEmbedding.map(Math.fround));
 
       const permalink = await feedApi.getFeedView({ publicationId: Number(ids[51]) });
       assert.equal(permalink.items.length, 1);
