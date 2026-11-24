@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/product/domain.md`
 - Template Version: `20260605`
-- Changed: `20260619`
+- Changed: `20261124`
 
 ## Purpose
 
@@ -31,6 +31,8 @@ Purpose: hold the shared product corpus of externally sourced publications and t
 Ownership: the corpus is a product-wide shared asset, not a per-user asset.
 
 Primary entities: publication, annotation, overview, embedding, data corpus, demo corpus, full corpus.
+
+Retention: Mindstream retains each publication and its associated data for 100 days from the publication date. If that date is unavailable, the retention period starts when Mindstream first discovers the publication.
 
 Relation to other areas: this area provides the material consumed by browser-side feed projection and attention analysis.
 

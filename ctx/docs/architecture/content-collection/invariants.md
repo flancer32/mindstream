@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/architecture/content-collection/invariants.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20261124`
 
 ## Purpose
 
@@ -82,7 +82,7 @@ The Content Collection may update or replace derived representations of publicat
 
 ### Removal
 
-Removing a publication from the Content Collection causes cascade cleanup of related attention data and does not initiate reverse flows.
+When the [publication retention period](../../product/domain.md#publication-corpus) expires, remove the publication and its dependent data, including extracted content, summaries, embeddings, and publication-specific attention records. This cleanup preserves sources and anonymous identities and does not initiate reverse flows.
 
 ---
 
