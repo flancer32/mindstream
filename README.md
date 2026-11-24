@@ -56,28 +56,24 @@ MindStream uses DEM 2 and DEM-RDB for its PostgreSQL schema, repositories, and c
 CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
 ```
 
-3. Создайте отдельную целевую схему:
+3. Populate `.env` from [the example](.env.example) with `TEQFW_DEM_RDB__SEARCH_PATH=public`. The application role needs `USAGE` and `CREATE` on `public`. Initial startup creates the application tables and DEM history there.
+4. Обнаружьте публикации из RSS Хабра: `npm exec -- teq ingest:discover:habr`.
+5. Извлеките тексты публикаций: `npm exec -- teq ingest:extract:habr`.
+6. Сформируйте обзор и аннотацию: `npm exec -- teq process:generate:summaries`.
+7. Сформируйте эмбеддинги: `npm exec -- teq process:generate:embeddings`.
+8. Запустите сервер: `npm start` (это запускает команду `web:start` по умолчанию).
 
-```sql
-CREATE SCHEMA mindstream_data AUTHORIZATION mindstream;
-```
-
-4. Заполните `.env` по [примеру](.env.example). Задайте `TEQFW_DEM_RDB__SEARCH_PATH=mindstream_data,public`. При первом запуске приложение создаёт таблицы и историю модели в `mindstream_data`.
-5. Для переноса legacy-данных остановите процессы записи, сделайте отдельную резервную копию и проверьте её восстановлением в изолированной базе. Затем запустите `npm run db:migrate-legacy -- --source-schema=public`. Для другой исходной схемы укажите её имя. [Требования к переключению](ctx/docs/environment/setup/postgresql.md#backup-and-cutover).
-6. Обнаружьте публикации из RSS Хабра: `npm exec -- teq ingest:discover:habr`.
-7. Извлеките тексты публикаций: `npm exec -- teq ingest:extract:habr`.
-8. Сформируйте обзор и аннотацию: `npm exec -- teq process:generate:summaries`.
-9. Сформируйте эмбеддинги: `npm exec -- teq process:generate:embeddings`.
-10. Запустите сервер: `npm start` (это запускает команду `web:start` по умолчанию).
-
-Миграционная команда инициализирует целевые таблицы и историю DEM до транзакции копирования. При ошибке копирования транзакция откатывается, а целевая схема остаётся инициализированной с пустыми таблицами данных. Исходные таблицы сохраняются. Шаги 8–9 используют внешний LLM API и требуют заполненных `MINDSTREAM__LLM_*` переменных.
+Generation commands use an external LLM API and require the `MINDSTREAM__LLM_*` settings.
 После запуска откройте `http://localhost:3000`.
 
-### Production DEM-RDB migration
+### One-time Production Schema Consolidation
 
-1. Schedule maintenance and verify that an independent PostgreSQL backup can be restored. Pause any writers outside the deployment account.
-2. Dispatch **LIVE - Migrate Mindstream to DEM-RDB once** on `main` with `maintenance_confirmed=true`. The workflow pauses Mindstream entries in the deployment account's crontab, stops `mindstream-web` in PM2, checks for other database clients, and saves and reads back a full archive under `var/backups/postgresql` on the deployment host. It then migrates `public` into `mindstream_data` and records the archive path in `mindstream-dem-rdb.completed`.
-3. Review the migration result and verify the target before resuming writers. Configure and start the new release with the matching `TEQFW_DEM_RDB__*` connection settings and `TEQFW_DEM_RDB__SEARCH_PATH=mindstream_data,public`. Review the saved deployment crontab before re-enabling its jobs. Keep the archive and the previous release available for rollback until cutover is accepted.
+1. Schedule maintenance, verify restoration of an independent backup, pause writers outside the deployment account, and keep deployments paused during the cutover. Review the deployment account's cron entries, including entries with the `# DEM-RDB maintenance:` prefix. The script re-enables those entries.
+2. Dispatch **LIVE - Consolidate PostgreSQL into public once** on `main` with `maintenance_confirmed=true`. For a manual run as the production deployment account, use `bash .github/scripts/consolidate-postgresql.sh /path/to/app/mindstream` from a checkout containing the script and its companion SQL file.
+3. The script pauses MindStream cron jobs, stops PM2, reads back a fresh backup, and runs the cleanup in one PostgreSQL transaction. It sets the deployed search path to `public`, starts PM2, and checks the local feed before resuming cron. Keep the backup and the saved configuration and crontab under `var/backups/postgresql/mindstream-pre-public.*` until cutover is accepted.
+4. If a failure occurs after the database transaction commits, use the printed maintenance directory to recover. With a successfully migrated database, complete the configuration switch to `public`, restart PM2 and verify the feed before restoring `crontab.after`. For a full rollback, restore the pre-cutover dump and use `env.before` and `crontab.before`.
+
+The legacy copy command remains available for recovery from a pre-DEM database. Its source and target schemas must be separate.
 
 ## Attention API (MVP)
 
@@ -112,4 +108,4 @@ Payload:
 
 Быстрые локальные проверки: `npm test`. Команда запускает unit-тесты и проверки файлов приложения. Только unit-тесты: `npm run test:unit`.
 
-Изолированные PostgreSQL-проверки DEM-RDB и переноса данных: `npm run test:postgresql:dem`. Нужна отдельная тестовая БД `dem_rdb_test` с доступной в `public` extension `vector` и правами пользователя на создание и удаление схем. По умолчанию тесты подключаются через локальный Unix socket, используя пользователя из `USER`. Для другой настройки подключения задайте `DEM_TEST_PG_DATABASE`, `DEM_TEST_PG_HOST`, `DEM_TEST_PG_PORT`, `DEM_TEST_PG_USER` и при необходимости `DEM_TEST_PG_PASSWORD`.
+Run the isolated DEM-RDB and migration checks with `npm run test:postgresql:dem`. Use a dedicated test database named `dem_rdb_test` with the `vector` extension in `public`, no tables in `public`, and no `mindstream_data` schema. The test role needs permission to create schemas and tables in `public`. By default, tests use the local Unix socket and the role in `USER`. Override the connection with `DEM_TEST_PG_DATABASE`, `DEM_TEST_PG_HOST`, `DEM_TEST_PG_PORT`, `DEM_TEST_PG_USER` and, if needed, `DEM_TEST_PG_PASSWORD`.

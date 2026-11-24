@@ -2,11 +2,6 @@ name: LIVE - Build & Deploy Mindstream (PM2 cluster x4)
 
 on:
   workflow_dispatch:
-    inputs:
-      activate_migrated_database:
-        description: Configure the release for the completed DEM-RDB migration
-        type: boolean
-        default: false
 
 concurrency:
   group: mindstream-production
@@ -113,74 +108,24 @@ jobs:
               : "${!DB_NAME_KEY:?Database name is required for deployment backup}"
               : "${!DB_USER_KEY:?Database user is required for deployment backup}"
 
-              if [ "${{ inputs.activate_migrated_database }}" = true ]; then
-                BACKUP_FILE=$(cat "$BACKUP_DIR/mindstream-dem-rdb.completed")
-                case "$BACKUP_FILE" in
-                  "$BACKUP_DIR"/mindstream-pre-dem-rdb.*.dump) ;;
-                  *) echo 'Invalid migration backup path.' >&2; exit 1 ;;
-                esac
-                pg_restore --list "$BACKUP_FILE" >/dev/null
-                echo "Using the verified backup from the completed migration: $BACKUP_FILE"
-              else
-                mkdir -p "$BACKUP_DIR"
-                chmod 700 "$BACKUP_DIR"
-                BACKUP_FILE="$BACKUP_DIR/${{ env.PRJ }}_${TIMESTAMP}.dump"
+              mkdir -p "$BACKUP_DIR"
+              chmod 700 "$BACKUP_DIR"
+              BACKUP_FILE="$BACKUP_DIR/${{ env.PRJ }}_${TIMESTAMP}.dump"
 
-                PGPASSWORD="${!DB_PASSWORD_KEY:-}" pg_dump \
-                  --format=custom \
-                  --host="${!DB_HOST_KEY:-localhost}" \
-                  --port="${!DB_PORT_KEY:-5432}" \
-                  --username="${!DB_USER_KEY}" \
-                  --file="$BACKUP_FILE" \
-                  "${!DB_NAME_KEY}"
-                pg_restore --list "$BACKUP_FILE" >/dev/null
+              PGPASSWORD="${!DB_PASSWORD_KEY:-}" pg_dump \
+                --format=custom \
+                --host="${!DB_HOST_KEY:-localhost}" \
+                --port="${!DB_PORT_KEY:-5432}" \
+                --username="${!DB_USER_KEY}" \
+                --file="$BACKUP_FILE" \
+                "${!DB_NAME_KEY}"
+              pg_restore --list "$BACKUP_FILE" >/dev/null
 
-                # Keep the most recent 30 days of deployment backups.
-                find "$BACKUP_DIR" -type f -name '${{ env.PRJ }}_*.dump' -mtime +30 -delete
-                echo "PostgreSQL backup created and archive catalog checked: $BACKUP_FILE"
-              fi
+              # Keep the most recent 30 days of deployment backups.
+              find "$BACKUP_DIR" -type f -name '${{ env.PRJ }}_*.dump' -mtime +30 -delete
+              echo "PostgreSQL backup created and archive catalog checked: $BACKUP_FILE"
             else
               echo "No previous deployment found; PostgreSQL backup is not required."
-            fi
-
-            if [ "${{ inputs.activate_migrated_database }}" = true ]; then
-              test -s "$BACKUP_DIR/mindstream-dem-rdb.completed"
-              export CUTOVER_DB_CONFIG=TEQFW_DB
-              if [ -z "${TEQFW_DB__DATABASE:-}${TEQFW_DB__USER:-}" ]; then
-                export CUTOVER_DB_CONFIG=TEQFW_DEM_RDB
-              fi
-              install -m 600 "$BACKUP_ENV" prod.new/.env
-              node --input-type=module <<'JS' >> prod.new/.env
-            const prefix = process.env.CUTOVER_DB_CONFIG;
-            const read = (key) => process.env[`${prefix}__${key}`];
-            const settings = {
-              CLIENT: 'pg',
-              DATABASE: read('DATABASE'),
-              USER: read('USER'),
-              HOST: read('HOST') || 'localhost',
-              PORT: read('PORT') || '5432',
-              PASSWORD: read('PASSWORD') ?? '',
-              SEARCH_PATH: 'mindstream_data,public',
-            };
-            if (settings.DATABASE !== 'mindstream' || !settings.USER) {
-              throw new Error('The migration database configuration is incomplete.');
-            }
-            for (const value of Object.values(settings)) {
-              if (/[\r\n']/.test(value)) {
-                throw new Error('A database setting cannot be written as a single-quoted dotenv value.');
-              }
-            }
-            process.stdout.write('\n' + Object.entries(settings)
-              .map(([key, value]) => `TEQFW_DEM_RDB__${key}='${value}'\n`).join(''));
-            JS
-              set -a
-              . ./prod.new/.env
-              set +a
-              PGPASSWORD="$TEQFW_DEM_RDB__PASSWORD" PGOPTIONS='-c default_transaction_read_only=on' \
-                psql -Xw --set=ON_ERROR_STOP=1 \
-                --host="$TEQFW_DEM_RDB__HOST" --port="$TEQFW_DEM_RDB__PORT" \
-                --username="$TEQFW_DEM_RDB__USER" --dbname="$TEQFW_DEM_RDB__DATABASE" \
-                --command='SELECT count(*) AS migrated_publications FROM mindstream_data.mindstream_publication'
             fi
 
             # Stop previous runtime if exists
@@ -221,16 +166,3 @@ jobs:
             echo "Mindstream deployed successfully (PM2 cluster x4)"
             pm2 ls
             ls -lh "${{ env.APP_DIR }}"
-
-            if [ "${{ inputs.activate_migrated_database }}" = true ]; then
-              crontab -l 2>/dev/null | awk '
-                /^# DEM-RDB maintenance: / {
-                  if (match($0, /(ingest|process):[[:alnum:]_-]+(:[[:alnum:]_-]+)*/)) {
-                    print "Paused Mindstream command: " substr($0, RSTART, RLENGTH)
-                  } else {
-                    unknown++
-                  }
-                }
-                END { if (unknown) print "Paused Mindstream entries requiring manual review: " unknown }
-              '
-            fi

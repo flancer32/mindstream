@@ -1,17 +1,19 @@
 # PostgreSQL Runtime For Mindstream
 
 - Path: `ctx/docs/environment/setup/postgresql.md`
-- Changed: `20261123`
+- Changed: `20261124`
 
 ## Requirements
 
-The target requires PostgreSQL 16 or later, an application database, a configured schema first in the connection search path, and privileges to manage its tables and constraints. Install pgvector on the server and enable the `vector` extension in the application database before initialization. The extension type must be visible on the application's search path. Initialization fails before writes if the extension is unavailable to the application connection.
+The target requires PostgreSQL 16 or later and a dedicated application database. The `public` schema contains the application tables, DEM history, and the `vector` extension. The application role requires usage and creation privileges on `public` and ownership of its tables. Install pgvector on the server and enable it in `public` before initialization. Initialization fails before writes if the extension is unavailable to the application connection.
 
-The application connection uses `TEQFW_DEM_RDB__CLIENT`, `TEQFW_DEM_RDB__HOST`, `TEQFW_DEM_RDB__PORT`, `TEQFW_DEM_RDB__DATABASE`, `TEQFW_DEM_RDB__USER`, `TEQFW_DEM_RDB__PASSWORD`, and `TEQFW_DEM_RDB__SEARCH_PATH`. Put the target schema first in `SEARCH_PATH` and `public` after it when pgvector is installed there. Create the target schema before startup. The legacy source schema remains separately addressable for the explicit migration command.
+The application connection uses `TEQFW_DEM_RDB__CLIENT`, `TEQFW_DEM_RDB__HOST`, `TEQFW_DEM_RDB__PORT`, `TEQFW_DEM_RDB__DATABASE`, `TEQFW_DEM_RDB__USER`, `TEQFW_DEM_RDB__PASSWORD`, and `TEQFW_DEM_RDB__SEARCH_PATH=public`.
 
 Before cutover, confirm that the selected DEM-RDB release supports the required physical foreign-key actions and enum `CHECK` constraints, and validates them when reopening the schema. The target requires the declared cascade behavior and the closed `attention_type` set to be enforced in PostgreSQL for application and direct SQL writes. If either guarantee is unsupported or the existing layout does not match, stop the cutover; do not compensate with weaker application-only validation or automatic DDL repair.
 
 ## Backup And Cutover
+
+Consolidation of an already migrated database drops the legacy tables, moves the DEM-RDB tables and history into `public`, and removes the empty staging schema in one transaction. Keep pgvector in `public`. Resume background writers after the runtime starts against the consolidated schema and the feed responds.
 
 Before migration, create a separate consistent backup and prove it can be restored in an isolated environment. Preserve the backup and the old runtime until cutover has been verified and accepted. Migration is an explicit maintenance operation: stop writers, preflight the old and new layouts, convert data using an explicit mapping, verify values and constraints, and resume service only after acceptance. On failure, stop and restore the verified backup; never rebuild automatically on startup.
 

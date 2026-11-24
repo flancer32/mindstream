@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import test from 'node:test';
 
@@ -62,6 +63,94 @@ const openStorage = async function (schema, includePublic = true) {
 };
 
 const timestamp = '2026-11-23T12:34:56.123456Z';
+
+test('PostgreSQL consolidation is atomic and DEM-RDB reopens with public as its only schema', async () => {
+  const sql = await readFile(path.join(projectRoot, '.github/scripts/consolidate-postgresql.sql'), 'utf8');
+  const legacy = [
+    'anonymous_identities', 'attention_states', 'publication_embeddings', 'publication_extractions',
+    'publication_sources', 'publication_summaries', 'publications', 'schema_version',
+  ];
+  const current = [
+    'dem_application', 'dem_snapshot', 'mindstream_attention', 'mindstream_embedding', 'mindstream_extraction',
+    'mindstream_identity', 'mindstream_publication', 'mindstream_source', 'mindstream_summary',
+  ];
+  const admin = await createAdminClient();
+  await admin.connect();
+  try {
+    const layout = await admin.query(`
+      SELECT to_regnamespace('mindstream_data') IS NULL AS staging_absent,
+        NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public') AS public_empty
+    `);
+    assert.deepEqual(layout.rows[0], { staging_absent: true, public_empty: true });
+    await admin.query('CREATE SCHEMA mindstream_data');
+    try {
+      await admin.query(legacy.map((name) => `CREATE TABLE public.${name} (id integer);`).join('\n'));
+      const first = await openStorage('mindstream_data');
+      try {
+        const sourceRepo = await first.backend.get({ path: '/mindstream/source' });
+        const source = (await sourceRepo.create({ record: {
+          code: 'consolidation', url: 'https://example.test/feed', name: 'Consolidation',
+          is_active: true, created_at: timestamp, updated_at: timestamp,
+        } })).record;
+        const pubRepo = await first.backend.get({ path: '/mindstream/publication' });
+        const publication = (await pubRepo.create({ record: {
+          source_id: source.id, source_item_hash: 'a'.repeat(64), source_url: 'https://example.test/post',
+          rss_title: 'Test', rss_published_at: timestamp, discovered_at: timestamp,
+        } })).record;
+        const client = first.storage.getClient();
+        await client('mindstream_summary').insert({
+          publication_id: publication.id, overview: 'Overview', annotation: 'Annotation', created_at: timestamp,
+        });
+        const vector = JSON.stringify(Array(1536).fill(0.1));
+        await client('mindstream_embedding').insert({
+          publication_id: publication.id, overview_embedding: vector, annotation_embedding: vector, created_at: timestamp,
+        });
+      } finally {
+        await first.storage.close();
+      }
+
+      await admin.query('CREATE TABLE mindstream_data.unexpected (id integer)');
+      await assert.rejects(admin.query(`BEGIN; ${sql} COMMIT;`), { code: '2BP01' });
+      await admin.query('ROLLBACK');
+      const before = await admin.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
+      assert.deepEqual(before.rows.map(({ tablename }) => tablename), legacy);
+      await admin.query('DROP TABLE mindstream_data.unexpected');
+      await admin.query(`BEGIN; ${sql} COMMIT;`);
+
+      const after = await admin.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
+      assert.deepEqual(after.rows.map(({ tablename }) => tablename), current);
+      const namespace = await admin.query("SELECT to_regnamespace('mindstream_data') AS staging");
+      assert.equal(namespace.rows[0].staging, null);
+
+      const { backend, container, storage, history } = await openStorage('public', false);
+      try {
+        assert.equal(history.created, false);
+        container.register('Mindstream_Back_Storage_Database$', { get: () => storage.getClient() });
+        container.register('Mindstream_Back_Logger$', { debug() {}, info() {}, exception() {} });
+        const feedApi = await container.get('Mindstream_Back_Web_Api_FeedView$');
+        const feed = await feedApi.getFeedView();
+        assert.equal(feed.items.length, 1);
+        assert.equal(feed.items[0].embeddings.overview.length, 1536);
+        assert.equal(feed.items[0].embeddings.overview[0], Math.fround(0.1));
+        const identityRepo = await backend.get({ path: '/mindstream/identity' });
+        const identity = (await identityRepo.create({ record: {
+          identity_uuid: '00000000-0000-4000-8000-000000000003', registered_at: timestamp,
+        } })).record;
+        const ingress = await container.get('Mindstream_Back_Attention_Ingress$');
+        assert.deepEqual(await ingress.accept({
+          identity: identity.identity_uuid, publication_id: feed.items[0].id, attention_type: 'overview_view',
+        }), { ok: true });
+      } finally {
+        await storage.close();
+      }
+    } finally {
+      await admin.query('DROP SCHEMA IF EXISTS mindstream_data CASCADE');
+      await admin.query(`DROP TABLE IF EXISTS ${[...current, ...legacy].map((name) => `public.${name}`).join(', ')}`);
+    }
+  } finally {
+    await admin.end();
+  }
+});
 
 test('DEM-RDB initializes and reopens native vector schema with required constraints', async () => {
   await withSchema(async ({ schema, admin }) => {
