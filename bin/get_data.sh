@@ -22,6 +22,10 @@ run () {
   )
 }
 
+step "Maintenance: remove publications outside the retention period"
+run maintenance:retention
+echo
+
 step "Ingest: discover publications (Habr RSS)"
 run ingest:discover:habr
 echo
