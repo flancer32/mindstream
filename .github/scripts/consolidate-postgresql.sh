@@ -47,6 +47,49 @@ db_state() {
 install -d -m 700 "$backup_dir"
 exec 9>"$backup_dir/consolidate-postgresql.lock"
 flock -n 9
+
+resume_services() {
+  TEQFW_DEM_RDB__SEARCH_PATH=public pm2 restart mindstream-web --update-env
+  (
+    # shellcheck source=/dev/null
+    source "$prod/.env"
+    scheme=http
+    curl_options=()
+    case "${TEQFW_WEB__TYPE:-http}" in
+      http2) curl_options+=(--http2-prior-knowledge) ;;
+      https) scheme=https ;;
+    esac
+    curl "${curl_options[@]}" --fail --silent --show-error --output /dev/null --max-time 10 \
+      --retry 10 --retry-delay 2 --retry-connrefused \
+      "$scheme://127.0.0.1:${TEQFW_WEB__PORT:-3000}/api/feed"
+  )
+  pm2 jlist | node --input-type=module -e '
+    import {readFileSync} from "node:fs";
+    const workers = JSON.parse(readFileSync(0, "utf8")).filter(({name}) => name === "mindstream-web");
+    if (!workers.length || workers.some(({pm2_env}) => pm2_env.status !== "online")) {
+      throw new Error("Mindstream PM2 workers must be online before resuming cron.");
+    }
+  '
+  pm2 save
+  if [[ -f "$maintenance/crontab.after" ]]; then
+    crontab "$maintenance/crontab.after"
+  fi
+  echo "Mindstream now uses public. Backup: $maintenance/mindstream.dump"
+}
+
+if [[ -n "${2:-}" ]]; then
+  [[ "$2" =~ ^mindstream-pre-public\.[[:alnum:]]{8}$ && "$(db_state)" == after ]]
+  maintenance="$backup_dir/$2"
+  [[ -s "$maintenance/mindstream.dump" ]]
+  (
+    # shellcheck source=/dev/null
+    source "$prod/.env"
+    [[ "${TEQFW_DEM_RDB__SEARCH_PATH:-}" == public ]]
+  )
+  resume_services
+  exit
+fi
+
 [[ "$(db_state)" == before ]] || {
   echo 'Expected the two-schema DEM-RDB deployment.' >&2
   exit 1
@@ -118,23 +161,4 @@ ddl_started=true
 database psql -X --set=ON_ERROR_STOP=1 --single-transaction --file="$sql"
 mv -- "$next_env" "$prod/.env"
 
-TEQFW_DEM_RDB__SEARCH_PATH=public pm2 restart mindstream-web --update-env
-(
-  # shellcheck source=/dev/null
-  source "$prod/.env"
-  curl --fail --silent --show-error --output /dev/null --max-time 10 \
-    --retry 10 --retry-delay 2 --retry-connrefused \
-    "http://127.0.0.1:${TEQFW_WEB__PORT:-3000}/api/feed"
-)
-pm2 jlist | node --input-type=module -e '
-  import {readFileSync} from "node:fs";
-  const workers = JSON.parse(readFileSync(0, "utf8")).filter(({name}) => name === "mindstream-web");
-  if (!workers.length || workers.some(({pm2_env}) => pm2_env.status !== "online")) {
-    throw new Error("Mindstream PM2 workers must be online before resuming cron.");
-  }
-'
-pm2 save
-if $cron_paused; then
-  crontab "$maintenance/crontab.after"
-fi
-echo "Mindstream now uses public. Backup: $maintenance/mindstream.dump"
+resume_services

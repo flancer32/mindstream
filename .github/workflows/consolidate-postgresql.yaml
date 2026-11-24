@@ -8,6 +8,10 @@ on:
         type: boolean
         required: true
         default: false
+      recovery_directory:
+        description: Maintenance directory basename for resuming services after the SQL transaction
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -43,10 +47,13 @@ jobs:
 
       - name: Run the cutover on the production host
         uses: appleboy/ssh-action@v1
+        env:
+          RECOVERY_DIRECTORY: ${{ inputs.recovery_directory }}
         with:
           host: ${{ vars.HOST }}
           username: ${{ vars.USER }}
           key: ${{ secrets.SSH_KEY }}
+          envs: RECOVERY_DIRECTORY
           command_timeout: 45m
           script: |
             set -eu
@@ -56,4 +63,4 @@ jobs:
             scripts=$(mktemp -d "$app_dir/var/migration/consolidation.XXXXXXXX")
             trap 'rm -- "$scripts/consolidate-postgresql.sh" "$scripts/consolidate-postgresql.sql" "$archive"; rmdir -- "$scripts"' EXIT
             tar -xzf "$archive" -C "$scripts"
-            bash "$scripts/consolidate-postgresql.sh" "$app_dir"
+            bash "$scripts/consolidate-postgresql.sh" "$app_dir" "${RECOVERY_DIRECTORY:-}"
