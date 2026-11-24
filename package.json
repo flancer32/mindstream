@@ -61,6 +61,13 @@
             "component": "Mindstream_Back_Cli_Ingest_Extract_Habr$"
           },
           {
+            "id": "maintenance:retention",
+            "summary": "Remove publications and dependent data older than 100 days.",
+            "arguments": [],
+            "options": [],
+            "component": "Mindstream_Back_Cli_Process_Publication_Retention$"
+          },
+          {
             "id": "process:generate:embeddings",
             "summary": "Generate publication embeddings.",
             "arguments": [],

@@ -6,8 +6,10 @@ export default class Mindstream_Back_Ingest_Import {
    * @param {Mindstream_Back_Storage_Database$} deps.database
    * @param {Mindstream_Back_Logger$} deps.logger
    * @param {typeof import('node:crypto')} deps.cryptoModule
+   * @param {Mindstream_Back_Ingest_Publication_Retention$} deps.retention
+   * @param {Mindstream_Back_Ingest_Publication_IdAllocator$} deps.idAllocator
    */
-  constructor({ database, logger, cryptoModule }) {
+  constructor({ database, logger, cryptoModule, retention, idAllocator }) {
     const namespace = 'Mindstream_Back_Ingest_Import';
     /** @param {unknown} value @param {string} label */
     const object = function (value, label) {
@@ -42,22 +44,22 @@ export default class Mindstream_Back_Ingest_Import {
         const articleUrl = url(value.url, 'Article URL', 1024);
         const title = text(value.title, 'Title', 512);
         const markdown = text(value.markdown, 'Markdown', 1_000_000);
-        const date = text(value.publishedAt, 'Publication timestamp', 40);
-        if (!/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(date) || !Number.isFinite(Date.parse(date))) throw new Error('Publication timestamp must be an ISO timestamp with a timezone.');
+        const date = value.publishedAt === null || value.publishedAt === undefined
+          ? null
+          : text(value.publishedAt, 'Publication timestamp', 40);
+        if (date !== null && (!/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(date) || !Number.isFinite(Date.parse(date)))) throw new Error('Publication timestamp must be an ISO timestamp with a timezone.');
         const hash = cryptoModule.createHash('sha256').update(articleUrl).digest('hex');
         const now = new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
+        if (retention.isExpired({publishedAt: date, discoveredAt: now, now: new Date(now)})) {
+          throw new Error('Publication is outside the 100-day retention period.');
+        }
         const result = await database.get().transaction(async (/** @type {ReturnType<Mindstream_Back_Storage_Database$['get']>} */ trx) => {
           await trx('mindstream_source').insert({id: source.id, code, name, url: sourceUrl, is_active: 1, created_at: now, updated_at: now}).onConflict().ignore();
           const stored = await trx('mindstream_source').where({id: source.id}).first();
           if (!stored || stored.code !== code || stored.url !== sourceUrl || stored.name !== name) throw new Error('Source identity conflicts with an existing source. Use its exact descriptor or a new identifier.');
           await trx.raw('SELECT pg_advisory_xact_lock(hashtextextended(?, 0))', ['mindstream_publication']);
-          const highest = await trx('mindstream_publication')
-            .select(trx.raw('CAST(MAX(??) AS TEXT) AS value', ['id']))
-            .first();
-          const nextIdValue = BigInt(highest?.value ?? '0') + 1n;
-          if (nextIdValue > 9223372036854775807n) throw new Error('Publication identity capacity exhausted.');
-          const nextId = nextIdValue.toString();
-          const publishedAt = new Date(date).toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
+          const [nextId] = await idAllocator.allocate(trx, 1);
+          const publishedAt = date === null ? null : new Date(date).toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
           const inserted = await trx('mindstream_publication').insert({id: nextId, source_id: source.id, source_item_hash: hash, source_url: articleUrl, rss_title: title, rss_published_at: publishedAt, discovered_at: now, status: 'extracted'}).onConflict(['source_id', 'source_item_hash']).ignore().returning('id');
           if (!inserted.length) return {created: false};
           const id = inserted[0].id;
@@ -78,4 +80,6 @@ export const __deps__ = Object.freeze({default: {
   database: 'Mindstream_Back_Storage_Database$',
   logger: 'Mindstream_Back_Logger$',
   cryptoModule: 'node:crypto',
+  retention: 'Mindstream_Back_Ingest_Publication_Retention$',
+  idAllocator: 'Mindstream_Back_Ingest_Publication_IdAllocator$',
 }});

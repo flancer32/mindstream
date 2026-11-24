@@ -63,6 +63,14 @@ CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
 7. Сформируйте эмбеддинги: `npm exec -- teq process:generate:embeddings`.
 8. Запустите сервер: `npm start` (это запускает команду `web:start` по умолчанию).
 
+Для соблюдения срока хранения запускайте очистку ежедневно, например добавив в crontab приложения:
+
+```cron
+15 3 * * * cd /path/to/mindstream && npm exec -- teq maintenance:retention
+```
+
+Команда удаляет публикации возрастом 100 дней и старше. Если дата публикации отсутствует, возраст отсчитывается от первого обнаружения. PostgreSQL каскадно удаляет связанные тексты, обзоры, эмбеддинги и записи внимания. Источники и анонимные идентичности сохраняются. Команду можно запускать повторно.
+
 Generation commands use an external LLM API and require the `MINDSTREAM__LLM_*` settings.
 После запуска откройте `http://localhost:3000`.
 

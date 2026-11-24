@@ -76,13 +76,15 @@ The Content Collection is formed only by server-side flows and stored in canonic
 
 Publications enter the Content Collection through server-side ingestion and content-processing flows.
 
+Publications whose retention period has expired are excluded from discovery and manual import. Missing publication dates use the first discovery timestamp for this decision.
+
 ### Change
 
 The Content Collection may update or replace derived representations of publications without changing the architectural status of the publication.
 
 ### Removal
 
-When the [publication retention period](../../product/domain.md#publication-corpus) expires, remove the publication and its dependent data, including extracted content, summaries, embeddings, and publication-specific attention records. This cleanup preserves sources and anonymous identities and does not initiate reverse flows.
+When the [publication retention period](../../product/domain.md#publication-corpus) expires, remove the publication and its dependent data, including extracted content, summaries, embeddings, and publication-specific attention records. This cleanup preserves sources and anonymous identities, keeps retired publication identifiers from being reassigned, and does not initiate reverse flows.
 
 ---
 

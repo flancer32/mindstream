@@ -14,6 +14,7 @@ This document defines the canonical space of allowed CLI commands for the Mindst
 ingest:discover:habr
 ingest:extract:habr
 ingest:import
+maintenance:retention
 process:generate:embeddings
 process:generate:summaries
 web:start
@@ -63,7 +64,7 @@ Purpose: import one prepared external publication from a local JSON file, retain
 
 Parameter: required `file` path, relative to the invocation directory.
 
-The object contains `source` (`id`, `code`, `name`, `url`), article `url`, `title`, `publishedAt` (ISO timestamp), and `markdown`. Source identifiers are stable operator-assigned integers above 1; identifier 1 remains reserved for Habr. Source identifiers, codes, and URLs must not be reassigned. URLs must use HTTP or HTTPS without embedded credentials. Existing publications are left unchanged on repeated import. New publication and extracted text are inserted in one transaction, with status `extracted`. No downstream processing is started.
+The object contains `source` (`id`, `code`, `name`, `url`), article `url`, `title`, optional `publishedAt` (ISO timestamp), and `markdown`. When `publishedAt` is absent, the import time is the first discovery time used by retention. Imports at least 100 days old are rejected. Source identifiers are stable operator-assigned integers above 1; identifier 1 remains reserved for Habr. Source identifiers, codes, and URLs must not be reassigned. URLs must use HTTP or HTTPS without embedded credentials. Existing publications are left unchanged on repeated import. New publication and extracted text are inserted in one transaction, with status `extracted`. No downstream processing is started.
 
 Example input:
 
@@ -78,6 +79,21 @@ Example input:
 ```
 
 The operator runs `npm exec -- teq ingest:import article.json`, followed separately by `npm exec -- teq process:generate:summaries` and `npm exec -- teq process:generate:embeddings`. The last two commands use the configured AI services and make successfully processed material eligible for the existing feed.
+
+### `maintenance:retention`
+
+Contour: maintenance.
+
+Purpose: remove publications whose publication date, or first discovery date when the publication date is unavailable, is at least 100 days old.
+
+Parameters: none.
+
+Constraints:
+
+- removes the publication and relies on declared foreign-key cascades for its extracted content, summaries, embeddings, and publication-specific attention;
+- preserves sources and anonymous identities;
+- can be rerun safely and can be scheduled through the host's existing task scheduler;
+- does not reset publication ID allocation.
 
 ### `process:generate:embeddings`
 

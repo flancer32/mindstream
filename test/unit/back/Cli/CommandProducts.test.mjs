@@ -7,14 +7,18 @@ test('remaining Mindstream CLI products expose their Teq command identifiers', a
   const container = await createTestContainer();
   container.register('Mindstream_Back_Ingest_Discover_Habr$', { async execute() {} });
   container.register('Mindstream_Back_Ingest_Extract_Habr$', { async execute() {} });
+  const cleanupCalls = [];
+  container.register('Mindstream_Back_Process_Publication_RetentionCleanup$', {async execute() { cleanupCalls.push(true); }});
 
   const commands = await Promise.all([
     container.get('Mindstream_Back_Cli_Ingest_Discover_Habr$'),
     container.get('Mindstream_Back_Cli_Ingest_Extract_Habr$'),
+    container.get('Mindstream_Back_Cli_Process_Publication_Retention$'),
   ]);
   assert.deepEqual(commands.map((command) => command.id), [
     'ingest:discover:habr',
     'ingest:extract:habr',
+    'maintenance:retention',
   ]);
   for (const command of commands) {
     assert.equal(command.lifetime, 'finite');
@@ -22,4 +26,5 @@ test('remaining Mindstream CLI products expose their Teq command identifiers', a
     assert.deepEqual(command.options, []);
     await command.execute({ args: {}, options: {} });
   }
+  assert.equal(cleanupCalls.length, 1);
 });

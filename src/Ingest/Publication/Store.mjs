@@ -9,11 +9,15 @@ export default class Mindstream_Back_Ingest_Publication_Store {
  * @param {Mindstream_Back_Storage_Database$} deps.database
  * @param {Mindstream_Back_Logger$} deps.logger
  * @param {Mindstream_Back_Ingest_Publication_Status$} deps.statusCatalog
+ * @param {Mindstream_Back_Ingest_Publication_Retention$} deps.retention
+ * @param {Mindstream_Back_Ingest_Publication_IdAllocator$} deps.idAllocator
  */
 constructor({
     database,
     logger,
     statusCatalog,
+    retention,
+    idAllocator,
   }) {
     const NAMESPACE = 'Mindstream_Back_Ingest_Publication_Store';
 
@@ -72,8 +76,7 @@ const ensureSource = async function (trx, source) {
  * @param {unknown} items
  * @returns {unknown}
  */
-const buildPublicationPayloads = function (items) {
-      const now = new Date().toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
+const buildPublicationPayloads = function (items, now) {
       return items.map((item) => ({
         source_id: item.source_id,
         source_item_hash: item.source_item_hash,
@@ -92,6 +95,7 @@ const buildPublicationPayloads = function (items) {
  * @param {unknown} deps
  * @param {unknown} deps.source
  * @param {unknown} deps.items
+ * @param {Date} [deps.now]
  * @returns {Promise<unknown>}
  */
 /**
@@ -100,34 +104,38 @@ const buildPublicationPayloads = function (items) {
  * @param {unknown} deps.items
  * @returns {Promise<unknown>}
  */
-this.saveDiscovered = async function ({ source, items }) {
+this.saveDiscovered = async function ({ source, items, now = new Date() }) {
       const rows = Array.isArray(items) ? items : [];
       if (!rows.length) {
         logger.info(NAMESPACE, 'No publications to persist.');
         return;
       }
 
+      const discoveredAt = now.toISOString().replace(/\.(\d{3})Z$/, (_match, fraction) => `.${fraction}000Z`);
+      const retained = rows.filter((item) => !retention.isExpired({
+        publishedAt: item.rss_published_at,
+        discoveredAt,
+        now,
+      }));
+      if (!retained.length) {
+        logger.info(NAMESPACE, 'No publications within the retention period to persist.');
+        return;
+      }
+
       const knexRef = getKnex();
       await knexRef.transaction(async (trx) => {
         await ensureSource(trx, source);
-        const payloads = buildPublicationPayloads(rows);
+        const payloads = buildPublicationPayloads(retained, discoveredAt);
         await trx.raw('SELECT pg_advisory_xact_lock(hashtextextended(?, 0))', ['mindstream_publication']);
-        const highest = await trx('mindstream_publication')
-          .select(trx.raw('CAST(MAX(??) AS TEXT) AS value', ['id']))
-          .first();
-        let nextId = BigInt(highest?.value ?? '0') + 1n;
-        for (const payload of payloads) {
-          if (nextId > 9223372036854775807n) throw new Error('Publication identity capacity exhausted.');
-          payload.id = nextId.toString();
-          nextId++;
-        }
+        const ids = await idAllocator.allocate(trx, payloads.length);
+        payloads.forEach((payload, index) => { payload.id = ids[index]; });
         await trx('mindstream_publication')
           .insert(payloads)
           .onConflict(['source_id', 'source_item_hash'])
           .ignore();
       });
 
-      logger.info(NAMESPACE, `Stored ${rows.length} discovered publications.`);
+      logger.info(NAMESPACE, `Stored ${retained.length} discovered publications within the retention period.`);
     };
 
     /**
@@ -193,5 +201,7 @@ export const __deps__ = Object.freeze({
     database: 'Mindstream_Back_Storage_Database$',
     logger: 'Mindstream_Back_Logger$',
     statusCatalog: 'Mindstream_Back_Ingest_Publication_Status$',
+    retention: 'Mindstream_Back_Ingest_Publication_Retention$',
+    idAllocator: 'Mindstream_Back_Ingest_Publication_IdAllocator$',
   }),
 });

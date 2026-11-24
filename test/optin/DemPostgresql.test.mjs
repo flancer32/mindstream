@@ -522,3 +522,84 @@ test('DEM-RDB runs import, summary and embedding processing through the shared c
     }
   });
 });
+
+test('PostgreSQL retention removes expired publications and cascades without reusing their IDs', async () => {
+  await withSchema(async ({ schema, admin }) => {
+    const { container, storage, backend } = await openStorage(schema);
+    try {
+      container.register('Mindstream_Back_Storage_Database$', {get: () => storage.getClient()});
+      container.register('Mindstream_Back_Logger$', {info() {}, exception() {}});
+      const sourceRepository = await backend.get({path: '/mindstream/source'});
+      const source = (await sourceRepository.create({record: {
+        code: 'retention-test', url: 'https://example.test/retention', name: 'Retention test', description: null,
+        is_active: true, created_at: timestamp, updated_at: timestamp,
+      }})).record;
+      const publicationRepository = await backend.get({path: '/mindstream/publication'});
+      const createPublication = async (hash, publishedAt, discoveredAt) => (await publicationRepository.create({record: {
+        source_id: source.id, source_item_hash: hash.repeat(64), source_url: `https://example.test/retention/${hash}`,
+        rss_title: hash, rss_guid: hash, rss_published_at: publishedAt, discovered_at: discoveredAt,
+      }})).record;
+      const recent = await createPublication('a', '2026-08-16T00:00:00.001Z', '2026-11-23T12:34:56.123456Z');
+      const expiredPublished = await createPublication('b', '2026-08-15T23:59:59.999Z', '2026-11-23T12:34:56.123456Z');
+      const boundary = await createPublication('c', '2026-08-16T00:00:00.000Z', '2026-11-23T12:34:56.123456Z');
+      const expiredUndated = await createPublication('d', null, '2026-08-15T00:00:00.000Z');
+      const highestBeforeCleanup = BigInt(expiredUndated.id);
+
+      const identityRepository = await backend.get({path: '/mindstream/identity'});
+      const identity = (await identityRepository.create({record: {
+        identity_uuid: '00000000-0000-4000-8000-000000000004', registered_at: timestamp,
+      }})).record;
+      const extractionRepository = await backend.get({path: '/mindstream/extraction'});
+      const summaryRepository = await backend.get({path: '/mindstream/summary'});
+      const embeddingRepository = await backend.get({path: '/mindstream/embedding'});
+      const attentionRepository = await backend.get({path: '/mindstream/attention'});
+      const oldPublications = [expiredPublished, boundary, expiredUndated];
+      const vector = Array(1536).fill(0.25);
+      for (const publication of oldPublications) {
+        await extractionRepository.create({record: {
+          publication_id: publication.id, html: null, md_text: 'expired text', created_at: timestamp,
+        }});
+        await summaryRepository.create({record: {
+          publication_id: publication.id, overview: 'expired overview', annotation: 'expired annotation', created_at: timestamp,
+        }});
+        await embeddingRepository.create({record: {
+          publication_id: publication.id, overview_embedding: vector, annotation_embedding: vector, created_at: timestamp,
+        }});
+        await attentionRepository.create({record: {
+          identity_id: identity.id, publication_id: publication.id, attention_type: 'overview_view', created_at: timestamp,
+        }});
+      }
+      await attentionRepository.create({record: {
+        identity_id: identity.id, publication_id: recent.id, attention_type: 'overview_view', created_at: timestamp,
+      }});
+
+      const cleanup = await container.get('Mindstream_Back_Process_Publication_RetentionCleanup$');
+      const now = new Date('2026-11-24T00:00:00.000Z');
+      assert.deepEqual(await cleanup.execute({now}), {deleted: 3, cutoff: '2026-08-16T00:00:00.000000Z'});
+      assert.deepEqual(await cleanup.execute({now}), {deleted: 0, cutoff: '2026-08-16T00:00:00.000000Z'});
+
+      const client = storage.getClient();
+      assert.deepEqual((await client('mindstream_publication').select('id')).map(({id}) => String(id)), [recent.id]);
+      for (const table of ['mindstream_extraction', 'mindstream_summary', 'mindstream_embedding']) {
+        assert.equal(Number((await client(table).count('* as count'))[0].count), 0);
+      }
+      assert.equal(Number((await client('mindstream_attention').count('* as count'))[0].count), 1);
+      assert.equal(Number((await client('mindstream_source').count('* as count'))[0].count), 1);
+      assert.equal(Number((await client('mindstream_identity').count('* as count'))[0].count), 1);
+
+      const importer = await container.get('Mindstream_Back_Ingest_Import$');
+      const imported = await importer.execute({
+        source: {id: 2, code: 'journal', name: 'Journal', url: 'https://example.test/journal'},
+        url: 'https://example.test/journal/after-cleanup', title: 'After cleanup',
+        publishedAt: new Date().toISOString(), markdown: 'New article after cleanup.',
+      });
+      assert.equal(imported.created, true);
+      assert.ok(BigInt(imported.id) > highestBeforeCleanup);
+      const staleIdLookup = await client('mindstream_publication').where({id: expiredUndated.id}).first();
+      assert.equal(staleIdLookup, undefined);
+      assert.equal(Number((await admin.query(`SELECT count(*) FROM "${schema}".mindstream_publication`)).rows[0].count), 2);
+    } finally {
+      await storage.close();
+    }
+  });
+});

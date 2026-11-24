@@ -26,7 +26,7 @@ Declare the required referential actions through Format 2 `onDelete` and `onUpda
 
 The selected adapter must enforce the required referential actions and closed attention type set for every write path, including application-owned SQL. Repository validation alone is insufficient. Do not assume that altering adapter-owned constraints is supported; verify compatibility with its layout validation before changing the schema.
 
-Numeric identity and reference values use DEM's normalized string representation and PostgreSQL `bigint`. Use DEM-RDB repository generation for generated IDs. Application-owned SQL writing those entities must supply IDs consistent with the selected allocation contract. Preserve existing externally visible numeric identifiers where conversion is exact and safe. Reject unsafe conversion at the API boundary.
+Numeric identity and reference values use DEM's normalized string representation and PostgreSQL `bigint`. Use DEM-RDB repository generation for generated IDs. Application-owned publication writes allocate IDs from the persistent PostgreSQL sequence `mindstream_publication_id_seq` under the publication advisory lock. The allocator advances the sequence past existing IDs before use, and retention cleanup never resets it. Preserve existing externally visible numeric identifiers where conversion is exact and safe. Reject unsafe conversion at the API boundary.
 
 DEM-RDB stores datetime values as text in PostgreSQL. Use canonical UTC values with six fractional digits where represented by the schema. Queries that compare datetime values or use them in a cursor must use the same canonical representation.
 
