@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/di-compatibility.md`
 - Template Version: `20260619`
-- Changed: `20260803`
+- Changed: `20261124`
 
 ## Purpose
 
@@ -103,8 +103,7 @@ The following uses of `node_modules` dependencies are prohibited and are archite
 The project fixes the following production composition roots:
 
 - one for `Back`;
-- one for `Web`;
-- one for Service Worker.
+- one for `Web`.
 
 Tests use a **separate composition root**, created either per test suite or per unit test.
 

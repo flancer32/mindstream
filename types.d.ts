@@ -46,8 +46,6 @@ declare global {
   type Mindstream_Back_Attention_Ingress$ = InstanceType<Mindstream_Back_Attention_Ingress>;
   type Mindstream_Back_Cli_Db_Schema_Create = typeof import("./src/Cli/Db/Schema/Create.mjs").default;
   type Mindstream_Back_Cli_Db_Schema_Create$ = InstanceType<Mindstream_Back_Cli_Db_Schema_Create>;
-  type Mindstream_Back_Cli_Db_Schema_MigrateV2 = typeof import("./src/Cli/Db/Schema/MigrateV2.mjs").default;
-  type Mindstream_Back_Cli_Db_Schema_MigrateV2$ = InstanceType<Mindstream_Back_Cli_Db_Schema_MigrateV2>;
   type Mindstream_Back_Cli_Db_Schema_Renew = typeof import("./src/Cli/Db/Schema/Renew.mjs").default;
   type Mindstream_Back_Cli_Db_Schema_Renew$ = InstanceType<Mindstream_Back_Cli_Db_Schema_Renew>;
   type Mindstream_Back_Cli_Ingest_Discover_Habr = typeof import("./src/Cli/Ingest/Discover/Habr.mjs").default;
@@ -100,8 +98,6 @@ declare global {
   type Mindstream_Back_Storage_Database$ = InstanceType<Mindstream_Back_Storage_Database>;
   type Mindstream_Back_Storage_DemDatabase = typeof import("./src/Storage/DemDatabase.mjs").default;
   type Mindstream_Back_Storage_DemDatabase$ = InstanceType<Mindstream_Back_Storage_DemDatabase>;
-  type Mindstream_Back_Storage_LegacyMigration = typeof import("./src/Storage/LegacyMigration.mjs").default;
-  type Mindstream_Back_Storage_LegacyMigration$ = InstanceType<Mindstream_Back_Storage_LegacyMigration>;
   type Mindstream_Back_Web_Api_Attention = typeof import("./src/Web/Api/Attention.mjs").default;
   type Mindstream_Back_Web_Api_Attention$ = InstanceType<Mindstream_Back_Web_Api_Attention>;
   type Mindstream_Back_Web_Api_Fallback = typeof import("./src/Web/Api/Fallback.mjs").default;

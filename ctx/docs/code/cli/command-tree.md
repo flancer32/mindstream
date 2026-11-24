@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/cli/command-tree.md`
 - Template Version: `20260619`
-- Changed: `20261120`
+- Changed: `20261124`
 
 ## Purpose
 
@@ -14,36 +14,12 @@ This document defines the canonical space of allowed CLI commands for the Mindst
 ingest:discover:habr
 ingest:extract:habr
 ingest:import
-db:schema:migrate-legacy-to-dem-rdb
 process:generate:embeddings
 process:generate:summaries
 web:start
 ```
 
 Commands absent from this hierarchy are invalid.
-
-## Command Registry
-
-Schema initialization and explicit migration follow the storage lifecycle contract.
-
-### `db:schema:migrate-legacy-to-dem-rdb`
-
-Contour: maintenance.
-
-Purpose: copy an existing MindStream PostgreSQL dataset from a legacy schema into an initialized DEM-RDB target schema.
-
-Parameter: optional `--source-schema` using an unquoted lowercase PostgreSQL identifier; defaults to `public`.
-
-Constraints:
-
-- target schema is the first schema in `TEQFW_DEM_RDB__SEARCH_PATH` and must differ from the legacy source schema;
-- target domain tables must be empty;
-- source tables must match the supported legacy MindStream table set and satisfy the migration preflight checks;
-- bootstrap initializes target tables and model history before the copy transaction;
-- domain rows are copied in one transaction, preserving identifiers, timestamps, and vector values as represented by PostgreSQL/DEM-RDB; on copy failure, the initialized target remains empty of domain data;
-- source tables are retained and never modified;
-- migration is run explicitly by an operator with writers stopped and a verified backup;
-- does not start runtime or processing.
 
 ### `ingest:discover:habr`
 

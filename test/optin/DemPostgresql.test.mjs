@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import test from 'node:test';
 
@@ -64,88 +63,32 @@ const openStorage = async function (schema, includePublic = true) {
 
 const timestamp = '2026-11-23T12:34:56.123456Z';
 
-test('PostgreSQL consolidation is atomic and DEM-RDB reopens with public as its only schema', async () => {
-  const sql = await readFile(path.join(projectRoot, '.github/scripts/consolidate-postgresql.sql'), 'utf8');
-  const legacy = [
-    'anonymous_identities', 'attention_states', 'publication_embeddings', 'publication_extractions',
-    'publication_sources', 'publication_summaries', 'publications', 'schema_version',
-  ];
+test('DEM-RDB initializes and reopens with public as its only schema', async () => {
+  const admin = await createAdminClient();
+  await admin.connect();
   const current = [
     'dem_application', 'dem_snapshot', 'mindstream_attention', 'mindstream_embedding', 'mindstream_extraction',
     'mindstream_identity', 'mindstream_publication', 'mindstream_source', 'mindstream_summary',
   ];
-  const admin = await createAdminClient();
-  await admin.connect();
+  const listTables = () => admin.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
   try {
-    const layout = await admin.query(`
-      SELECT to_regnamespace('mindstream_data') IS NULL AS staging_absent,
-        NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public') AS public_empty
-    `);
-    assert.deepEqual(layout.rows[0], { staging_absent: true, public_empty: true });
-    await admin.query('CREATE SCHEMA mindstream_data');
+    assert.deepEqual((await listTables()).rows, []);
     try {
-      await admin.query(legacy.map((name) => `CREATE TABLE public.${name} (id integer);`).join('\n'));
-      const first = await openStorage('mindstream_data');
+      const first = await openStorage('public', false);
       try {
-        const sourceRepo = await first.backend.get({ path: '/mindstream/source' });
-        const source = (await sourceRepo.create({ record: {
-          code: 'consolidation', url: 'https://example.test/feed', name: 'Consolidation',
-          is_active: true, created_at: timestamp, updated_at: timestamp,
-        } })).record;
-        const pubRepo = await first.backend.get({ path: '/mindstream/publication' });
-        const publication = (await pubRepo.create({ record: {
-          source_id: source.id, source_item_hash: 'a'.repeat(64), source_url: 'https://example.test/post',
-          rss_title: 'Test', rss_published_at: timestamp, discovered_at: timestamp,
-        } })).record;
-        const client = first.storage.getClient();
-        await client('mindstream_summary').insert({
-          publication_id: publication.id, overview: 'Overview', annotation: 'Annotation', created_at: timestamp,
-        });
-        const vector = JSON.stringify(Array(1536).fill(0.1));
-        await client('mindstream_embedding').insert({
-          publication_id: publication.id, overview_embedding: vector, annotation_embedding: vector, created_at: timestamp,
-        });
+        assert.equal(first.history.created, true);
+        assert.deepEqual((await listTables()).rows.map(({ tablename }) => tablename), current);
       } finally {
         await first.storage.close();
       }
-
-      await admin.query('CREATE TABLE mindstream_data.unexpected (id integer)');
-      await assert.rejects(admin.query(`BEGIN; ${sql} COMMIT;`), { code: '2BP01' });
-      await admin.query('ROLLBACK');
-      const before = await admin.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
-      assert.deepEqual(before.rows.map(({ tablename }) => tablename), legacy);
-      await admin.query('DROP TABLE mindstream_data.unexpected');
-      await admin.query(`BEGIN; ${sql} COMMIT;`);
-
-      const after = await admin.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
-      assert.deepEqual(after.rows.map(({ tablename }) => tablename), current);
-      const namespace = await admin.query("SELECT to_regnamespace('mindstream_data') AS staging");
-      assert.equal(namespace.rows[0].staging, null);
-
-      const { backend, container, storage, history } = await openStorage('public', false);
+      const reopened = await openStorage('public', false);
       try {
-        assert.equal(history.created, false);
-        container.register('Mindstream_Back_Storage_Database$', { get: () => storage.getClient() });
-        container.register('Mindstream_Back_Logger$', { debug() {}, info() {}, exception() {} });
-        const feedApi = await container.get('Mindstream_Back_Web_Api_FeedView$');
-        const feed = await feedApi.getFeedView();
-        assert.equal(feed.items.length, 1);
-        assert.equal(feed.items[0].embeddings.overview.length, 1536);
-        assert.equal(feed.items[0].embeddings.overview[0], Math.fround(0.1));
-        const identityRepo = await backend.get({ path: '/mindstream/identity' });
-        const identity = (await identityRepo.create({ record: {
-          identity_uuid: '00000000-0000-4000-8000-000000000003', registered_at: timestamp,
-        } })).record;
-        const ingress = await container.get('Mindstream_Back_Attention_Ingress$');
-        assert.deepEqual(await ingress.accept({
-          identity: identity.identity_uuid, publication_id: feed.items[0].id, attention_type: 'overview_view',
-        }), { ok: true });
+        assert.equal(reopened.history.created, false);
       } finally {
-        await storage.close();
+        await reopened.storage.close();
       }
     } finally {
-      await admin.query('DROP SCHEMA IF EXISTS mindstream_data CASCADE');
-      await admin.query(`DROP TABLE IF EXISTS ${[...current, ...legacy].map((name) => `public.${name}`).join(', ')}`);
+      await admin.query(`DROP TABLE IF EXISTS ${current.map((name) => `public.${name}`).join(', ')}`);
     }
   } finally {
     await admin.end();
@@ -347,9 +290,7 @@ test('PostgreSQL feed API pages canonical microsecond timestamps and decodes nat
     try {
       container.register('Mindstream_Back_Storage_Database$', {
         get: () => storage.getClient(),
-        getCompilation: () => storage.getCompilation(),
         getBackend: () => backend,
-        openBackend: (options) => storage.openBackend(options),
       });
       container.register('Mindstream_Back_Logger$', { debug() {}, info() {}, exception() {} });
       const feedApi = await container.get('Mindstream_Back_Web_Api_FeedView$');
@@ -430,8 +371,6 @@ test('PostgreSQL attention ingress is idempotent under concurrent duplicate writ
     try {
       container.register('Mindstream_Back_Storage_Database$', {
         get: () => storage.getClient(),
-        getCompilation: () => storage.getCompilation(),
-        openBackend: (options) => storage.openBackend(options),
       });
       const sourceRepository = await backend.get({ path: '/mindstream/source' });
       const source = (await sourceRepository.create({ record: {
@@ -494,8 +433,6 @@ test('PostgreSQL publication import rolls back source and publication when extra
     try {
       container.register('Mindstream_Back_Storage_Database$', {
         get: () => storage.getClient(),
-        getCompilation: () => storage.getCompilation(),
-        openBackend: (options) => storage.openBackend(options),
       });
       container.register('Mindstream_Back_Logger$', { info() {}, exception() {} });
       const importer = await container.get('Mindstream_Back_Ingest_Import$');
@@ -536,9 +473,7 @@ test('DEM-RDB runs import, summary and embedding processing through the shared c
     try {
       container.register('Mindstream_Back_Storage_Database$', {
         get: () => storage.getClient(),
-        getCompilation: () => storage.getCompilation(),
         getBackend: () => backend,
-        openBackend: (options) => storage.openBackend(options),
       });
       container.register('Mindstream_Back_Logger$', { debug() {}, info() {}, warn() {}, exception() {} });
       container.register('Mindstream_Back_Integration_OpenAi$', {
@@ -584,149 +519,6 @@ test('DEM-RDB runs import, summary and embedding processing through the shared c
       assert.equal(embedding.overview_embedding[0], Math.fround(0.2));
     } finally {
       await storage.close();
-    }
-  });
-});
-
-test('legacy migration copies all supported rows atomically and preserves the source schema', async () => {
-  await withSchema(async ({ schema: targetSchema, admin }) => {
-    const sourceSchema = `${targetSchema}_legacy`;
-    await admin.query(`CREATE SCHEMA "${sourceSchema}"`);
-    const { container, storage, backend } = await openStorage(targetSchema);
-    try {
-      await admin.query(`CREATE TABLE "${sourceSchema}".schema_version (
-        id bigint PRIMARY KEY, schema_version integer NOT NULL, schema_json text NOT NULL, applied_at timestamptz NOT NULL
-      )`);
-      container.register('Mindstream_Back_Storage_Database$', {
-        get: () => storage.getClient(),
-        getCompilation: () => storage.getCompilation(),
-        openBackend: (options) => storage.openBackend(options),
-      });
-      const migration = await container.get('Mindstream_Back_Storage_LegacyMigration$');
-      await assert.rejects(migration.execute({ sourceSchema }), /Legacy table set differs/u);
-      for (const table of ['source', 'publication', 'extraction', 'summary', 'embedding', 'identity', 'attention']) {
-        const rows = await admin.query(`SELECT count(*) FROM "${targetSchema}"."mindstream_${table}"`);
-        assert.equal(Number(rows.rows[0].count), 0, `${table} should remain empty after an incomplete legacy layout`);
-      }
-      assert.equal(Number((await admin.query(`SELECT count(*) FROM "${sourceSchema}".schema_version`)).rows[0].count), 0);
-      await admin.query(`DROP TABLE "${sourceSchema}".schema_version`);
-
-      await admin.query(`
-        CREATE TABLE "${sourceSchema}".schema_version (
-          id bigint PRIMARY KEY, schema_version integer NOT NULL, schema_json text NOT NULL, applied_at timestamptz NOT NULL
-        );
-        CREATE TABLE "${sourceSchema}".publication_sources (
-          id bigint PRIMARY KEY, code varchar(64) UNIQUE NOT NULL, url varchar(255) UNIQUE NOT NULL,
-          name varchar(255) NOT NULL, description text, is_active boolean NOT NULL,
-          created_at timestamptz NOT NULL, updated_at timestamptz NOT NULL
-        );
-        CREATE TABLE "${sourceSchema}".anonymous_identities (
-          id bigint PRIMARY KEY, identity_uuid varchar(36) UNIQUE NOT NULL, registered_at timestamptz NOT NULL
-        );
-        CREATE TABLE "${sourceSchema}".publications (
-          id bigint PRIMARY KEY, source_id bigint NOT NULL REFERENCES "${sourceSchema}".publication_sources(id),
-          source_item_hash varchar(64) NOT NULL, source_url varchar(1024) NOT NULL,
-          rss_title varchar(512), rss_guid varchar(255), rss_published_at timestamptz,
-          discovered_at timestamptz NOT NULL, status varchar(32) NOT NULL,
-          UNIQUE(source_id, source_item_hash)
-        );
-        CREATE TABLE "${sourceSchema}".publication_extractions (
-          publication_id bigint PRIMARY KEY REFERENCES "${sourceSchema}".publications(id),
-          html text, md_text text, created_at timestamptz NOT NULL
-        );
-        CREATE TABLE "${sourceSchema}".publication_summaries (
-          publication_id bigint PRIMARY KEY REFERENCES "${sourceSchema}".publications(id),
-          overview text NOT NULL, annotation text NOT NULL, created_at timestamptz NOT NULL
-        );
-        CREATE TABLE "${sourceSchema}".publication_embeddings (
-          publication_id bigint PRIMARY KEY REFERENCES "${sourceSchema}".publications(id),
-          overview_embedding vector(1536) NOT NULL, annotation_embedding vector(1536) NOT NULL,
-          created_at timestamptz NOT NULL
-        );
-        CREATE TABLE "${sourceSchema}".attention_states (
-          identity_id bigint NOT NULL REFERENCES "${sourceSchema}".anonymous_identities(id),
-          publication_id bigint NOT NULL REFERENCES "${sourceSchema}".publications(id),
-          attention_type varchar(32) NOT NULL CHECK (attention_type IN ('overview_view', 'link_click', 'link_click_after_overview')),
-          created_at timestamptz NOT NULL, PRIMARY KEY(identity_id, publication_id, attention_type)
-        );
-        INSERT INTO "${sourceSchema}".schema_version VALUES (1, 2, '{}', '${timestamp}');
-        INSERT INTO "${sourceSchema}".publication_sources VALUES
-          (7, 'legacy', 'https://example.test', 'Legacy', NULL, TRUE, '${timestamp}', '${timestamp}'),
-          (9000000000000, 'legacy-high-id', 'https://example.test/high-id', 'High ID', NULL, TRUE, '${timestamp}', '${timestamp}');
-        INSERT INTO "${sourceSchema}".anonymous_identities VALUES (9, '00000000-0000-4000-8000-000000000009', '${timestamp}');
-        INSERT INTO "${sourceSchema}".publications VALUES (11, 7, repeat('a', 64), 'https://example.test/11', 'Legacy item', 'legacy-11', '${timestamp}', '${timestamp}', 'ready');
-        INSERT INTO "${sourceSchema}".publication_extractions VALUES (11, '<p>legacy</p>', 'legacy markdown', '${timestamp}');
-        INSERT INTO "${sourceSchema}".publication_summaries VALUES (11, 'overview', 'annotation', '${timestamp}');
-        INSERT INTO "${sourceSchema}".publication_embeddings VALUES (11, array_fill(0.1::real, ARRAY[1536])::vector, array_fill(0.2::real, ARRAY[1536])::vector, '${timestamp}');
-        INSERT INTO "${sourceSchema}".attention_states VALUES (9, 11, 'overview_view', '${timestamp}');
-      `);
-
-      await admin.query(`ALTER TABLE "${targetSchema}".mindstream_summary ADD CONSTRAINT fail_migration_test CHECK (overview <> 'overview')`);
-      await assert.rejects(migration.execute({ sourceSchema }));
-      for (const table of ['source', 'publication', 'extraction', 'summary', 'embedding', 'identity', 'attention']) {
-        const rows = await admin.query(`SELECT count(*) FROM "${targetSchema}"."mindstream_${table}"`);
-        assert.equal(Number(rows.rows[0].count), 0, `${table} rows should roll back after a copy failure`);
-      }
-      await admin.query(`ALTER TABLE "${targetSchema}".mindstream_summary DROP CONSTRAINT fail_migration_test`);
-
-      const result = await migration.execute({ sourceSchema });
-      assert.equal(result.sourceSchema, sourceSchema);
-      assert.equal(result.targetSchema, targetSchema);
-      assert.deepEqual(Object.fromEntries(Object.entries(result.after).map(([table, count]) => [table, count.toString()])), {
-        publication_sources: '2', publications: '1', publication_extractions: '1', publication_summaries: '1',
-        publication_embeddings: '1', anonymous_identities: '1', attention_states: '1',
-      });
-      const migrated = await admin.query(
-        `SELECT s.id::text, s.is_active, s.created_at, p.id::text AS publication_id,
-                e.md_text, sm.overview, a.attention_type
-         FROM "${targetSchema}".mindstream_source s
-         JOIN "${targetSchema}".mindstream_publication p ON p.source_id = s.id
-         JOIN "${targetSchema}".mindstream_extraction e ON e.publication_id = p.id
-         JOIN "${targetSchema}".mindstream_summary sm ON sm.publication_id = p.id
-         JOIN "${targetSchema}".mindstream_attention a ON a.publication_id = p.id
-         ORDER BY s.id`,
-      );
-      assert.equal(migrated.rows[0].id, '7');
-      assert.equal(migrated.rows[0].publication_id, '11');
-      assert.equal(migrated.rows[0].is_active, 1);
-      assert.equal(migrated.rows[0].created_at, timestamp);
-      assert.equal(migrated.rows[0].md_text, 'legacy markdown');
-      assert.equal(migrated.rows[0].overview, 'overview');
-      assert.equal(migrated.rows[0].attention_type, 'overview_view');
-      const embeddingRepository = await backend.get({ path: '/mindstream/embedding' });
-      const embedding = (await embeddingRepository.read({ key: { kind: 'primary', values: { publication_id: '11' } } })).record;
-      assert.equal(embedding.overview_embedding.length, 1536);
-      assert.equal(embedding.overview_embedding[0], Math.fround(0.1));
-
-      const sourceRowsBefore = await admin.query(`SELECT count(*) FROM "${sourceSchema}".publications`);
-      assert.equal(Number(sourceRowsBefore.rows[0].count), 1);
-      const sourceRepository = await backend.get({ path: '/mindstream/source' });
-      const next = (await sourceRepository.create({ record: {
-        code: 'after-migration', url: 'https://example.test/after', name: 'After', description: null,
-        is_active: true, created_at: timestamp, updated_at: timestamp,
-      } })).record;
-      assert.ok(BigInt(next.id) > 9000000000000n);
-      const publicationRepository = await backend.get({ path: '/mindstream/publication' });
-      const nextPublication = (await publicationRepository.create({ record: {
-        source_id: next.id,
-        source_item_hash: 'd'.repeat(64),
-        source_url: 'https://example.test/after-migration',
-        rss_title: 'After migration',
-        rss_guid: 'after-migration',
-        discovered_at: timestamp,
-      } })).record;
-      assert.ok(BigInt(nextPublication.id) > 11n);
-      const identityRepository = await backend.get({ path: '/mindstream/identity' });
-      const nextIdentity = (await identityRepository.create({ record: {
-        identity_uuid: '00000000-0000-4000-8000-000000000010', registered_at: timestamp,
-      } })).record;
-      assert.ok(BigInt(nextIdentity.id) > 9n);
-      await assert.rejects(migration.execute({ sourceSchema }), /Target table 'mindstream_source' is not empty/);
-      const sourceRowsAfter = await admin.query(`SELECT count(*) FROM "${sourceSchema}".publications`);
-      assert.equal(Number(sourceRowsAfter.rows[0].count), 1);
-    } finally {
-      await storage.close();
-      await admin.query(`DROP SCHEMA "${sourceSchema}" CASCADE`);
     }
   });
 });

@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/overview.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20261124`
 
 ## Purpose
 
@@ -67,7 +67,7 @@ The following stable zones exist in the codebase:
 
 - **execution entry zone** — code that initiates application and task startup;
 - **server application zone** — implementation of API and server logic;
-- **client zone** — static frontend artifacts delivered as a PWA;
+- **client zone** — static browser assets served by the Node.js application;
 - **testing zone** — code that verifies correctness of the server and client parts.
 
 These zones reflect **different code roles** and must not be mixed.
@@ -80,7 +80,6 @@ Within the code layer, the following are considered invalid:
 
 - mixing startup logic with application logic;
 - placing client static assets inside server modules;
-- using server code to serve static assets;
 - introducing alternative entry points that are inconsistent with the project form.
 
 Structural form supports iterative evolution and is not a temporary per-task convention.

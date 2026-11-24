@@ -95,30 +95,20 @@ jobs:
               . "$BACKUP_ENV"
               set +a
 
-              # The previous release may still use the legacy database configuration.
-              DB_CONFIG=TEQFW_DEM_RDB
-              if [ -z "${TEQFW_DEM_RDB__DATABASE:-}${TEQFW_DEM_RDB__USER:-}" ]; then
-                DB_CONFIG=TEQFW_DB
-              fi
-              DB_NAME_KEY="${DB_CONFIG}__DATABASE"
-              DB_USER_KEY="${DB_CONFIG}__USER"
-              DB_HOST_KEY="${DB_CONFIG}__HOST"
-              DB_PORT_KEY="${DB_CONFIG}__PORT"
-              DB_PASSWORD_KEY="${DB_CONFIG}__PASSWORD"
-              : "${!DB_NAME_KEY:?Database name is required for deployment backup}"
-              : "${!DB_USER_KEY:?Database user is required for deployment backup}"
+              : "${TEQFW_DEM_RDB__DATABASE:?Database name is required for deployment backup}"
+              : "${TEQFW_DEM_RDB__USER:?Database user is required for deployment backup}"
 
               mkdir -p "$BACKUP_DIR"
               chmod 700 "$BACKUP_DIR"
               BACKUP_FILE="$BACKUP_DIR/${{ env.PRJ }}_${TIMESTAMP}.dump"
 
-              PGPASSWORD="${!DB_PASSWORD_KEY:-}" pg_dump \
+              PGPASSWORD="${TEQFW_DEM_RDB__PASSWORD:-}" pg_dump \
                 --format=custom \
-                --host="${!DB_HOST_KEY:-localhost}" \
-                --port="${!DB_PORT_KEY:-5432}" \
-                --username="${!DB_USER_KEY}" \
+                --host="${TEQFW_DEM_RDB__HOST:-localhost}" \
+                --port="${TEQFW_DEM_RDB__PORT:-5432}" \
+                --username="$TEQFW_DEM_RDB__USER" \
                 --file="$BACKUP_FILE" \
-                "${!DB_NAME_KEY}"
+                "$TEQFW_DEM_RDB__DATABASE"
               pg_restore --list "$BACKUP_FILE" >/dev/null
 
               # Keep the most recent 30 days of deployment backups.
@@ -162,6 +152,16 @@ jobs:
             
             cd "${{ env.APP_DIR }}"
             mv "${{ env.PRJ }}.zip" "${{ env.PRJ }}-${TIMESTAMP}.zip"
+
+            # Keep release archives and one-time migration dumps for up to 183 days.
+            find . -maxdepth 1 -type f -regextype posix-extended \
+              -regex './mindstream-[0-9]{8}-[0-9]{6}\.zip' -mtime +182 -delete
+            if [ -d "$BACKUP_DIR" ]; then
+              find "$BACKUP_DIR" -maxdepth 2 -type f \
+                \( -path "$BACKUP_DIR/mindstream-pre-dem-rdb.*.dump" \
+                   -o -path "$BACKUP_DIR/mindstream-pre-public.*/mindstream.dump" \) \
+                -mtime +182 -delete
+            fi
 
             echo "Mindstream deployed successfully (PM2 cluster x4)"
             pm2 ls

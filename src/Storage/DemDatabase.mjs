@@ -19,8 +19,6 @@ export default class Mindstream_Back_Storage_DemDatabase {
     /** @type {any} */
     let backend;
     let state = 'new';
-    let compilation;
-    let boundRuntime;
 
     /** @param {unknown} error @param {string} action */
     const logCleanupFailure = (error, action) => {
@@ -42,10 +40,10 @@ export default class Mindstream_Back_Storage_DemDatabase {
         registry.finalize();
 
         const inputs = await acquire.exec({ hostRoot });
-        compilation = await compile.exec(inputs);
+        const compilation = await compile.exec(inputs);
         compile.assertResult({ value: compilation });
 
-        boundRuntime = runtime.bind({
+        const boundRuntime = runtime.bind({
           model: compilation.model,
           registry,
           handlers: [vectorHandler],
@@ -80,23 +78,11 @@ export default class Mindstream_Back_Storage_DemDatabase {
       return connection.getClient();
     };
 
-    this.getCompilation = function () {
-      if (state !== 'ready' || !compilation) throw new Error('DEM storage is not initialized.');
-      return compilation;
-    };
-
-    this.openBackend = async function ({ connection: scopedConnection }) {
-      if (state !== 'ready' || !compilation || !boundRuntime) throw new Error('DEM storage is not initialized.');
-      return adapter.open({ model: compilation.model, runtime: boundRuntime, connection: scopedConnection });
-    };
-
     this.close = async function () {
       if (state !== 'ready') return;
       state = 'closed';
       const ownedBackend = backend;
       backend = undefined;
-      compilation = undefined;
-      boundRuntime = undefined;
       let failure;
       try { await ownedBackend.close(); } catch (error) { failure = error; }
       try { await connection.disconnect(); } catch (error) { failure ??= error; }

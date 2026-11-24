@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/code/testing.md`
 - Template Version: `20260619`
-- Changed: `20261123`
+- Changed: `20261124`
 
 ## Purpose
 
@@ -53,9 +53,9 @@ Real side effects are prohibited in unit tests, including filesystem access, net
 
 ## Test Types
 
-Focused PostgreSQL integration checks are required for storage lifecycle, critical data flows and migration cutover. They use an isolated disposable database and must not mutate production data. Verify the declared FK actions, including the source delete restriction, propagation of key updates, and deletion of direct dependents of publications and identities. Verify accepted attention types and rejection of invalid direct SQL inserts and updates. Reopen must accept a matching layout and reject missing or divergent FK and CHECK constraints before writes, including changed definitions under the expected names. Check transactional rollback.
+Focused PostgreSQL integration checks are required for storage lifecycle and critical data flows. They use an isolated disposable database and must not mutate production data. Verify the declared FK actions, including the source delete restriction, propagation of key updates, and deletion of direct dependents of publications and identities. Verify accepted attention types and rejection of invalid direct SQL inserts and updates. Reopen must accept a matching layout and reject missing or divergent FK and CHECK constraints before writes, including changed definitions under the expected names. Check transactional rollback.
 
-Use PostgreSQL with pgvector to verify both native `vector(1536)` columns and the float32 round trip through DEM-RDB. Verify that initialization fails before writes when the vector type is unavailable on the application search path, and that reopen rejects an incompatible vector column. Migration checks compare every stored legacy component with the value read through the target codec, preserving order and float32 values. Unit tests remain the default for other code; broader test types are not required by default.
+Use PostgreSQL with pgvector to verify both native `vector(1536)` columns and the float32 round trip through DEM-RDB. Verify that initialization fails before writes when the vector type is unavailable on the application search path, and that reopen rejects an incompatible vector column. Feed checks compare each float32 component in both vectors and verify that duplicate writes preserve the original vectors. Unit tests remain the default for other code; broader test types are not required by default.
 
 ## Testing Tools
 

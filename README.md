@@ -27,7 +27,7 @@ Mindstream не является рекомендательным сервисо
 ## Состав репозитория
 
 - `src/` — backend (ingest, processing, API, storage).
-- `web/` — клиентская PWA и интерфейс ленты.
+- `web/` — браузерный клиент и интерфейс ленты.
 - `ctx/` — когнитивный контекст и нормативная документация проекта.
 
 ## Требования
@@ -66,14 +66,11 @@ CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
 Generation commands use an external LLM API and require the `MINDSTREAM__LLM_*` settings.
 После запуска откройте `http://localhost:3000`.
 
-### One-time Production Schema Consolidation
+### Восстановление дампов до DEM-RDB
 
-1. Schedule maintenance, verify restoration of an independent backup, pause writers outside the deployment account, and keep deployments paused during the cutover. Review the deployment account's cron entries, including entries with the `# DEM-RDB maintenance:` prefix. The script re-enables those entries.
-2. Dispatch **LIVE - Consolidate PostgreSQL into public once** on `main` with `maintenance_confirmed=true`. For a manual run as the production deployment account, use `bash .github/scripts/consolidate-postgresql.sh /path/to/app/mindstream` from a checkout containing the script and its companion SQL file.
-3. The script pauses MindStream cron jobs, stops PM2, reads back a fresh backup, and runs the cleanup in one PostgreSQL transaction. It sets the deployed search path to `public`, starts PM2, and checks the local feed before resuming cron. Keep the backup and the saved configuration and crontab under `var/backups/postgresql/mindstream-pre-public.*` until cutover is accepted.
-4. If a failure occurs after the database transaction commits, use the printed maintenance directory to recover. With a successfully migrated database, complete the configuration switch to `public`, restart PM2 and verify the feed before restoring `crontab.after`. For a full rollback, restore the pre-cutover dump and use `env.before` and `crontab.before`.
+Для старых дампов используйте [проверенный коммит с миграцией](https://github.com/flancer32/mindstream/tree/b4ec5e8bde63dae23b7cf4642094e9b5e3e2ef3c). В его README описан переход в `public`. Команда `npm run db:migrate-legacy -- --source-schema public` из того коммита копирует данные в отдельную пустую целевую схему DEM-RDB. Восстанавливайте и проверяйте дамп в изолированной базе.
 
-The legacy copy command remains available for recovery from a pre-DEM database. Its source and target schemas must be separate.
+При деплое сервер удаляет ZIP-архивы релизов и одноразовые миграционные дампы по достижении 183 дней. Для обычных дампов действует отдельная ротация в 30 дней.
 
 ## Attention API (MVP)
 
@@ -108,4 +105,4 @@ Payload:
 
 Быстрые локальные проверки: `npm test`. Команда запускает unit-тесты и проверки файлов приложения. Только unit-тесты: `npm run test:unit`.
 
-Run the isolated DEM-RDB and migration checks with `npm run test:postgresql:dem`. Use a dedicated test database named `dem_rdb_test` with the `vector` extension in `public`, no tables in `public`, and no `mindstream_data` schema. The test role needs permission to create schemas and tables in `public`. By default, tests use the local Unix socket and the role in `USER`. Override the connection with `DEM_TEST_PG_DATABASE`, `DEM_TEST_PG_HOST`, `DEM_TEST_PG_PORT`, `DEM_TEST_PG_USER` and, if needed, `DEM_TEST_PG_PASSWORD`.
+Run the isolated DEM-RDB checks with `npm run test:postgresql:dem`. Use a dedicated test database named `dem_rdb_test` with the `vector` extension in `public`, and no tables in `public`. The test role needs permission to create schemas and tables in `public`. By default, tests use the local Unix socket and the role in `USER`. Override the connection with `DEM_TEST_PG_DATABASE`, `DEM_TEST_PG_HOST`, `DEM_TEST_PG_PORT`, `DEM_TEST_PG_USER` and, if needed, `DEM_TEST_PG_PASSWORD`.

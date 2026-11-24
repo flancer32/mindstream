@@ -1,7 +1,7 @@
 # Code Storage Layer — Overview
 
 - Path: `ctx/docs/code/storage/overview.md`
-- Changed: `20261123`
+- Changed: `20261124`
 
 ## Boundary
 
@@ -21,6 +21,4 @@ Publication embeddings use the DEM-RDB vector extension with native PostgreSQL s
 
 Initialize an empty scope with the compiled application and DEM infrastructure entities. DEM-RDB records and validates model history in `/dem/snapshot` and `/dem/application`; a different, incomplete, or incompatible layout fails visibly. Initialization must not automatically rebuild or migrate persistent data.
 
-An explicit, operator-controlled migration transfers the old physical layout and data only after a separate restorable backup, compatibility preflight and a verified conversion plan. Validate row counts, keys, constraints, timestamps, identity and attention behavior, and every embedding value before accepting cutover. Failure stops cutover and uses the verified backup for rollback. No migration is inferred from matching names.
-
-Focused tests cover essential contracts; critical flows and migration require real isolated PostgreSQL verification. Schema details are defined in [schema.md](schema.md).
+Focused tests cover essential contracts; critical flows require real isolated PostgreSQL verification. Schema details are defined in [schema.md](schema.md).

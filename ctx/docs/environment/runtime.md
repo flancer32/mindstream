@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/environment/runtime.md`
 - Template Version: `20260619`
-- Changed: `20261120`
+- Changed: `20261124`
 
 ## Purpose
 
@@ -54,7 +54,7 @@ The runtime context describes:
 
 ## Client Environment
 
-- The client is designed as a **PWA** with a **mobile-first** approach.
+- The browser client uses a **mobile-first** design.
 - Only **modern evergreen browsers** are supported.
 - Legacy browsers are excluded.
 - Offline mode is **out of scope** for the MVP.

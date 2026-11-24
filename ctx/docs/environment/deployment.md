@@ -2,7 +2,7 @@
 
 - Path: `ctx/docs/environment/deployment.md`
 - Template Version: `20260619`
-- Changed: `20260619`
+- Changed: `20261124`
 
 ## Purpose
 
@@ -27,11 +27,7 @@ The Mindstream MVP is deployed in the form:
 
 where Apache is the only external entry point and the Node.js application operates exclusively behind the proxy server.
 
-## HTTPS And PWA Requirements
-
-The Mindstream client is implemented as a **Progressive Web App (PWA)**.
-
-Within the MVP, the following is true:
+## HTTPS Requirements
 
 - HTTPS is a **mandatory condition** for product operation;
 - access over plain HTTP without TLS is not allowed;
@@ -43,8 +39,7 @@ Apache is a **mandatory MVP component** and the only external HTTPS entry point 
 
 In the MVP, Apache:
 
-- serves client-side static assets directly;
-- proxies API requests to the server application;
+- proxies browser asset and API requests to the server application;
 - enforces backend access policies, including filtering, limiting, and request modification;
 - terminates TLS connections.
 
@@ -54,14 +49,10 @@ Apache is treated as a full reverse proxy with complete control over incoming HT
 
 The Mindstream client side:
 
-- is a **pure static PWA** using HTML, JavaScript, and CSS;
+- uses static HTML, JavaScript, and CSS;
 - does not use server-side rendering;
 - does not use a build step;
-- is served directly by Apache without Node.js involvement.
-
-Static assets have a **version**, treated as part of the product and used in the PWA context.
-
-Serving static assets through Node.js is not allowed in the MVP.
+- is served by the Node.js application behind Apache.
 
 ## API And Routing
 
@@ -79,8 +70,7 @@ The server side of Mindstream is implemented as a Node.js application.
 
 Within the MVP, the following is true:
 
-- the Node.js application serves **only the API contour**;
-- the application does not serve static assets;
+- the Node.js application serves browser assets and the JSON API;
 - the application is not directly reachable from the external network;
 - the application listens only on an internal interface intended for Apache.
 
@@ -104,8 +94,8 @@ CLI access does not change the network or architectural deployment boundaries an
 
 Within the MVP, the following is true:
 
-- Apache is responsible for TLS, receiving external HTTP(S) requests, serving static assets, and proxying and controlling access to the API.
-- The Node.js application is responsible for API handling, server logic, and access to server-side data storage.
+- Apache terminates TLS and proxies and controls external HTTP requests.
+- Node.js serves browser assets and the JSON API, runs server logic, and accesses PostgreSQL.
 - The roles of these components do not directly overlap.
 
 ## Document Boundary
@@ -122,4 +112,4 @@ It defines **form**, not the implementation process.
 
 ## Summary
 
-`deployment.md` fixes the Mindstream MVP deployment model as a rigid part of the product, where Apache is the only external entry point and proxy layer, Node.js implements the API contour behind an internal interface, the client runs as an HTTPS PWA, and environment differences do not affect the architectural form of the system.
+Apache is the external HTTPS entry point. The Node.js application serves the browser client and API behind it and accesses PostgreSQL.

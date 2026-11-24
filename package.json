@@ -47,20 +47,6 @@
             "component": "Mindstream_Back_Cli_Ingest_Import$"
           },
           {
-            "id": "db:schema:migrate-legacy-to-dem-rdb",
-            "summary": "Copy legacy PostgreSQL data into an initialized DEM-RDB target schema.",
-            "arguments": [],
-            "options": [
-              {
-                "name": "source-schema",
-                "kind": "string",
-                "required": false,
-                "description": "Legacy PostgreSQL schema. Defaults to public."
-              }
-            ],
-            "component": "Mindstream_Back_Cli_Db_Schema_MigrateV2$"
-          },
-          {
             "id": "ingest:discover:habr",
             "summary": "Discover Habr publications through RSS.",
             "arguments": [],
@@ -93,7 +79,6 @@
     }
   },
   "scripts": {
-    "db:migrate-legacy": "teq db:schema:migrate-legacy-to-dem-rdb",
     "start": "teq web:start",
     "test": "npm run test:unit && npm run test:artifacts",
     "test:unit": "node --test \"test/unit/**/*.test.mjs\"",

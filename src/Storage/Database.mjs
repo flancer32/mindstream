@@ -18,14 +18,6 @@ export default class Mindstream_Back_Storage_Database {
       if (!initialized) throw new Error('Mindstream DEM-RDB storage is not initialized.');
       return demDatabase.getBackend();
     };
-    this.getCompilation = function () {
-      if (!initialized) throw new Error('Mindstream DEM-RDB storage is not initialized.');
-      return demDatabase.getCompilation();
-    };
-    this.openBackend = async function ({ connection }) {
-      if (!initialized) throw new Error('Mindstream DEM-RDB storage is not initialized.');
-      return demDatabase.openBackend({ connection });
-    };
     this.get = function () {
       if (!initialized) throw new Error('Mindstream DEM-RDB storage is not initialized.');
       return demDatabase.getClient();
