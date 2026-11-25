@@ -9,6 +9,7 @@ const projectRoot = path.resolve(__dirname, '../../..');
 
 const indexPath = path.join(projectRoot, 'web', 'index.html');
 const feedCssPath = path.join(projectRoot, 'web', 'ui', 'css', 'feed.css');
+const bootstrapPath = path.join(projectRoot, 'web', 'bootstrap.mjs');
 
 test('index.html exists and looks like valid HTML', async () => {
   const content = await fs.readFile(indexPath, 'utf8');
@@ -19,6 +20,15 @@ test('index.html exists and looks like valid HTML', async () => {
   assert.ok(normalized.includes('<head'));
   assert.ok(normalized.includes('<body'));
   assert.ok(normalized.includes('</html>'));
+});
+
+test('browser bootstrap configures DI namespaces in the Container constructor', async () => {
+  const content = await fs.readFile(bootstrapPath, 'utf8');
+
+  assert.match(content, /new Container\(\s*\{\s*namespaces:\s*\[/u);
+  assert.match(content, /prefix:\s*'Mindstream_Web_',\s*target:\s*'\/app\/Web',\s*defaultExt:\s*'\.mjs'/u);
+  assert.match(content, /prefix:\s*'Mindstream_Shared_',\s*target:\s*'\/app\/Shared',\s*defaultExt:\s*'\.mjs'/u);
+  assert.doesNotMatch(content, /addNamespaceRoot/u);
 });
 
 test('hidden feed cards override the card display mode', async () => {
